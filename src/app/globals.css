@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-lora);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+
+  /* Aurora animation */
+  --animate-aurora: aurora 60s ease infinite;
+}
+
+:root {
+  /* Cores beges e neutras - estilo minimalista */
+  --background: #FAF7F2;
+  --foreground: #2C2416;
+  --primary: #2C2416;
+  --primary-foreground: #FAF7F2;
+  --accent: #E8DFC8;
+  --accent-foreground: #2C2416;
+  --border: #D4C5A9;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
