@@ -9,6 +9,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
+  --color-muted-foreground: var(--muted-foreground);
 
   /* Aurora animation */
   --animate-aurora: aurora 60s ease infinite;
@@ -23,6 +24,7 @@
   --accent: #E8DFC8;
   --accent-foreground: #2C2416;
   --border: #D4C5A9;
+  --muted-foreground: #faf7f2bd;
 }
 
 @layer base {

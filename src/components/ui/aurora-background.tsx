@@ -26,18 +26,18 @@ export const AuroraBackground = ({
         style={
           {
             "--aurora":
-              "repeating-linear-gradient(100deg,#7A6850_10%,#96856E_15%,#B2A390_20%,#C2B399_25%,#7A6850_30%)",
+              "repeating-linear-gradient(100deg,#D4C5A9_10%,#E8DFC8_15%,#F0EBE0_20%,#FAF7F2_25%,#D4C5A9_30%)",
             "--shadow-gradient":
-              "repeating-linear-gradient(100deg,#1A1408_0%,#1A1408_7%,transparent_10%,transparent_12%,#1A1408_16%)",
+              "repeating-linear-gradient(100deg,#FAF7F2_0%,#FAF7F2_7%,transparent_10%,transparent_12%,#FAF7F2_16%)",
             "--light-gradient":
-              "repeating-linear-gradient(100deg,#E8E5E0_0%,#E8E5E0_7%,transparent_10%,transparent_12%,#E8E5E0_16%)",
+              "repeating-linear-gradient(100deg,#FFFFFF_0%,#FFFFFF_7%,transparent_10%,transparent_12%,#FFFFFF_16%)",
 
-            "--beige-dark": "#7A6850",
-            "--beige-medium": "#96856E",
-            "--beige-light": "#B2A390",
-            "--beige-lighter": "#C2B399",
-            "--shadow": "#1A1408",
-            "--bg": "#E8E5E0",
+            "--beige-dark": "#D4C5A9",
+            "--beige-medium": "#E8DFC8",
+            "--beige-light": "#F0EBE0",
+            "--beige-lighter": "#FAF7F2",
+            "--shadow": "#FAF7F2",
+            "--bg": "#FFFFFF",
             "--transparent": "transparent",
           } as React.CSSProperties
         }

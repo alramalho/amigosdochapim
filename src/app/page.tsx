@@ -6,11 +6,11 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <AuroraBackground className="w-full">
+      <AuroraBackground className="w-full bg-primary text-primary-foreground">
         <section className="max-w-5xl mx-auto px-4 pt-0 pb-10 md:pb-16 text-center relative z-10">
           <div className="mb-4 mb:mb-8 flex justify-center">
             <Image
-              src="/logo.png"
+              src="/logo_beige.png"
               alt="Amigos do Chapim"
               width={300}
               height={150}
@@ -19,36 +19,36 @@ export default function Home() {
             />
           </div>
           <div className="py-12 md:py-24">
-            <h1 className="text-3xl md:text-5xl lg:text-7xl font-semibold mb-4 md:mb-6 tracking-tight px-2">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold mb-4 md:mb-6 tracking-tight px-2">
               Democratizar a arte.
             </h1>
-            <p className="text-base md:text-xl lg:text-2xl text-foreground/80 max-w-3xl mx-auto font-normal px-4">
+            <p className="text-base md:text-xl lg:text-2xl text-primary-foreground/80 max-w-3xl mx-auto font-normal px-4">
               Uma organização sem fins lucrativos dedicada a ajudar os jovens artistas portugueses
             </p>
           </div>
         </section>
-      </AuroraBackground>
 
-      {/* Marquee de Parcerias */}
-      <section className="border-y border-border py-6 md:py-8 overflow-hidden">
-        <div className="flex gap-6 md:gap-12 items-center justify-center opacity-40 flex-wrap px-4">
-          <div className="text-xs md:text-sm uppercase tracking-widest">
-            Parceiro 1
+        {/* Marquee de Parcerias */}
+        <section className="py-6 md:py-8 overflow-hidden relative z-10">
+          <div className="flex gap-6 md:gap-12 items-center justify-center opacity-40 flex-wrap px-4">
+            <div className="text-xs md:text-sm uppercase tracking-widest">
+              Parceiro 1
+            </div>
+            <div className="text-xs md:text-sm uppercase tracking-widest">
+              Parceiro 2
+            </div>
+            <div className="text-xs md:text-sm uppercase tracking-widest">
+              Parceiro 3
+            </div>
+            <div className="text-xs md:text-sm uppercase tracking-widest">
+              Parceiro 4
+            </div>
+            <div className="text-xs md:text-sm uppercase tracking-widest">
+              Parceiro 5
+            </div>
           </div>
-          <div className="text-xs md:text-sm uppercase tracking-widest">
-            Parceiro 2
-          </div>
-          <div className="text-xs md:text-sm uppercase tracking-widest">
-            Parceiro 3
-          </div>
-          <div className="text-xs md:text-sm uppercase tracking-widest">
-            Parceiro 4
-          </div>
-          <div className="text-xs md:text-sm uppercase tracking-widest">
-            Parceiro 5
-          </div>
-        </div>
-      </section>
+        </section>
+      </AuroraBackground>
 
       {/* Quem Somos */}
       <section className="max-w-4xl mx-auto px-4 py-12 md:py-24">
