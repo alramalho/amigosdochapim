@@ -20,10 +20,10 @@ export default function Home() {
           </div>
           <div className="py-12 md:py-24">
             <h1 className="text-3xl md:text-5xl lg:text-7xl font-semibold mb-4 md:mb-6 tracking-tight px-2">
-              Democratizando a criaçao de arte.
+              Democratizar a arte.
             </h1>
             <p className="text-base md:text-xl lg:text-2xl text-foreground/80 max-w-3xl mx-auto font-normal px-4">
-              Uma organização sem fins lucrativos dedicada a ajudar os jovens de Portugal na criação de nova arte.
+              Uma organização sem fins lucrativos dedicada a ajudar os jovens artistas portugueses
             </p>
           </div>
         </section>
@@ -247,7 +247,7 @@ export default function Home() {
                 Amigos do Chapim
               </h3>
               <p className="text-xs md:text-sm text-foreground/60">
-                Democratizando o acesso às artes.
+                A democratizar a arte.
               </p>
             </div>
             <div>
