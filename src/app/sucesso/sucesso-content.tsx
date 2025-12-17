@@ -85,7 +85,7 @@ export function SucessoContent() {
         </h1>
 
         <p className="text-foreground/70 mb-6">
-          O seu pagamento foi processado com sucesso. Enviámos um email para{" "}
+          O seu registo foi efetuado com sucesso. Enviámos um email para{" "}
           <strong>{email}</strong> com um link para aceder à sua área de membro.
         </p>
 
