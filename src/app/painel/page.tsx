@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FileSpreadsheet, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+
+//note to self
+// stripe + supabase finished locally. now was a matter of testing it out in prod in the Real Goncalos account (double check env vars)
 
 interface UserData {
   name: string | null;
@@ -86,7 +90,7 @@ export default function PainelPage() {
             </button>
           </header>
 
-          <div className="text-center py-16 max-w-lg mx-auto">
+          <div className="text-center py-12 max-w-lg mx-auto">
             <h1 className="text-3xl font-semibold mb-4">
               Obrigado por te juntares!
             </h1>
@@ -107,6 +111,24 @@ export default function PainelPage() {
                 Falar connosco
               </a>
             </div>
+          </div>
+
+          {/* Transparência - available to all */}
+          <div className="mt-8">
+            <h2 className="text-lg font-medium mb-4">Transparência</h2>
+            <a
+              href="https://docs.google.com/spreadsheets/d/1eKD3LuBVSBuWO2aAKzYMNsrtAU6dnwcImb7ELD-tDjw"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-foreground/5 rounded-xl p-4 hover:bg-foreground/10 transition-colors"
+            >
+              <FileSpreadsheet className="w-8 h-8 text-green-600" />
+              <div>
+                <p className="font-medium">Custos Operacionais</p>
+                <p className="text-sm text-foreground/60">Ver folha de cálculo completa</p>
+              </div>
+              <ExternalLink className="w-4 h-4 ml-auto text-foreground/40" />
+            </a>
           </div>
         </div>
 
@@ -236,6 +258,24 @@ export default function PainelPage() {
               </a>
             </div>
           )}
+        </div>
+
+        {/* Transparência - available to all */}
+        <div className="mt-12">
+          <h2 className="text-lg font-medium mb-4">Transparência</h2>
+          <a
+            href="https://docs.google.com/spreadsheets/d/1eKD3LuBVSBuWO2aAKzYMNsrtAU6dnwcImb7ELD-tDjw"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-foreground/5 rounded-xl p-4 hover:bg-foreground/10 transition-colors"
+          >
+            <FileSpreadsheet className="w-8 h-8 text-green-600" />
+            <div>
+              <p className="font-medium">Custos Operacionais</p>
+              <p className="text-sm text-foreground/60">Ver folha de cálculo completa</p>
+            </div>
+            <ExternalLink className="w-4 h-4 ml-auto text-foreground/40" />
+          </a>
         </div>
       </div>
 

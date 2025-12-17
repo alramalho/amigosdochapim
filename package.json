@@ -34,7 +34,7 @@
     "@tailwindcss/postcss": "^4.1.15",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
-    "next": "^15.0.0",
+    "next": "^15.5.7",
     "prisma": "^6.19.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
