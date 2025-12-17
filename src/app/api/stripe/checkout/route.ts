@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
       metadata: {
         tier,
       },
+      subscription_data: {
+        trial_period_days: 15,
+      },
       success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/?cancelled=true`,
       billing_address_collection: "auto",
