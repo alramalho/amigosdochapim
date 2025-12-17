@@ -58,10 +58,13 @@ export default function Home() {
       </AuroraBackground>
 
       {/* Quem Somos */}
-      <section className="max-w-4xl mx-auto px-4 py-12 md:py-24">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8">
-          Quem somos
-        </h2>
+      <section id="quem-somos" className="max-w-4xl mx-auto px-4 py-12 md:py-24 scroll-mt-4">
+        <a href="#quem-somos" className="group">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8 inline-flex items-center gap-2">
+            Quem somos
+            <span className="opacity-0 group-hover:opacity-50 transition-opacity text-lg">#</span>
+          </h2>
+        </a>
         <div className="space-y-4 text-base md:text-lg leading-relaxed">
           <p>
             Os Amigos do Chapim nasceram de conversas entre amigos na zona do
@@ -78,11 +81,14 @@ export default function Home() {
       </section>
 
       {/* Como Funciona */}
-      <section className="bg-accent/30 py-12 md:py-24">
+      <section id="como-funciona" className="bg-accent/30 py-12 md:py-24 scroll-mt-4">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8">
-            Como funciona
-          </h2>
+          <a href="#como-funciona" className="group">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8 inline-flex items-center gap-2">
+              Como funciona
+              <span className="opacity-0 group-hover:opacity-50 transition-opacity text-lg">#</span>
+            </h2>
+          </a>
           <div className="space-y-4 text-base md:text-lg leading-relaxed mb-6">
             <p>
               O processo é simples e transparente. Anualmente abrimos
@@ -110,12 +116,15 @@ export default function Home() {
 
       {/* Como Ajudar */}
       <section
-        id="precos"
-        className="max-w-4xl mx-auto px-4 py-12 md:py-24"
+        id="como-ajudar"
+        className="max-w-4xl mx-auto px-4 py-12 md:py-24 scroll-mt-4"
       >
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8">
-          Como ajudar
-        </h2>
+        <a href="#como-ajudar" className="group">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8 inline-flex items-center gap-2">
+            Como ajudar
+            <span className="opacity-0 group-hover:opacity-50 transition-opacity text-lg">#</span>
+          </h2>
+        </a>
         <p className="text-base md:text-lg mb-3 md:mb-4">
           Oferecemos duas formas de apoio à nossa missão:
         </p>
@@ -147,11 +156,14 @@ export default function Home() {
       </section>
 
       {/* Transparência Financeira */}
-      <section className="bg-accent/30 py-12 md:py-24">
+      <section id="transparencia" className="bg-accent/30 py-12 md:py-24 scroll-mt-4">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8">
-            Transparência financeira
-          </h2>
+          <a href="#transparencia" className="group">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8 inline-flex items-center gap-2">
+              Transparência financeira
+              <span className="opacity-0 group-hover:opacity-50 transition-opacity text-lg">#</span>
+            </h2>
+          </a>
           <div className="space-y-6 text-base md:text-lg leading-relaxed">
             <p>
               Acreditamos que a confiança se constrói com transparência. Por
@@ -207,10 +219,13 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section className="max-w-4xl mx-auto px-4 py-12 md:py-24">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-8 md:mb-12">
-          Perguntas frequentes
-        </h2>
+      <section id="faq" className="max-w-4xl mx-auto px-4 py-12 md:py-24 scroll-mt-4">
+        <a href="#faq" className="group">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-8 md:mb-12 inline-flex items-center gap-2">
+            Perguntas frequentes
+            <span className="opacity-0 group-hover:opacity-50 transition-opacity text-lg">#</span>
+          </h2>
+        </a>
         <div className="space-y-6 md:space-y-8">
           <div>
             <h3 className="text-lg md:text-xl font-semibold mb-2">
