@@ -1,12 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import { PricingCard } from "@/components/pricing-card";
+import { AuthNavLink } from "@/components/auth-nav-link";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <AuroraBackground className="w-full bg-primary text-primary-foreground">
+        {/* Navigation */}
+        <nav className="absolute top-0 left-0 right-0 z-20 px-4 py-4 flex justify-end">
+          <AuthNavLink className="px-4 py-2 text-sm font-medium bg-background/10 hover:bg-background/20 rounded-lg transition-colors backdrop-blur-sm" />
+        </nav>
+
         <section className="max-w-5xl mx-auto px-4 pt-0 pb-10 md:pb-16 text-center relative z-10">
           <div className="mb-4 mb:mb-8 flex justify-center">
             <Image
@@ -95,7 +102,7 @@ export default function Home() {
 
       {/* Como Ajudar */}
       <section
-        id="como-ajudar"
+        id="precos"
         className="max-w-4xl mx-auto px-4 py-12 md:py-24"
       >
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 md:mb-8">
@@ -110,41 +117,24 @@ export default function Home() {
         </p>
 
         <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-          {/* Tier 1 - Apoiante */}
-          <div className="border border-border p-6 md:p-8 rounded-sm">
-            <div className="mb-4">
-              <h3 className="text-xl md:text-2xl font-semibold mb-2">
-                Apoiante
-              </h3>
-              <div className="text-2xl md:text-3xl font-semibold">
-                8€{" "}
-                <span className="text-base md:text-lg font-normal text-foreground/60">
-                  / mês
-                </span>
-              </div>
-            </div>
-            <p className="text-sm md:text-base text-foreground/80">
-              Contribui diretamente para o financiamento de projetos artísticos.
-            </p>
-          </div>
+          <PricingCard
+            tier="APOIANTE"
+            name="Apoiante"
+            price="8€"
+            description="Contribui diretamente para o financiamento de projetos artísticos."
+          />
 
-          {/* Tier 2 - Amigo */}
-          <div className="border-2 border-primary p-6 md:p-8 rounded-sm relative">
-            <div className="mb-4">
-              <h3 className="text-xl md:text-2xl font-semibold mb-2">Amigo</h3>
-              <div className="text-2xl md:text-3xl font-semibold">
-                12€{" "}
-                <span className="text-base md:text-lg font-normal text-foreground/60">
-                  / mês
-                </span>
-              </div>
-            </div>
-            <ul className="space-y-2 text-sm md:text-base text-foreground/80">
-              <li>• Tudo do plano Apoiante</li>
-              <li>• Participação na parcela pública do júri</li>
-              <li>• Acesso a todas as candidaturas submetidas</li>
-            </ul>
-          </div>
+          <PricingCard
+            tier="AMIGO"
+            name="Amigo"
+            price="12€"
+            features={[
+              "Tudo do plano Apoiante",
+              "Participação na parcela pública do júri",
+              "Acesso a todas as candidaturas submetidas",
+            ]}
+            highlighted
+          />
         </div>
       </section>
 

@@ -1,0 +1,2 @@
+-- Seed file for local development
+-- Add any initial data here

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora } from "next/font/google";
 import "./globals.css";
+import { AuthHandler } from "@/components/auth-handler";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body
         className={`${lora.variable} antialiased`}
       >
+        <AuthHandler />
         {children}
       </body>
     </html>

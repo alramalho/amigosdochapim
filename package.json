@@ -7,9 +7,19 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev -p 3027",
+    "tunnel": "stripe listen --forward-to localhost:3027/api/stripe/webhook",
+    "dev:tunnel": "concurrently \"next dev -p 3027\" \"stripe listen --forward-to localhost:3027/api/stripe/webhook\"",
+    "build": "prisma generate && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:status": "npx supabase status",
+    "supabase:reset": "npx supabase db reset",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,11 +27,18 @@
   "license": "ISC",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.88.0",
     "@tailwindcss/postcss": "^4.1.15",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
     "next": "^15.0.0",
+    "prisma": "^6.19.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "stripe": "^20.1.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
@@ -29,6 +46,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10",
+    "concurrently": "^9.2.1",
+    "localtunnel": "^2.0.2",
     "postcss": "^8",
     "tailwindcss": "^4.0.0",
     "typescript": "^5"
