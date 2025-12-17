@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 
 //note to self
 // stripe + supabase finished locally. now was a matter of testing it out in prod in the Real Goncalos account (double check env vars)
+// I was also amidst testing the email integration. I've changed the dns recrod sbut they say it might take up to 60mins... im not receiving emails
 
 interface UserData {
   name: string | null;

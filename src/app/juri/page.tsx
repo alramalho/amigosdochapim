@@ -65,9 +65,38 @@ export default function JuriPage() {
                 <p className="text-sm md:text-base text-foreground/70 mb-3 md:mb-4">
                   Composta pelos membros fundadores e coordenadores da organização.
                 </p>
-                <p className="text-sm md:text-base text-foreground/80">
+                <p className="text-sm md:text-base text-foreground/80 mb-4">
                   Esta parcela traz conhecimento profundo da missão e valores dos Amigos do Chapim, avaliando não apenas a qualidade artística mas também o alinhamento com os objetivos da organização e a viabilidade de execução.
                 </p>
+                <div className="mt-4 pt-4 border-t border-border">
+                  <h4 className="font-semibold mb-3 text-sm md:text-base">Critérios de avaliação:</h4>
+                  <ul className="space-y-2 text-sm md:text-base text-foreground/70">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span>Qualidade artística</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span>Originalidade</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span>Clareza, estrutura e qualidade do argumento</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span>Visão estética e qualidade da execução</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span>Viabilidade orçamental</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span>Motivação do candidato</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

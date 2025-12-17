@@ -91,12 +91,20 @@ export default function Home() {
               fundos apoiam os projetos mais prometedores e dedicados.
             </p>
           </div>
-          <Link
-            href="/juri"
-            className="inline-block text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
-          >
-            Como funciona o júri? →
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+            <Link
+              href="/o-que-deve-ser-entregue"
+              className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
+            >
+              O que deve ser entregue? →
+            </Link>
+            <Link
+              href="/juri"
+              className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
+            >
+              Como funciona o júri? →
+            </Link>
+          </div>
         </div>
       </section>
 
