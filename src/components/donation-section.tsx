@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { differenceInMonths } from "date-fns";
 import { DonationProgress } from "./donation-progress";
 import { PricingCard } from "./pricing-card";
 
-// Duration of each concurso in months
-const SUBSCRIPTION_MONTHS = 4;
+// Next concurso date
+const CONCURSO_DATE = new Date("2026-04-15");
+
+// Calculate months until concurso (including current month)
+function getMonthsUntilConcurso(): number {
+  const months = differenceInMonths(CONCURSO_DATE, new Date()) + 1;
+  return Math.max(1, months); // At least 1 month
+}
+
 const TIER_PRICES = {
   APOIANTE: 8,
   AMIGO: 12,
@@ -15,9 +23,11 @@ export function DonationSection() {
   const [selectedTier, setSelectedTier] = useState<"APOIANTE" | "AMIGO" | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Calculate 6-month contribution
+  const monthsUntilConcurso = getMonthsUntilConcurso();
+
+  // Calculate contribution until concurso
   const selectedAmount = selectedTier
-    ? TIER_PRICES[selectedTier] * SUBSCRIPTION_MONTHS
+    ? TIER_PRICES[selectedTier] * monthsUntilConcurso
     : 0;
 
   const handleProceed = async () => {
@@ -85,7 +95,7 @@ export function DonationSection() {
         <div className="mt-8 text-center">
           <p className="text-sm text-foreground/60 mb-4">
             Com a tua subscrição de {TIER_PRICES[selectedTier]}€/mês, contribuirás{" "}
-            <strong>{selectedAmount}€</strong> ao longo dos {SUBSCRIPTION_MONTHS} meses do concurso.
+            <strong>{selectedAmount}€</strong> até ao concurso de Abril 2026 ({monthsUntilConcurso} meses).
           </p>
           <button
             onClick={handleProceed}
