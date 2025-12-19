@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 interface PricingCardProps {
   tier: "APOIANTE" | "AMIGO";
   name: string;
@@ -9,6 +7,8 @@ interface PricingCardProps {
   description?: string;
   features?: string[];
   highlighted?: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
 }
 
 export function PricingCard({
@@ -18,40 +18,25 @@ export function PricingCard({
   description,
   features,
   highlighted = false,
+  selected = false,
+  onSelect,
 }: PricingCardProps) {
-  const [loading, setLoading] = useState(false);
-
-  const handleSubscribe = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier }),
-      });
-
-      const data = await response.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        console.error("No checkout URL returned");
-        alert("Erro ao processar. Por favor, tente novamente.");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Erro ao processar. Por favor, tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div
       className={`${
-        highlighted ? "border-2 border-primary" : "border border-border"
-      } p-6 md:p-8 rounded-sm relative flex flex-col`}
+        selected
+          ? "border-2 border-primary ring-2 ring-primary/20"
+          : highlighted
+          ? "border-2 border-primary"
+          : "border border-border"
+      } p-6 md:p-8 rounded-sm relative flex flex-col transition-all`}
     >
+      {selected && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">
+          Selecionado
+        </div>
+      )}
+
       <div className="mb-4">
         <h3 className="text-xl md:text-2xl font-semibold mb-2">{name}</h3>
         <div className="text-2xl md:text-3xl font-semibold">
@@ -77,15 +62,16 @@ export function PricingCard({
       )}
 
       <button
-        onClick={handleSubscribe}
-        disabled={loading}
-        className={`mt-auto w-full py-3 px-4 rounded-sm font-medium transition-opacity disabled:opacity-50 ${
-          highlighted
+        onClick={onSelect}
+        className={`mt-auto w-full py-3 px-4 rounded-sm font-medium transition-all ${
+          selected
+            ? "bg-primary text-primary-foreground"
+            : highlighted
             ? "bg-foreground text-background hover:opacity-90"
             : "border border-foreground hover:bg-foreground/5"
         }`}
       >
-        {loading ? "A processar..." : "Subscrever"}
+        {selected ? "Selecionado" : "Selecionar"}
       </button>
     </div>
   );

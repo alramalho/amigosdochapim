@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AuroraBackground } from "@/components/ui/aurora-background";
-import { PricingCard } from "@/components/pricing-card";
 import { AuthNavLink } from "@/components/auth-nav-link";
+import { DonationSection } from "@/components/donation-section";
 
 export default function Home() {
   return (
@@ -92,9 +92,10 @@ export default function Home() {
           <div className="space-y-4 text-base md:text-lg leading-relaxed mb-6">
             <p>
               O processo é simples e transparente. Anualmente abrimos
-              candidaturas abertas a todos. Um júri avalia o potencial artístico
-              e a viabilidade financeira de cada projeto, garantindo que os
-              fundos apoiam os projetos mais prometedores e dedicados.
+              candidaturas para curtas-metragens. Cada candidato submete a sua
+              proposta — sinopse, argumento, material visual e plano de produção.
+              Um júri avalia o potencial artístico e a viabilidade de cada
+              projeto, garantindo que os fundos apoiam as ideias mais prometedoras.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
@@ -125,34 +126,11 @@ export default function Home() {
             <span className="opacity-0 group-hover:opacity-50 transition-opacity text-lg">#</span>
           </h2>
         </a>
-        <p className="text-base md:text-lg mb-3 md:mb-4">
+        <p className="text-base md:text-lg mb-8 md:mb-12">
           Oferecemos duas formas de apoio à nossa missão:
         </p>
-        <p className="text-sm md:text-base text-foreground/70 mb-8 md:mb-12 italic">
-          Os primeiros 50 apoiantes de cada ano aparecem nos créditos do projeto
-          vencedor.
-        </p>
 
-        <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-          <PricingCard
-            tier="APOIANTE"
-            name="Apoiante"
-            price="8€"
-            description="Contribui diretamente para o financiamento de projetos artísticos."
-          />
-
-          <PricingCard
-            tier="AMIGO"
-            name="Amigo"
-            price="12€"
-            features={[
-              "Tudo do plano Apoiante",
-              "Participação na parcela pública do júri",
-              "Acesso a todas as candidaturas submetidas",
-            ]}
-            highlighted
-          />
-        </div>
+        <DonationSection />
       </section>
 
       {/* Transparência Financeira */}

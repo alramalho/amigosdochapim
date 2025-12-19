@@ -12,6 +12,17 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Amigos do Chapim",
   description: "Uma organização sem fins lucrativos dedicada a facilitar o acesso às artes através da entreajuda.",
+  openGraph: {
+    title: "Amigos do Chapim",
+    description: "Uma organização sem fins lucrativos dedicada a facilitar o acesso às artes através da entreajuda.",
+    images: ["/og.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Amigos do Chapim",
+    description: "Uma organização sem fins lucrativos dedicada a facilitar o acesso às artes através da entreajuda.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({
