@@ -4,8 +4,8 @@ import { useState } from "react";
 import { DonationProgress } from "./donation-progress";
 import { PricingCard } from "./pricing-card";
 
-// 6 months of subscription (duration of each concurso)
-const SUBSCRIPTION_MONTHS = 6;
+// Duration of each concurso in months
+const SUBSCRIPTION_MONTHS = 4;
 const TIER_PRICES = {
   APOIANTE: 8,
   AMIGO: 12,
@@ -85,7 +85,7 @@ export function DonationSection() {
         <div className="mt-8 text-center">
           <p className="text-sm text-foreground/60 mb-4">
             Com a tua subscrição de {TIER_PRICES[selectedTier]}€/mês, contribuirás{" "}
-            <strong>{selectedAmount}€</strong> ao longo dos 6 meses do concurso.
+            <strong>{selectedAmount}€</strong> ao longo dos {SUBSCRIPTION_MONTHS} meses do concurso.
           </p>
           <button
             onClick={handleProceed}
