@@ -36,7 +36,7 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
     fetchBalance();
   }, []);
 
-  const goal = data?.goal ?? 1000;
+  const goal = data?.goal ?? 1300;
   const currentTotal = data?.total ?? 0;
   const fundosProprios = data?.fundosProprios ?? 0;
   const donations = data?.donations ?? 0;
@@ -197,6 +197,9 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
           ) : (
             <>Faltam <strong>{(goal - totalWithSelected).toFixed(0)}€</strong> para financiar o próximo concurso</>
           )}
+        </p>
+        <p className="text-xs text-foreground/50">
+          O prémio é de 1000€. Os restantes 300€ cobrem impostos e custos operacionais.
         </p>
       </div>
     </div>

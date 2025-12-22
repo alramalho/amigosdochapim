@@ -3,7 +3,7 @@ import { stripe } from "@/lib/stripe";
 
 // Own funds (fundos próprios) - seed money from the organization
 const FUNDOS_PROPRIOS = 588;
-const GOAL = 1000;
+const GOAL = 1300;
 
 export async function GET() {
   try {
