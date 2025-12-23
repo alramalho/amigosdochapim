@@ -286,8 +286,9 @@ function mapStripeStatus(status: Stripe.Subscription.Status) {
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  // Only process subscription invoices
-  if (!invoice.subscription) {
+  // Only process subscription invoices (billing_reason starts with "subscription")
+  const billingReason = invoice.billing_reason;
+  if (!billingReason || !billingReason.startsWith("subscription")) {
     return;
   }
 
