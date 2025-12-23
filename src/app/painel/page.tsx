@@ -190,9 +190,10 @@ export default function PainelPage() {
         </header>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold mb-2">
+          <h1 className="text-3xl font-semibold mb-1">
             Olá, {user.name || "Amigo"}!
           </h1>
+          <p className="text-sm text-foreground/50 mb-2">{userEmail}</p>
           <p className="text-foreground/70">
             Bem-vindo à tua área de membro. És um{" "}
             <span className="font-medium">{getUserTier()}</span>.
