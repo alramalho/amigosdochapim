@@ -44,7 +44,10 @@ export default function TermosPage() {
           <section>
             <h2 className="text-xl md:text-2xl font-semibold mb-4">2. Sobre a Organização</h2>
             <p className="text-foreground/80 mb-3">
-              Os Amigos do Chapim é uma organização sem fins lucrativos com o objetivo de facilitar o acesso às artes através da entreajuda. A nossa missão é apoiar jovens talentos artísticos através de financiamento e recursos.
+              Os Amigos do Chapim é um projeto dedicado a facilitar o acesso às artes através da entreajuda. A nossa missão é apoiar jovens talentos artísticos através de financiamento e recursos.
+            </p>
+            <p className="text-foreground/80 mb-3">
+              <strong>Enquadramento Legal Atual:</strong> O projeto opera atualmente através da atividade de trabalhador independente de Gonçalo Melo (NIF 269462309), nos termos do Artigo 3.º do Código do IRS (Categoria B — Rendimentos Empresariais e Profissionais). Está em curso o processo de constituição de uma associação sem fins lucrativos, prevista para o início de 2025.
             </p>
             <p className="text-foreground/80">
               Todos os fundos angariados são utilizados de forma transparente, conforme descrito na nossa política de transparência financeira.
@@ -52,8 +55,27 @@ export default function TermosPage() {
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">3. Subscrições e Doações</h2>
-            <h3 className="text-lg font-semibold mb-2 mt-4">3.1 Níveis de Apoio</h3>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">3. Subscrições e Contribuições</h2>
+
+            <h3 className="text-lg font-semibold mb-2 mt-4">3.1 Natureza das Contribuições</h3>
+            <p className="text-foreground/80 mb-3">
+              As contribuições efetuadas através desta Plataforma, independentemente da designação utilizada na interface ("doação", "apoio", "contribuição", etc.), constituem, para efeitos legais e fiscais, <strong>pagamentos pela prestação de serviços digitais</strong>, nos termos do{" "}
+              <a href="https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs3.aspx" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Artigo 3.º do Código do IRS</a>.
+            </p>
+            <p className="text-foreground/80 mb-3">
+              Os serviços incluem:
+            </p>
+            <ul className="list-disc list-inside space-y-2 text-foreground/80 ml-4 mb-3">
+              <li>Acesso à plataforma digital e aos seus conteúdos</li>
+              <li>Visualização de candidaturas artísticas</li>
+              <li>Participação no júri público (plano "Amigo")</li>
+              <li>Acompanhamento dos projetos financiados</li>
+            </ul>
+            <p className="text-foreground/80">
+              <strong>Nota fiscal:</strong> As contribuições não são dedutíveis em sede de IRS. Será emitida fatura-recibo eletrónica para cada pagamento processado.
+            </p>
+
+            <h3 className="text-lg font-semibold mb-2 mt-4">3.2 Níveis de Apoio</h3>
             <p className="text-foreground/80 mb-3">
               Oferecemos dois níveis de apoio mensal:
             </p>
@@ -62,12 +84,12 @@ export default function TermosPage() {
               <li><strong>Amigo</strong> (12€/mês) - Todos os benefícios de Apoiante + participação no júri público + acesso a candidaturas</li>
             </ul>
 
-            <h3 className="text-lg font-semibold mb-2 mt-4">3.2 Processamento de Pagamentos</h3>
+            <h3 className="text-lg font-semibold mb-2 mt-4">3.3 Processamento de Pagamentos</h3>
             <p className="text-foreground/80 mb-3">
               As subscrições são processadas através da Stripe. Ao subscrever, concorda com os termos de serviço da Stripe e autoriza cobranças mensais recorrentes no método de pagamento fornecido.
             </p>
 
-            <h3 className="text-lg font-semibold mb-2 mt-4">3.3 Cancelamento</h3>
+            <h3 className="text-lg font-semibold mb-2 mt-4">3.4 Cancelamento</h3>
             <p className="text-foreground/80">
               Pode cancelar a sua subscrição a qualquer momento sem penalizações. O cancelamento terá efeito no final do período de faturação atual. Não são efetuados reembolsos por períodos parciais.
             </p>

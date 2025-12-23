@@ -30,7 +30,7 @@ export default function Home() {
               Democratizar a arte.
             </h1>
             <p className="text-base md:text-xl lg:text-2xl text-primary-foreground/80 max-w-3xl mx-auto font-normal px-4">
-              Uma organização sem fins lucrativos dedicada a ajudar os jovens artistas portugueses
+              Uma iniciativa dedicada a ajudar os jovens artistas portugueses
             </p>
           </div>
         </section>
