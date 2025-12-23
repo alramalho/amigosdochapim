@@ -121,7 +121,7 @@ export function DonationSection() {
 
       {/* One-off Donation Cards */}
       {donationType === "one-off" && (
-        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
+        <div className="grid gap-6 md:grid-cols-2 md:gap-8">
           <PricingCard
             name="Apoiante"
             price="15€"
@@ -132,33 +132,71 @@ export function DonationSection() {
             onSelect={() => setSelectedOneOff(selectedOneOff === 15 ? null : 15)}
           />
 
-          <PricingCard
-            name="Amigo"
-            price="25€"
-            priceLabel=""
-            badge="único"
-            features={[
-              "Participação na parcela pública do júri",
-              "Acesso a todas as candidaturas submetidas",
-            ]}
-            highlighted
-            selected={selectedOneOff === 25}
-            onSelect={() => setSelectedOneOff(selectedOneOff === 25 ? null : 25)}
-          />
+          {/* Amigo card with 25€/50€ toggle */}
+          <div
+            className={`${
+              selectedOneOff === 25 || selectedOneOff === 50
+                ? "border-2 border-primary ring-2 ring-primary/20"
+                : "border-2 border-primary"
+            } p-6 md:p-8 rounded-sm relative flex flex-col transition-all`}
+          >
+            {(selectedOneOff === 25 || selectedOneOff === 50) && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">
+                Selecionado
+              </div>
+            )}
 
-          <PricingCard
-            name="Mecenas"
-            price="50€"
-            priceLabel=""
-            badge="único"
-            features={[
-              "Participação na parcela pública do júri",
-              "Acesso a todas as candidaturas submetidas",
-              "Reconhecimento especial nos créditos",
-            ]}
-            selected={selectedOneOff === 50}
-            onSelect={() => setSelectedOneOff(selectedOneOff === 50 ? null : 50)}
-          />
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-xl md:text-2xl font-semibold">Amigo</h3>
+                <span className="text-xs text-foreground/40 font-normal">único</span>
+              </div>
+
+              {/* Price toggle */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSelectedOneOff(25)}
+                  className={`text-2xl md:text-3xl font-semibold transition-all cursor-pointer ${
+                    selectedOneOff === 25
+                      ? "text-primary underline underline-offset-4"
+                      : "text-foreground/40 hover:text-foreground/70 hover:underline hover:underline-offset-4"
+                  }`}
+                >
+                  25€
+                </button>
+                <span className="text-2xl md:text-3xl font-semibold text-foreground/20">/</span>
+                <button
+                  onClick={() => setSelectedOneOff(50)}
+                  className={`text-2xl md:text-3xl font-semibold transition-all cursor-pointer ${
+                    selectedOneOff === 50
+                      ? "text-primary underline underline-offset-4"
+                      : "text-foreground/40 hover:text-foreground/70 hover:underline hover:underline-offset-4"
+                  }`}
+                >
+                  50€
+                </button>
+              </div>
+            </div>
+
+            <ul className="space-y-2 text-sm md:text-base text-foreground/80 mb-6">
+              <li>• Participação na parcela pública do júri</li>
+              <li>• Acesso a todas as candidaturas submetidas</li>
+              {selectedOneOff === 50 && (
+                <li>• Reconhecimento especial nos créditos</li>
+              )}
+            </ul>
+
+            <button
+              onClick={() => setSelectedOneOff(selectedOneOff === 25 || selectedOneOff === 50 ? null : 25)}
+              className={`mt-auto w-full py-3 px-4 rounded-sm font-medium transition-all ${
+                selectedOneOff === 25 || selectedOneOff === 50
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-foreground text-background hover:opacity-90"
+              }`}
+            >
+              {selectedOneOff === 25 || selectedOneOff === 50 ? "Selecionado" : "Selecionar"}
+            </button>
+          </div>
         </div>
       )}
 
@@ -179,7 +217,6 @@ export function DonationSection() {
             price="12€"
             badge="mensal"
             features={[
-              "Tudo do plano Apoiante",
               "Participação na parcela pública do júri",
               "Acesso a todas as candidaturas submetidas",
               "Reconhecimento especial nos créditos",
@@ -196,8 +233,11 @@ export function DonationSection() {
         <div className="mt-8 text-center">
           <p className="text-sm text-foreground/60 mb-4">
             A tua doação de <strong>{selectedOneOff}€</strong> ajuda a financiar o próximo concurso.
-            {selectedOneOff >= 25 && (
+            {selectedOneOff >= 25 && selectedOneOff < 45 && (
               <> Terás acesso às candidaturas e poderás participar no júri.</>
+            )}
+            {selectedOneOff >= 45 && (
+              <> Terás acesso ao júri e aparecerás nos créditos.</>
             )}
           </p>
           <label className="flex items-center justify-center gap-2 mb-4 cursor-pointer">

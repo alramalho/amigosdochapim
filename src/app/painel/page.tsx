@@ -20,7 +20,12 @@ interface UserData {
     total: number;
     count: number;
   };
+  contributions: {
+    total: number;
+    count: number;
+  };
   hasJuryAccess: boolean;
+  hasCreditsAccess: boolean;
 }
 
 export default function PainelPage() {
@@ -157,12 +162,12 @@ export default function PainelPage() {
   }
 
   const hasSubscription = !!user.subscription;
-  const hasDonations = user.donations.total > 0;
 
   // Determine user tier for display purposes
   const getUserTier = () => {
+    if (user.hasCreditsAccess) return "Patrocinador";
     if (user.hasJuryAccess) return "Amigo";
-    if (hasSubscription || hasDonations) return "Apoiante";
+    if (hasSubscription || user.contributions.total > 0) return "Apoiante";
     return "Membro";
   };
 
@@ -222,32 +227,36 @@ export default function PainelPage() {
             </div>
           )}
 
-          {/* Donations Card - Only if has donations */}
-          {hasDonations && (
-            <div className="bg-foreground/5 rounded-xl p-6">
-              <h2 className="text-lg font-medium mb-4">As tuas doações</h2>
-              <div className="space-y-2 text-sm">
-                <p>
-                  <span className="text-foreground/70">Total doado:</span>{" "}
-                  <span className="font-medium">{user.donations.total}€</span>
+          {/* Contributions Card */}
+          <div className="bg-foreground/5 rounded-xl p-6">
+            <h2 className="text-lg font-medium mb-4">As tuas contribuições</h2>
+            <div className="space-y-2 text-sm">
+              <p>
+                <span className="text-foreground/70">Total contribuído:</span>{" "}
+                <span className="font-medium">{user.contributions.total}€</span>
+              </p>
+              {user.hasJuryAccess && (
+                <p className="text-green-600 font-medium mt-2">
+                  ✓ Tens acesso ao júri
                 </p>
-                <p>
-                  <span className="text-foreground/70">Número de doações:</span>{" "}
-                  {user.donations.count}
+              )}
+              {!user.hasJuryAccess && (
+                <p className="text-foreground/60 mt-2">
+                  Faltam {(25 - user.contributions.total).toFixed(0)}€ para acesso ao júri
                 </p>
-                {user.hasJuryAccess && (
-                  <p className="text-green-600 font-medium mt-2">
-                    Tens acesso ao júri!
-                  </p>
-                )}
-                {!user.hasJuryAccess && (
-                  <p className="text-foreground/60 mt-2">
-                    Faltam {(25 - user.donations.total).toFixed(0)}€ para acesso ao júri
-                  </p>
-                )}
-              </div>
+              )}
+              {user.hasCreditsAccess && (
+                <p className="text-green-600 font-medium">
+                  ✓ Apareces nos créditos
+                </p>
+              )}
+              {!user.hasCreditsAccess && user.hasJuryAccess && (
+                <p className="text-foreground/60">
+                  Faltam {(45 - user.contributions.total).toFixed(0)}€ para aparecer nos créditos
+                </p>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Jury Card - For users with jury access */}
           {user.hasJuryAccess && (
@@ -288,14 +297,14 @@ export default function PainelPage() {
             <div className="bg-foreground/10 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Desbloqueia o acesso ao júri</h2>
               <p className="text-sm text-foreground/70 mb-4">
-                Com uma doação total de 25€ ou mais, ganhas acesso às candidaturas
-                e podes participar na votação do júri.
+                Subscreve o plano Amigo (12€/mês) ou faz uma doação única de 25€ ou mais
+                para aceder às candidaturas e participar na votação do júri.
               </p>
               <Link
-                href="/#precos"
+                href="/#como-ajudar"
                 className="inline-block px-4 py-2 bg-foreground text-background rounded-lg text-sm hover:opacity-90 transition-opacity"
               >
-                Fazer doação
+                Contribuir
               </Link>
             </div>
           )}

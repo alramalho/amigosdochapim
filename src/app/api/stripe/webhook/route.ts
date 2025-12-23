@@ -53,6 +53,12 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaid(invoice);
+        break;
+      }
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -192,6 +198,7 @@ async function handleDonationCompleted(
   await prisma.donation.create({
     data: {
       userId: user.id,
+      type: "ONE_OFF",
       amount,
       stripePaymentIntentId: paymentIntentId,
     },
@@ -276,4 +283,47 @@ function mapStripeStatus(status: Stripe.Subscription.Status) {
     default:
       return "ACTIVE";
   }
+}
+
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  // Only process subscription invoices
+  if (!invoice.subscription) {
+    return;
+  }
+
+  const customerId = invoice.customer as string;
+  const amount = invoice.amount_paid; // Already in cents
+  const invoiceId = invoice.id;
+
+  // Find user by Stripe customer ID
+  const user = await prisma.user.findUnique({
+    where: { stripeCustomerId: customerId },
+  });
+
+  if (!user) {
+    console.error(`User not found for Stripe customer: ${customerId}`);
+    return;
+  }
+
+  // Check if this invoice was already recorded (idempotency)
+  const existingDonation = await prisma.donation.findUnique({
+    where: { stripeInvoiceId: invoiceId },
+  });
+
+  if (existingDonation) {
+    console.log(`Invoice ${invoiceId} already recorded, skipping`);
+    return;
+  }
+
+  // Create donation record for subscription payment
+  await prisma.donation.create({
+    data: {
+      userId: user.id,
+      type: "SUBSCRIPTION",
+      amount,
+      stripeInvoiceId: invoiceId,
+    },
+  });
+
+  console.log(`Subscription payment recorded: ${user.email} - ${amount / 100}€`);
 }
