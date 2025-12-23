@@ -30,6 +30,7 @@ model User {
   updatedAt            DateTime           @updatedAt @map("updated_at")
 
   subscription         Subscription?
+  donations            Donation[]
 
   @@map("users")
 }
@@ -49,4 +50,16 @@ model Subscription {
   user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+model Donation {
+  id                   String             @id @default(cuid())
+  userId               String             @map("user_id")
+  amount               Int                // Amount in cents (1500=Apoiante, 2500=Amigo, 5000=Mecenas)
+  stripePaymentIntentId String?           @unique @map("stripe_payment_intent_id")
+  createdAt            DateTime           @default(now()) @map("created_at")
+
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("donations")
 }

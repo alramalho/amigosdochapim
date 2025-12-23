@@ -195,7 +195,7 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
               "Objetivo alcançado!"
             )
           ) : (
-            <>Faltam <strong>{(goal - totalWithSelected).toFixed(0)}€</strong> para financiar o próximo concurso</>
+            <>{selectedAmount > 0 ? "Ficam a faltar" : "Faltam"} <strong>{(goal - totalWithSelected).toFixed(0)}€</strong> para financiar o próximo concurso</>
           )}
         </p>
         <p className="text-xs text-foreground/50">

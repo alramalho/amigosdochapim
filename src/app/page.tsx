@@ -127,7 +127,7 @@ export default function Home() {
           </h2>
         </a>
         <p className="text-base md:text-lg mb-8 md:mb-12">
-          Oferecemos duas formas de apoio à nossa missão:
+          Oferecemos várias formas de apoio à nossa missão:
         </p>
 
         <DonationSection />

@@ -16,6 +16,11 @@ interface UserData {
     tier: "APOIANTE" | "AMIGO";
     currentPeriodEnd: string;
   } | null;
+  donations: {
+    total: number;
+    count: number;
+  };
+  hasJuryAccess: boolean;
 }
 
 export default function PainelPage() {
@@ -72,7 +77,8 @@ export default function PainelPage() {
     );
   }
 
-  if (!user || !user.subscription) {
+  // User not found in our DB (only exists in Supabase)
+  if (!user) {
     return (
       <main className="min-h-screen flex flex-col px-4">
         <div className="max-w-4xl mx-auto w-full flex-1 py-12">
@@ -96,14 +102,14 @@ export default function PainelPage() {
               Obrigado por te juntares!
             </h1>
             <p className="text-foreground/70 mb-8">
-              Ainda não tens uma subscrição ativa. Torna-te Apoiante ou Amigo e ajuda-nos a democratizar o acesso à arte em Portugal.
+              Ainda não fizeste uma doação. Contribui e ajuda-nos a democratizar o acesso à arte em Portugal.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/#precos"
                 className="px-6 py-3 bg-foreground text-background rounded-lg font-medium hover:opacity-90 transition-opacity"
               >
-                Ver planos
+                Ver opções de doação
               </Link>
               <a
                 href="mailto:geral@amigosdochapim.org"
@@ -150,7 +156,15 @@ export default function PainelPage() {
     );
   }
 
-  const isAmigo = user.subscription.tier === "AMIGO";
+  const hasSubscription = !!user.subscription;
+  const hasDonations = user.donations.total > 0;
+
+  // Determine user tier for display purposes
+  const getUserTier = () => {
+    if (user.hasJuryAccess) return "Amigo";
+    if (hasSubscription || hasDonations) return "Apoiante";
+    return "Membro";
+  };
 
   return (
     <main className="min-h-screen flex flex-col px-4">
@@ -176,45 +190,88 @@ export default function PainelPage() {
           </h1>
           <p className="text-foreground/70">
             Bem-vindo à tua área de membro. És um{" "}
-            <span className="font-medium">
-              {user.subscription.tier === "AMIGO" ? "Amigo" : "Apoiante"}
-            </span>
-            .
+            <span className="font-medium">{getUserTier()}</span>.
           </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Subscription Card */}
-          <div className="bg-foreground/5 rounded-xl p-6">
-            <h2 className="text-lg font-medium mb-4">A tua subscrição</h2>
-            <div className="space-y-2 text-sm">
-              <p>
-                <span className="text-foreground/70">Plano:</span>{" "}
-                {user.subscription.tier === "AMIGO" ? "Amigo (12€/mês)" : "Apoiante (8€/mês)"}
-              </p>
-              <p>
-                <span className="text-foreground/70">Estado:</span>{" "}
-                <span className="text-green-600">Ativo</span>
-              </p>
-              <p>
-                <span className="text-foreground/70">Próxima renovação:</span>{" "}
-                {new Date(user.subscription.currentPeriodEnd).toLocaleDateString("pt-PT")}
-              </p>
+          {/* Subscription Card - Only if has subscription */}
+          {hasSubscription && (
+            <div className="bg-foreground/5 rounded-xl p-6">
+              <h2 className="text-lg font-medium mb-4">A tua subscrição</h2>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="text-foreground/70">Plano:</span>{" "}
+                  {user.subscription!.tier === "AMIGO" ? "Amigo (12€/mês)" : "Apoiante (8€/mês)"}
+                </p>
+                <p>
+                  <span className="text-foreground/70">Estado:</span>{" "}
+                  <span className="text-green-600">Ativo</span>
+                </p>
+                <p>
+                  <span className="text-foreground/70">Próxima renovação:</span>{" "}
+                  {new Date(user.subscription!.currentPeriodEnd).toLocaleDateString("pt-PT")}
+                </p>
+              </div>
+              <button
+                onClick={handleManageSubscription}
+                className="mt-4 text-sm text-foreground/70 hover:text-foreground transition-colors"
+              >
+                Gerir subscrição →
+              </button>
             </div>
-            <button
-              onClick={handleManageSubscription}
-              className="mt-4 text-sm text-foreground/70 hover:text-foreground transition-colors"
-            >
-              Gerir subscrição →
-            </button>
-          </div>
+          )}
 
-          {/* Content Card */}
-          {isAmigo && (
+          {/* Donations Card - Only if has donations */}
+          {hasDonations && (
+            <div className="bg-foreground/5 rounded-xl p-6">
+              <h2 className="text-lg font-medium mb-4">As tuas doações</h2>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="text-foreground/70">Total doado:</span>{" "}
+                  <span className="font-medium">{user.donations.total}€</span>
+                </p>
+                <p>
+                  <span className="text-foreground/70">Número de doações:</span>{" "}
+                  {user.donations.count}
+                </p>
+                {user.hasJuryAccess && (
+                  <p className="text-green-600 font-medium mt-2">
+                    Tens acesso ao júri!
+                  </p>
+                )}
+                {!user.hasJuryAccess && (
+                  <p className="text-foreground/60 mt-2">
+                    Faltam {(25 - user.donations.total).toFixed(0)}€ para acesso ao júri
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Jury Card - For users with jury access */}
+          {user.hasJuryAccess && (
+            <div className="bg-foreground/5 rounded-xl p-6">
+              <h2 className="text-lg font-medium mb-4">Júri</h2>
+              <p className="text-sm text-foreground/70 mb-4">
+                Participa na votação de projetos e ajuda a decidir quais
+                iniciativas culturais receberão apoio.
+              </p>
+              <Link
+                href="/em-construcao"
+                className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
+              >
+                Ver candidaturas →
+              </Link>
+            </div>
+          )}
+
+          {/* Content Card - For users with jury access */}
+          {user.hasJuryAccess && (
             <div className="bg-foreground/5 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Conteúdo exclusivo</h2>
               <p className="text-sm text-foreground/70 mb-4">
-                Como Amigo, tens acesso a conteúdo exclusivo e podes participar
+                Tens acesso a conteúdo exclusivo e podes participar
                 como júri na seleção de projetos.
               </p>
               <Link
@@ -226,37 +283,20 @@ export default function PainelPage() {
             </div>
           )}
 
-          {/* Jury Card - Only for Amigos */}
-          {isAmigo && (
-            <div className="bg-foreground/5 rounded-xl p-6">
-              <h2 className="text-lg font-medium mb-4">Júri</h2>
+          {/* Upgrade Card - For users without jury access */}
+          {!user.hasJuryAccess && (
+            <div className="bg-foreground/10 rounded-xl p-6">
+              <h2 className="text-lg font-medium mb-4">Desbloqueia o acesso ao júri</h2>
               <p className="text-sm text-foreground/70 mb-4">
-                Participa na votação de projetos e ajuda a decidir quais
-                iniciativas culturais receberão apoio.
+                Com uma doação total de 25€ ou mais, ganhas acesso às candidaturas
+                e podes participar na votação do júri.
               </p>
               <Link
-                href="/em-construcao"
-                className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
-              >
-                Ver votações →
-              </Link>
-            </div>
-          )}
-
-          {/* Upgrade Card - Only for Apoiantes */}
-          {!isAmigo && (
-            <div className="bg-foreground/10 rounded-xl p-6">
-              <h2 className="text-lg font-medium mb-4">Torna-te Amigo</h2>
-              <p className="text-sm text-foreground/70 mb-4">
-                Faz upgrade para Amigo e ganha acesso ao júri e conteúdo
-                exclusivo por apenas mais 4€/mês.
-              </p>
-              <a
-                href="/api/stripe/upgrade"
+                href="/#precos"
                 className="inline-block px-4 py-2 bg-foreground text-background rounded-lg text-sm hover:opacity-90 transition-opacity"
               >
-                Fazer upgrade
-              </a>
+                Fazer doação
+              </Link>
             </div>
           )}
         </div>

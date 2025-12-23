@@ -1,9 +1,10 @@
 "use client";
 
 interface PricingCardProps {
-  tier: "APOIANTE" | "AMIGO";
   name: string;
   price: string;
+  priceLabel?: string;
+  badge?: string;
   description?: string;
   features?: string[];
   highlighted?: boolean;
@@ -12,9 +13,10 @@ interface PricingCardProps {
 }
 
 export function PricingCard({
-  tier,
   name,
   price,
+  priceLabel = "/ mês",
+  badge,
   description,
   features,
   highlighted = false,
@@ -38,12 +40,21 @@ export function PricingCard({
       )}
 
       <div className="mb-4">
-        <h3 className="text-xl md:text-2xl font-semibold mb-2">{name}</h3>
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-xl md:text-2xl font-semibold">{name}</h3>
+          {badge && (
+            <span className="text-xs text-foreground/40 font-normal">
+              {badge}
+            </span>
+          )}
+        </div>
         <div className="text-2xl md:text-3xl font-semibold">
           {price}{" "}
-          <span className="text-base md:text-lg font-normal text-foreground/60">
-            / mês
-          </span>
+          {priceLabel && (
+            <span className="text-base md:text-lg font-normal text-foreground/60">
+              {priceLabel}
+            </span>
+          )}
         </div>
       </div>
 

@@ -71,13 +71,21 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const email = session.customer_details?.email;
   const name = session.customer_details?.name;
   const customerId = session.customer as string;
-  const subscriptionId = session.subscription as string;
-  const tier = (session.metadata?.tier || "APOIANTE") as SubscriptionTier;
 
   if (!email) {
     console.error("No email found in checkout session");
     return;
   }
+
+  // Check if this is a one-time donation
+  if (session.metadata?.type === "donation") {
+    await handleDonationCompleted(session, email, name, customerId);
+    return;
+  }
+
+  // Handle subscription checkout
+  const subscriptionId = session.subscription as string;
+  const tier = (session.metadata?.tier || "APOIANTE") as SubscriptionTier;
 
   // Get subscription details from Stripe
   const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -154,6 +162,80 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   console.log(`New subscriber: ${email} (${tier})`);
+}
+
+async function handleDonationCompleted(
+  session: Stripe.Checkout.Session,
+  email: string,
+  name: string | null | undefined,
+  customerId: string
+) {
+  const amount = parseInt(session.metadata?.amount || "0", 10) * 100; // Convert to cents
+  const tier = (session.metadata?.tier || "APOIANTE") as SubscriptionTier;
+  const paymentIntentId = session.payment_intent as string;
+
+  // Create or update user in database
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {
+      name,
+      stripeCustomerId: customerId,
+    },
+    create: {
+      email,
+      name,
+      stripeCustomerId: customerId,
+    },
+  });
+
+  // Create donation record
+  await prisma.donation.create({
+    data: {
+      userId: user.id,
+      amount,
+      stripePaymentIntentId: paymentIntentId,
+    },
+  });
+
+  // Generate magic link via Supabase
+  const supabase = createServiceClient();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3027";
+
+  const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+    options: {
+      redirectTo: `${appUrl}/painel`,
+    },
+  });
+
+  if (linkError) {
+    console.error("Failed to generate magic link:", linkError);
+    return;
+  }
+
+  const magicLink = linkData.properties.action_link;
+
+  // Update user with Supabase ID if available
+  if (linkData.user?.id) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { supabaseId: linkData.user.id },
+    });
+  }
+
+  // Add contact to Loops (as donor)
+  await addContactToLoops({ email, name: name || undefined, tier });
+
+  // Send welcome email with magic link
+  await sendWelcomeEmail({
+    email,
+    name: name || undefined,
+    tier,
+    magicLink,
+  });
+
+  console.log(`New donation: ${email} - ${amount / 100}€ (${tier})`);
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {

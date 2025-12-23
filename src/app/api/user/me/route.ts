@@ -2,6 +2,44 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 
+// Minimum donation amount (in cents) for jury access
+const JURY_ACCESS_THRESHOLD = 2500; // 25€
+
+async function getUserData(email: string) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      subscription: true,
+      donations: true,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  // Calculate total donations in cents
+  const totalDonations = user.donations.reduce((sum, d) => sum + d.amount, 0);
+
+  // User has jury access if total donations >= 25€
+  const hasJuryAccess = totalDonations >= JURY_ACCESS_THRESHOLD;
+
+  return {
+    name: user.name,
+    subscription: user.subscription
+      ? {
+          tier: user.subscription.tier,
+          currentPeriodEnd: user.subscription.currentPeriodEnd.toISOString(),
+        }
+      : null,
+    donations: {
+      total: totalDonations / 100, // Convert to euros
+      count: user.donations.length,
+    },
+    hasJuryAccess,
+  };
+}
+
 export async function GET(request: NextRequest) {
   // Get email from Authorization header (sent by client)
   const email = request.headers.get("x-user-email");
@@ -15,42 +53,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: { subscription: true },
-    });
+    const userData = await getUserData(session.user.email);
 
-    if (!user) {
+    if (!userData) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({
-      name: user.name,
-      subscription: user.subscription
-        ? {
-            tier: user.subscription.tier,
-            currentPeriodEnd: user.subscription.currentPeriodEnd.toISOString(),
-          }
-        : null,
-    });
+    return NextResponse.json(userData);
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: { subscription: true },
-  });
+  const userData = await getUserData(email);
 
-  if (!user) {
+  if (!userData) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  return NextResponse.json({
-    name: user.name,
-    subscription: user.subscription
-      ? {
-          tier: user.subscription.tier,
-          currentPeriodEnd: user.subscription.currentPeriodEnd.toISOString(),
-        }
-      : null,
-  });
+  return NextResponse.json(userData);
 }
