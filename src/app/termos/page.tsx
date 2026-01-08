@@ -73,13 +73,9 @@ export default function TermosPage() {
             </ul>
 
             <h3 className="text-lg font-semibold mb-2 mt-4">3.2 Níveis de Apoio</h3>
-            <p className="text-foreground/80 mb-3">
-              Oferecemos dois níveis de apoio mensal:
+            <p className="text-foreground/80">
+              Os níveis de apoio disponíveis e respetivos valores estão descritos na <Link href="/#como-ajudar" className="text-primary underline underline-offset-2">secção de doações</Link> da página principal.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-foreground/80 ml-4">
-              <li><strong>Apoiante</strong> (8€/mês) - Contribuição direta para projetos artísticos</li>
-              <li><strong>Amigo</strong> (12€/mês) - Todos os benefícios de Apoiante + participação no júri público + acesso a candidaturas</li>
-            </ul>
 
             <h3 className="text-lg font-semibold mb-2 mt-4">3.3 Processamento de Pagamentos</h3>
             <p className="text-foreground/80 mb-3">

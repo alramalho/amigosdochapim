@@ -290,8 +290,20 @@ export function DonationSection() {
                   </button>
                 </div>
                 <ul className="space-y-2 text-foreground/80 mb-6 flex-grow">
-                  <li>• Participação na parcela pública do júri</li>
-                  <li>• Acesso a todas as candidaturas submetidas</li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    Participação na parcela pública do júri
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    Acesso a todas as candidaturas submetidas
+                  </li>
+                  {selectedOneOff && selectedOneOff >= 50 && (
+                    <li className="flex items-center gap-2 animate-[fadeInPulse_0.3s_ease-out]">
+                      <CheckCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                      Reconhecimento especial nos créditos
+                    </li>
+                  )}
                 </ul>
                 <button
                   onClick={() => setSelectedOneOff(selectedOneOff && selectedOneOff >= 25 ? null : 25)}
@@ -493,9 +505,18 @@ export function DonationSection() {
                   12€<span className="text-lg font-normal text-foreground/60"> / mês</span>
                 </div>
                 <ul className="space-y-2 text-foreground/80 mb-6 flex-grow">
-                  <li>• Participação na parcela pública do júri</li>
-                  <li>• Acesso a todas as candidaturas submetidas</li>
-                  <li>• Reconhecimento especial nos créditos</li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    Participação na parcela pública do júri
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    Acesso a todas as candidaturas submetidas
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                    Reconhecimento especial nos créditos
+                  </li>
                 </ul>
                 <button
                   onClick={() => setSelectedTier(selectedTier === "AMIGO" ? null : "AMIGO")}
