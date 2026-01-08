@@ -50,7 +50,7 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
 
   return (
     <div className="flex flex-col items-center gap-4 md:gap-6">
-      <div className="flex flex-row justify-around items-center md:gap-15 gap-4 w-full">
+      <div className="flex flex-row justify-around items-start md:gap-15 gap-4 w-full">
         {/* Left side: Title + Money info */}
         <div className="text-left">
           <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">Próximo concurso:</h1>
