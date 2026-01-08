@@ -44,3 +44,18 @@
     background-position: 350% 50%, 350% 50%;
   }
 }
+
+@keyframes fadeInPulse {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

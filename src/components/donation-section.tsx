@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { differenceInMonths } from "date-fns";
+import { Check, CheckCheck } from "lucide-react";
 import { DonationProgress } from "./donation-progress";
-import { PricingCard } from "./pricing-card";
 
 // Next concurso date
 const CONCURSO_DATE = new Date("2026-04-15");
@@ -19,14 +19,12 @@ const TIER_PRICES = {
   AMIGO: 12,
 };
 
-const ONE_OFF_AMOUNTS = [15, 25, 50] as const;
-
 type DonationType = "subscription" | "one-off";
 
 export function DonationSection() {
   const [donationType, setDonationType] = useState<DonationType>("one-off");
-  const [selectedTier, setSelectedTier] = useState<"APOIANTE" | "AMIGO" | null>(null);
-  const [selectedOneOff, setSelectedOneOff] = useState<number | null>(null);
+  const [selectedTier, setSelectedTier] = useState<"APOIANTE" | "AMIGO" | null>("AMIGO");
+  const [selectedOneOff, setSelectedOneOff] = useState<number | null>(25);
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -81,17 +79,18 @@ export function DonationSection() {
     }
   };
 
-  // Clear selection when switching donation type
+  // Set defaults when switching donation type
   const handleDonationTypeChange = (type: DonationType) => {
     setDonationType(type);
-    setSelectedTier(null);
-    setSelectedOneOff(null);
+    setSelectedTier(type === "subscription" ? "AMIGO" : null);
+    setSelectedOneOff(type === "one-off" ? 25 : null);
+    setAcceptedTerms(false);
   };
 
   return (
     <div>
       {/* Donation Progress */}
-      <div className="mb-12 md:mb-16">
+      <div className="mb-0">
         <DonationProgress selectedAmount={selectedAmount} />
       </div>
 
@@ -119,180 +118,430 @@ export function DonationSection() {
         </div>
       </div>
 
-      {/* One-off Donation Cards */}
+      {/* One-off Donation */}
       {donationType === "one-off" && (
-        <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-          <PricingCard
-            name="Apoiante"
-            price="15€"
-            priceLabel=""
-            badge="único"
-            description="Contribui para o financiamento de projetos artísticos."
-            selected={selectedOneOff === 15}
-            onSelect={() => setSelectedOneOff(selectedOneOff === 15 ? null : 15)}
-          />
+        <>
+          {/* Mobile: Grid Layout */}
+          <div className="md:hidden space-y-4">
+            {/* Amount Grid 2x2 */}
+            <div className="grid grid-cols-2 gap-3">
+              {[15, 25, 50, 100].map((amount) => {
+                const isAmigo = amount >= 25;
+                const isSelected = selectedOneOff === amount;
+                return (
+                  <button
+                    key={amount}
+                    onClick={() => setSelectedOneOff(isSelected ? null : amount)}
+                    className={`
+                      p-4 rounded-sm text-center transition-all
+                      ${isAmigo ? "border-2 border-primary" : "border border-border"}
+                      ${isSelected ? "ring-2 ring-primary/20 bg-primary/5" : "hover:bg-accent/50"}
+                    `}
+                  >
+                    <span className={`text-2xl font-semibold ${isSelected ? "text-primary" : ""}`}>
+                      {amount}€
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Amigo card with 25€/50€ toggle */}
-          <div
-            className={`${
-              selectedOneOff === 25 || selectedOneOff === 50
-                ? "border-2 border-primary ring-2 ring-primary/20"
-                : "border-2 border-primary"
-            } p-6 md:p-8 rounded-sm relative flex flex-col transition-all`}
-          >
-            {(selectedOneOff === 25 || selectedOneOff === 50) && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">
-                Selecionado
+            {/* Amigo Benefits Card - appears when >=25€ selected */}
+            {selectedOneOff && selectedOneOff >= 25 && (
+              <div className="border-2 border-primary rounded-sm p-4 animate-[fadeInPulse_0.3s_ease-out]">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-lg font-semibold">Amigo</h3>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                    {selectedOneOff}€
+                  </span>
+                </div>
+                <ul className="space-y-1.5 text-sm text-foreground/70">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    Participação na parcela pública do júri
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    Acesso a todas as candidaturas submetidas
+                  </li>
+                  {selectedOneOff >= 50 && (
+                    <li className="flex items-center gap-2 animate-[fadeInPulse_0.3s_ease-out]">
+                      <CheckCheck className="w-4 h-4 text-primary" />
+                      Reconhecimento especial nos créditos
+                    </li>
+                  )}
+                </ul>
               </div>
             )}
 
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-xl md:text-2xl font-semibold">Amigo</h3>
-                <span className="text-xs text-foreground/40 font-normal">único</span>
+            {/* Apoiante info - appears when 15€ selected */}
+            {selectedOneOff === 15 && (
+              <div className="border border-border rounded-sm p-4 animate-[fadeInPulse_0.3s_ease-out]">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-lg font-semibold">Apoiante</h3>
+                  <span className="text-xs bg-foreground/10 text-foreground/70 px-2 py-0.5 rounded-full">
+                    15€
+                  </span>
+                </div>
+                <p className="text-sm text-foreground/70">
+                  Contribui para o financiamento de projetos artísticos.
+                </p>
+              </div>
+            )}
+
+            {/* Terms & Donate Button */}
+            {selectedOneOff && (
+              <div className="space-y-4 pt-2 animate-[fadeInPulse_0.3s_ease-out]">
+                <label className="flex items-center justify-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="w-4 h-4 rounded border-border accent-primary cursor-pointer"
+                  />
+                  <span className="text-sm text-foreground/70">
+                    Li e aceito os{" "}
+                    <a href="/termos" target="_blank" className="text-primary underline underline-offset-2">
+                      termos e condições
+                    </a>
+                  </span>
+                </label>
+                <button
+                  onClick={handleProceed}
+                  disabled={loading || !acceptedTerms}
+                  className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? "A processar..." : "Doar"}
+                  {!loading && <span>→</span>}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Card Layout */}
+          <div className="hidden md:block space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Apoiante Card */}
+              <div
+                className={`border rounded-sm p-6 flex flex-col transition-all ${
+                  selectedOneOff === 15
+                    ? "border-2 border-primary ring-2 ring-primary/20"
+                    : "border-border"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-2xl font-semibold">Apoiante</h3>
+                  <span className="text-sm text-foreground/40">único</span>
+                </div>
+                <div className="text-3xl font-semibold mb-4">15€</div>
+                <p className="text-foreground/80 mb-6 flex-grow">
+                  Contribui para o financiamento de projetos artísticos.
+                </p>
+                <button
+                  onClick={() => setSelectedOneOff(selectedOneOff === 15 ? null : 15)}
+                  className={`w-full py-3 px-4 rounded-sm font-medium transition-all ${
+                    selectedOneOff === 15
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-foreground hover:bg-foreground/5"
+                  }`}
+                >
+                  {selectedOneOff === 15 ? "Selecionado" : "Selecionar"}
+                </button>
               </div>
 
-              {/* Price toggle */}
-              <div className="flex gap-3">
+              {/* Amigo Card */}
+              <div
+                className={`border-2 border-primary rounded-sm p-6 flex flex-col transition-all ${
+                  selectedOneOff && selectedOneOff >= 25
+                    ? "ring-2 ring-primary/20"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-2xl font-semibold">Amigo</h3>
+                  <span className="text-sm text-foreground/40">único</span>
+                </div>
+                <div className="text-3xl font-semibold mb-4">
+                  <button
+                    onClick={() => setSelectedOneOff(25)}
+                    className={`hover:underline underline-offset-4 transition-all ${
+                      selectedOneOff === 25 ? "underline" : "text-foreground/40"
+                    }`}
+                  >
+                    25€
+                  </button>
+                  <span className="text-foreground/30 mx-2">/</span>
+                  <button
+                    onClick={() => setSelectedOneOff(50)}
+                    className={`hover:underline underline-offset-4 transition-all ${
+                      selectedOneOff === 50 ? "underline" : "text-foreground/40"
+                    }`}
+                  >
+                    50€
+                  </button>
+                  <span className="text-foreground/30 mx-2">/</span>
+                  <button
+                    onClick={() => setSelectedOneOff(100)}
+                    className={`hover:underline underline-offset-4 transition-all ${
+                      selectedOneOff === 100 ? "underline" : "text-foreground/40"
+                    }`}
+                  >
+                    100€
+                  </button>
+                </div>
+                <ul className="space-y-2 text-foreground/80 mb-6 flex-grow">
+                  <li>• Participação na parcela pública do júri</li>
+                  <li>• Acesso a todas as candidaturas submetidas</li>
+                </ul>
                 <button
-                  onClick={() => setSelectedOneOff(25)}
-                  className={`text-2xl md:text-3xl font-semibold transition-all cursor-pointer ${
-                    selectedOneOff === 25
-                      ? "text-primary underline underline-offset-4"
-                      : "text-foreground/40 hover:text-foreground/70 hover:underline hover:underline-offset-4"
+                  onClick={() => setSelectedOneOff(selectedOneOff && selectedOneOff >= 25 ? null : 25)}
+                  className={`w-full py-3 px-4 rounded-sm font-medium transition-all ${
+                    selectedOneOff && selectedOneOff >= 25
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-foreground text-background hover:opacity-90"
                   }`}
                 >
-                  25€
-                </button>
-                <span className="text-2xl md:text-3xl font-semibold text-foreground/20">/</span>
-                <button
-                  onClick={() => setSelectedOneOff(50)}
-                  className={`text-2xl md:text-3xl font-semibold transition-all cursor-pointer ${
-                    selectedOneOff === 50
-                      ? "text-primary underline underline-offset-4"
-                      : "text-foreground/40 hover:text-foreground/70 hover:underline hover:underline-offset-4"
-                  }`}
-                >
-                  50€
+                  {selectedOneOff && selectedOneOff >= 25 ? "Selecionado" : "Selecionar"}
                 </button>
               </div>
             </div>
 
-            <ul className="space-y-2 text-sm md:text-base text-foreground/80 mb-6">
-              <li>• Participação na parcela pública do júri</li>
-              <li>• Acesso a todas as candidaturas submetidas</li>
-              {selectedOneOff === 50 && (
-                <li>• Reconhecimento especial nos créditos</li>
-              )}
-            </ul>
-
-            <button
-              onClick={() => setSelectedOneOff(selectedOneOff === 25 || selectedOneOff === 50 ? null : 25)}
-              className={`mt-auto w-full py-3 px-4 rounded-sm font-medium transition-all ${
-                selectedOneOff === 25 || selectedOneOff === 50
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-foreground text-background hover:opacity-90"
-              }`}
-            >
-              {selectedOneOff === 25 || selectedOneOff === 50 ? "Selecionado" : "Selecionar"}
-            </button>
+            {/* Terms & Donate Button - Desktop */}
+            {selectedOneOff && (
+              <div className="space-y-4 pt-2 flex flex-col items-center">
+                <label className="flex items-center justify-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="w-4 h-4 rounded border-border accent-primary cursor-pointer"
+                  />
+                  <span className="text-sm text-foreground/70">
+                    Li e aceito os{" "}
+                    <a href="/termos" target="_blank" className="text-primary underline underline-offset-2">
+                      termos e condições
+                    </a>
+                  </span>
+                </label>
+                <button
+                  onClick={handleProceed}
+                  disabled={loading || !acceptedTerms}
+                  className="py-3 px-8 bg-primary text-primary-foreground rounded-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? "A processar..." : `Doar ${selectedOneOff}€`}
+                  {!loading && <span>→</span>}
+                </button>
+              </div>
+            )}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Subscription Cards */}
+      {/* Subscription */}
       {donationType === "subscription" && (
-        <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-          <PricingCard
-            name="Apoiante"
-            price="8€"
-            badge="mensal"
-            description="Contribui diretamente para o financiamento de projetos artísticos."
-            selected={selectedTier === "APOIANTE"}
-            onSelect={() => setSelectedTier(selectedTier === "APOIANTE" ? null : "APOIANTE")}
-          />
+        <>
+          {/* Mobile: Grid Layout */}
+          <div className="md:hidden space-y-4">
+            {/* Price Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSelectedTier(selectedTier === "APOIANTE" ? null : "APOIANTE")}
+                className={`
+                  p-4 rounded-sm text-center transition-all border border-border
+                  ${selectedTier === "APOIANTE" ? "ring-2 ring-primary/20 bg-primary/5" : "hover:bg-accent/50"}
+                `}
+              >
+                <span className={`text-2xl font-semibold ${selectedTier === "APOIANTE" ? "text-primary" : ""}`}>
+                  8€
+                </span>
+                <span className="text-sm text-foreground/50">/mês</span>
+              </button>
 
-          <PricingCard
-            name="Amigo"
-            price="12€"
-            badge="mensal"
-            features={[
-              "Participação na parcela pública do júri",
-              "Acesso a todas as candidaturas submetidas",
-              "Reconhecimento especial nos créditos",
-            ]}
-            highlighted
-            selected={selectedTier === "AMIGO"}
-            onSelect={() => setSelectedTier(selectedTier === "AMIGO" ? null : "AMIGO")}
-          />
-        </div>
-      )}
+              <button
+                onClick={() => setSelectedTier(selectedTier === "AMIGO" ? null : "AMIGO")}
+                className={`
+                  p-4 rounded-sm text-center transition-all border-2 border-primary
+                  ${selectedTier === "AMIGO" ? "ring-2 ring-primary/20 bg-primary/5" : "hover:bg-accent/50"}
+                `}
+              >
+                <span className={`text-2xl font-semibold ${selectedTier === "AMIGO" ? "text-primary" : ""}`}>
+                  12€
+                </span>
+                <span className="text-sm text-foreground/50">/mês</span>
+              </button>
+            </div>
 
-      {/* Proceed Button - One-off */}
-      {donationType === "one-off" && selectedOneOff && (
-        <div className="mt-8 text-center">
-          <p className="text-sm text-foreground/60 mb-4">
-            A tua doação de <strong>{selectedOneOff}€</strong> ajuda a financiar o próximo concurso.
-            {selectedOneOff >= 25 && selectedOneOff < 45 && (
-              <> Terás acesso às candidaturas e poderás participar no júri.</>
+            {/* Amigo Benefits Card */}
+            {selectedTier === "AMIGO" && (
+              <div className="border-2 border-primary rounded-sm p-4 animate-[fadeInPulse_0.3s_ease-out]">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-lg font-semibold">Amigo</h3>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                    12€/mês
+                  </span>
+                </div>
+                <ul className="space-y-1.5 text-sm text-foreground/70">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    Participação na parcela pública do júri
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    Acesso a todas as candidaturas submetidas
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCheck className="w-4 h-4 text-primary" />
+                    Reconhecimento especial nos créditos
+                  </li>
+                </ul>
+              </div>
             )}
-            {selectedOneOff >= 45 && (
-              <> Terás acesso ao júri e aparecerás nos créditos.</>
-            )}
-          </p>
-          <label className="flex items-center justify-center gap-2 mb-4 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="w-4 h-4 rounded border-border accent-primary cursor-pointer"
-            />
-            <span className="text-sm text-foreground/70">
-              Li e aceito os{" "}
-              <a href="/termos" target="_blank" className="text-primary hover:underline">
-                termos e condições
-              </a>
-            </span>
-          </label>
-          <button
-            onClick={handleProceed}
-            disabled={loading || !acceptedTerms}
-            className="px-8 py-3 bg-primary text-primary-foreground rounded-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? "A processar..." : "Doar"}
-          </button>
-        </div>
-      )}
 
-      {/* Proceed Button - Subscription */}
-      {donationType === "subscription" && selectedTier && (
-        <div className="mt-8 text-center">
-          <p className="text-sm text-foreground/60 mb-4">
-            Com a tua subscrição de {TIER_PRICES[selectedTier]}€/mês, contribuirás{" "}
-            <strong>{selectedAmount}€</strong> até ao concurso de Abril 2026 ({monthsUntilConcurso} meses).
-          </p>
-          <label className="flex items-center justify-center gap-2 mb-4 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="w-4 h-4 rounded border-border accent-primary cursor-pointer"
-            />
-            <span className="text-sm text-foreground/70">
-              Li e aceito os{" "}
-              <a href="/termos" target="_blank" className="text-primary hover:underline">
-                termos e condições
-              </a>
-            </span>
-          </label>
-          <button
-            onClick={handleProceed}
-            disabled={loading || !acceptedTerms}
-            className="px-8 py-3 bg-primary text-primary-foreground rounded-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? "A processar..." : "Subscrever"}
-          </button>
-        </div>
+            {/* Apoiante info */}
+            {selectedTier === "APOIANTE" && (
+              <div className="border border-border rounded-sm p-4 animate-[fadeInPulse_0.3s_ease-out]">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-lg font-semibold">Apoiante</h3>
+                  <span className="text-xs bg-foreground/10 text-foreground/70 px-2 py-0.5 rounded-full">
+                    8€/mês
+                  </span>
+                </div>
+                <p className="text-sm text-foreground/70">
+                  Contribui diretamente para o financiamento de projetos artísticos.
+                </p>
+              </div>
+            )}
+
+            {/* Terms & Subscribe Button */}
+            {selectedTier && (
+              <div className="space-y-4 pt-2 animate-[fadeInPulse_0.3s_ease-out]">
+                <p className="text-sm text-foreground/60 text-center">
+                  Contribuirás <strong>{selectedAmount}€</strong> até Abril 2026 ({monthsUntilConcurso} meses)
+                </p>
+                <label className="flex items-center justify-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="w-4 h-4 rounded border-border accent-primary cursor-pointer"
+                  />
+                  <span className="text-sm text-foreground/70">
+                    Li e aceito os{" "}
+                    <a href="/termos" target="_blank" className="text-primary underline underline-offset-2">
+                      termos e condições
+                    </a>
+                  </span>
+                </label>
+                <button
+                  onClick={handleProceed}
+                  disabled={loading || !acceptedTerms}
+                  className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? "A processar..." : "Subscrever"}
+                  {!loading && <span>→</span>}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Card Layout */}
+          <div className="hidden md:block space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Apoiante Card */}
+              <div
+                className={`border rounded-sm p-6 flex flex-col transition-all ${
+                  selectedTier === "APOIANTE"
+                    ? "border-2 border-primary ring-2 ring-primary/20"
+                    : "border-border"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-2xl font-semibold">Apoiante</h3>
+                  <span className="text-sm text-foreground/40">mensal</span>
+                </div>
+                <div className="text-3xl font-semibold mb-4">
+                  8€<span className="text-lg font-normal text-foreground/60"> / mês</span>
+                </div>
+                <p className="text-foreground/80 mb-6 flex-grow">
+                  Contribui diretamente para o financiamento de projetos artísticos.
+                </p>
+                <button
+                  onClick={() => setSelectedTier(selectedTier === "APOIANTE" ? null : "APOIANTE")}
+                  className={`w-full py-3 px-4 rounded-sm font-medium transition-all ${
+                    selectedTier === "APOIANTE"
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-foreground hover:bg-foreground/5"
+                  }`}
+                >
+                  {selectedTier === "APOIANTE" ? "Selecionado" : "Selecionar"}
+                </button>
+              </div>
+
+              {/* Amigo Card */}
+              <div
+                className={`border-2 border-primary rounded-sm p-6 flex flex-col transition-all ${
+                  selectedTier === "AMIGO"
+                    ? "ring-2 ring-primary/20"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-2xl font-semibold">Amigo</h3>
+                  <span className="text-sm text-foreground/40">mensal</span>
+                </div>
+                <div className="text-3xl font-semibold mb-4">
+                  12€<span className="text-lg font-normal text-foreground/60"> / mês</span>
+                </div>
+                <ul className="space-y-2 text-foreground/80 mb-6 flex-grow">
+                  <li>• Participação na parcela pública do júri</li>
+                  <li>• Acesso a todas as candidaturas submetidas</li>
+                  <li>• Reconhecimento especial nos créditos</li>
+                </ul>
+                <button
+                  onClick={() => setSelectedTier(selectedTier === "AMIGO" ? null : "AMIGO")}
+                  className={`w-full py-3 px-4 rounded-sm font-medium transition-all ${
+                    selectedTier === "AMIGO"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-foreground text-background hover:opacity-90"
+                  }`}
+                >
+                  {selectedTier === "AMIGO" ? "Selecionado" : "Selecionar"}
+                </button>
+              </div>
+            </div>
+
+            {/* Terms & Subscribe Button - Desktop */}
+            {selectedTier && (
+              <div className="space-y-4 pt-2 flex flex-col items-center">
+                <p className="text-sm text-foreground/60 text-center">
+                  Contribuirás <strong>{selectedAmount}€</strong> até Abril 2026 ({monthsUntilConcurso} meses)
+                </p>
+                <label className="flex items-center justify-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="w-4 h-4 rounded border-border accent-primary cursor-pointer"
+                  />
+                  <span className="text-sm text-foreground/70">
+                    Li e aceito os{" "}
+                    <a href="/termos" target="_blank" className="text-primary underline underline-offset-2">
+                      termos e condições
+                    </a>
+                  </span>
+                </label>
+                <button
+                  onClick={handleProceed}
+                  disabled={loading || !acceptedTerms}
+                  className="py-3 px-8 bg-primary text-primary-foreground rounded-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? "A processar..." : "Subscrever"}
+                  {!loading && <span>→</span>}
+                </button>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

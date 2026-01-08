@@ -44,7 +44,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-xl md:text-2xl font-semibold mb-4">2. Sobre a Organização</h2>
             <p className="text-foreground/80 mb-3">
-              Os Amigos do Chapim é uma associação sem fins lucrativos dedicada a facilitar o acesso às artes através da entreajuda. A nossa missão é apoiar jovens talentos artísticos através de financiamento e recursos.
+              Os Amigos do Chapim é uma associação sem fins lucrativos dedicada a democratizar a arte. A nossa missão é apoiar jovens talentos artísticos através de financiamento e recursos.
             </p>
             <p className="text-foreground/80 mb-3">
               <strong>Identificação:</strong> ASSOCIAÇÃO AMIGOS DO CHAPIM, pessoa coletiva sem fins lucrativos, com o NIPC 519177029, com sede em Rua Alves Redol Nº1 6ºC, 2675-285 Odivelas, Lisboa.

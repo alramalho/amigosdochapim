@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
-const ALLOWED_AMOUNTS = [15, 25, 50]; // in euros
+const ALLOWED_AMOUNTS = [15, 25, 50, 100]; // in euros
 
 function getTierFromAmount(amount: number): "APOIANTE" | "AMIGO" {
   return amount === 15 ? "APOIANTE" : "AMIGO";

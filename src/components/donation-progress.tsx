@@ -49,12 +49,60 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
   const totalWithSelected = currentTotal + selectedAmount;
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="flex flex-row justify-around items-center md:gap-15 gap-6 w-full">
-        <div className="text-left mb-16">
+    <div className="flex flex-col items-center gap-4 md:gap-6">
+      <div className="flex flex-row justify-around items-center md:gap-15 gap-4 w-full">
+        {/* Left side: Title + Money info */}
+        <div className="text-left">
           <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">Próximo concurso:</h1>
-          <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold">Abril 2026</h1>
+          <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold mb-4 md:mb-6">Abril 2026</h1>
+
+          {/* Money info - below title */}
+          <div className="space-y-2">
+            <div className="text-xl md:text-2xl font-semibold">
+              {loading ? (
+                <span className="text-foreground/50">...</span>
+              ) : (
+                <>
+                  <span>{currentTotal.toFixed(0)}€</span>
+                  {selectedAmount > 0 && (
+                    <span className="text-primary/70"> +{selectedAmount}€</span>
+                  )}
+                </>
+              )}
+              <span className="text-foreground/50 text-base md:text-lg"> / {goal}€</span>
+            </div>
+            {/* Legend */}
+            {!loading && data && (
+              <div className="flex flex-col gap-1 text-xs md:text-sm">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 md:w-3 md:h-3 rounded-sm bg-primary" />
+                  <span className="text-foreground/60">Fundos próprios: <strong>{data.fundosProprios}€</strong></span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 md:w-3 md:h-3 rounded-sm" style={{ backgroundColor: '#722F37' }} />
+                  <span className="text-foreground/60">Doações: <strong>{data.donations.toFixed(0)}€</strong></span>
+                </div>
+                {selectedAmount > 0 && (
+                  <div className="flex items-center gap-1.5 animate-[fadeInPulse_0.5s_ease-out]">
+                    <div className="w-2 h-2 md:w-3 md:h-3 rounded-sm border border-[#5a7247]" style={{ backgroundColor: '#5a7247' }} />
+                    <span className="font-medium" style={{ color: '#5a7247' }}>A tua contribuição: <strong>{selectedAmount}€</strong></span>
+                  </div>
+                )}
+              </div>
+            )}
+            <p className="text-xs md:text-sm text-foreground/60">
+              {loading ? (
+                "A carregar..."
+              ) : totalWithSelected >= goal ? (
+                selectedAmount > 0 ? "Objetivo alcançado!" : "Objetivo alcançado!"
+              ) : (
+                <>{selectedAmount > 0 ? "Faltam " : "Faltam "}<strong>{(goal - totalWithSelected).toFixed(0)}€</strong></>
+              )}
+            </p>
+          </div>
         </div>
+
+        {/* Figure */}
         <div className="relative w-32 h-64 md:w-40 md:h-80">
           {/* Human figure SVG */}
           <svg
@@ -79,10 +127,10 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
                 <rect x="53" y="94" width="16" height="62" rx="8" ry="8" />
               </clipPath>
 
-              {/* Pattern for selected amount (striped) */}
+              {/* Pattern for selected amount (striped green) */}
               <pattern id="selectedPattern" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
-                <rect width="3" height="6" fill="var(--color-primary)" opacity="0.6" />
-                <rect x="3" width="3" height="6" fill="var(--color-primary)" opacity="0.3" />
+                <rect width="3" height="6" fill="#5a7247" opacity="0.8" />
+                <rect x="3" width="3" height="6" fill="#5a7247" opacity="0.4" />
               </pattern>
             </defs>
 
@@ -100,7 +148,7 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
                   width="100"
                   height={`${selectedProgress * 2}`}
                   fill="url(#selectedPattern)"
-                  className="transition-all duration-[1500ms] ease-out"
+                  className="transition-all duration-[2000ms] ease-out"
                 />
               </g>
             )}
@@ -147,60 +195,6 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
             </div>
           )}
         </div>
-      </div>
-
-      {/* Progress info */}
-      <div className="text-center space-y-3">
-        <div className="text-3xl md:text-4xl font-semibold">
-          {loading ? (
-            <span className="text-foreground/50">...</span>
-          ) : (
-            <>
-              <span>{currentTotal.toFixed(0)}€</span>
-              {selectedAmount > 0 && (
-                <span className="text-primary/70"> +{selectedAmount}€</span>
-              )}
-            </>
-          )}
-          <span className="text-foreground/50 text-xl md:text-2xl"> / {goal}€</span>
-        </div>
-
-        {/* Legend */}
-        {!loading && data && (
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-primary" />
-              <span className="text-foreground/60">Fundos próprios: <strong className="text-foreground/80">{data.fundosProprios}€</strong></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#722F37' }} />
-              <span className="text-foreground/60">Doações: <strong className="text-foreground/80">{data.donations.toFixed(0)}€</strong></span>
-            </div>
-            {selectedAmount > 0 && (
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm bg-primary/50" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, var(--color-primary) 2px, var(--color-primary) 4px)' }} />
-                <span className="text-foreground/60">A tua contribuição: <strong className="text-primary">{selectedAmount}€</strong></span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <p className="text-sm md:text-base text-foreground/70">
-          {loading ? (
-            "A carregar..."
-          ) : totalWithSelected >= goal ? (
-            selectedAmount > 0 ? (
-              <>Com a tua ajuda, <strong>alcançamos o objetivo!</strong></>
-            ) : (
-              "Objetivo alcançado!"
-            )
-          ) : (
-            <>{selectedAmount > 0 ? "Ficam a faltar" : "Faltam"} <strong>{(goal - totalWithSelected).toFixed(0)}€</strong> para financiar o próximo concurso</>
-          )}
-        </p>
-        <p className="text-xs text-foreground/50">
-          O prémio é de 1000€. Os restantes 300€ cobrem impostos e custos operacionais.
-        </p>
       </div>
     </div>
   );

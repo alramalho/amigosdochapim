@@ -3,6 +3,11 @@ import Image from "next/image";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { AuthNavLink } from "@/components/auth-nav-link";
 import { DonationSection } from "@/components/donation-section";
+import { FAQItem } from "@/components/faq-item";
+
+// Flag para mostrar logotipo da CM Odivelas (aguarda autorização)
+// true em dev para testar, false em prod até ter autorização
+const APROVADO_CM = process.env.NODE_ENV === "development";
 
 export default function Home() {
   return (
@@ -35,24 +40,25 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Marquee de Parcerias */}
+        {/* Parceiros */}
         <section className="py-6 md:py-8 overflow-hidden relative z-10">
-          <div className="flex gap-6 md:gap-12 items-center justify-center opacity-40 flex-wrap px-4">
-            <div className="text-xs md:text-sm uppercase tracking-widest">
-              Parceiro 1
-            </div>
-            <div className="text-xs md:text-sm uppercase tracking-widest">
-              Parceiro 2
-            </div>
-            <div className="text-xs md:text-sm uppercase tracking-widest">
-              Parceiro 3
-            </div>
-            <div className="text-xs md:text-sm uppercase tracking-widest">
-              Parceiro 4
-            </div>
-            <div className="text-xs md:text-sm uppercase tracking-widest">
-              Parceiro 5
-            </div>
+          <div className="flex gap-6 md:gap-12 items-center justify-center opacity-60 flex-wrap px-4">
+            {APROVADO_CM ? (
+              <Image
+                src="/cm_odivelas_branco.png"
+                alt="Câmara Municipal de Odivelas"
+                width={100}
+                height={40}
+                className="h-8 md:h-10 w-auto object-contain"
+              />
+            ) : (
+              <>
+                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 1</div>
+                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 2</div>
+                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 3</div>
+                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 4</div>
+              </>
+            )}
           </div>
         </section>
       </AuroraBackground>
@@ -204,37 +210,22 @@ export default function Home() {
             <span className="opacity-0 group-hover:opacity-50 transition-opacity text-lg">#</span>
           </h2>
         </a>
-        <div className="space-y-6 md:space-y-8">
-          <div>
-            <h3 className="text-lg md:text-xl font-semibold mb-2">
-              Que tipos de projetos artísticos são elegíveis?
-            </h3>
-            <p className="text-sm md:text-base text-foreground/80">
-              Aceitamos candidaturas de todas as áreas artísticas: cinema,
-              música, teatro, artes plásticas, fotografia, dança, e outras
-              formas de expressão criativa.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-lg md:text-xl font-semibold mb-2">
-              Posso cancelar a minha subscrição a qualquer momento?
-            </h3>
-            <p className="text-sm md:text-base text-foreground/80">
-              Sim, sem qualquer compromisso. Podes cancelar a tua subscrição a
-              qualquer momento, sem penalizações.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-lg md:text-xl font-semibold mb-2">
-              Como funciona o sistema de votação por preferência do júri?
-            </h3>
-            <p className="text-sm md:text-base text-foreground/80">
-              Utilizamos o método de <em>Ranked-Choice Voting</em> (Voto por
-              Ordem de Preferência), onde cada membro do júri ordena os projetos
-              por preferência. Este sistema garante que o projeto vencedor tem
-              apoio amplo e não apenas maioria simples.
-            </p>
-          </div>
+        <div className="space-y-4">
+          <FAQItem question="Que tipos de projetos artísticos são elegíveis?">
+            Aceitamos candidaturas de todas as áreas artísticas: cinema,
+            música, teatro, artes plásticas, fotografia, dança, e outras
+            formas de expressão criativa.
+          </FAQItem>
+          <FAQItem question="Posso cancelar a minha subscrição a qualquer momento?">
+            Sim, sem qualquer compromisso. Podes cancelar a tua subscrição a
+            qualquer momento, sem penalizações.
+          </FAQItem>
+          <FAQItem question="Como funciona o sistema de votação por preferência do júri?">
+            Utilizamos o método de <em>Ranked-Choice Voting</em> (Voto por
+            Ordem de Preferência), onde cada membro do júri ordena os projetos
+            por preferência. Este sistema garante que o projeto vencedor tem
+            apoio amplo e não apenas maioria simples.
+          </FAQItem>
         </div>
       </section>
 
@@ -278,8 +269,29 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border text-center text-xs md:text-sm text-foreground/40">
-            © 2025 Amigos do Chapim. Todos os direitos reservados.
+          {/* Logos + Copyright */}
+          <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border">
+            <div className="flex gap-6 md:gap-8 items-center">
+              <Image
+                src="/logo.png"
+                alt="Amigos do Chapim"
+                width={100}
+                height={50}
+                className="h-8 md:h-10 w-auto object-contain opacity-40"
+              />
+              {APROVADO_CM && (
+                <Image
+                  src="/cm_odivelas_preto.png"
+                  alt="Câmara Municipal de Odivelas"
+                  width={120}
+                  height={40}
+                  className="h-6 md:h-8 w-auto object-contain opacity-30"
+                />
+              )}
+            </div>
+            <div className="mt-4 md:mt-6 text-xs md:text-sm text-foreground/40">
+              © 2025 Amigos do Chapim. Todos os direitos reservados.
+            </div>
           </div>
         </div>
       </footer>

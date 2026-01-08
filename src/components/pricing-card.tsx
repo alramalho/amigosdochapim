@@ -10,6 +10,7 @@ interface PricingCardProps {
   highlighted?: boolean;
   selected?: boolean;
   onSelect?: () => void;
+  className?: string;
 }
 
 export function PricingCard({
@@ -22,6 +23,7 @@ export function PricingCard({
   highlighted = false,
   selected = false,
   onSelect,
+  className = "",
 }: PricingCardProps) {
   return (
     <div
@@ -31,7 +33,7 @@ export function PricingCard({
           : highlighted
           ? "border-2 border-primary"
           : "border border-border"
-      } p-6 md:p-8 rounded-sm relative flex flex-col transition-all`}
+      } p-6 md:p-8 rounded-sm relative flex flex-col transition-all ${className}`}
     >
       {selected && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">
