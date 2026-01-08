@@ -127,7 +127,7 @@ export default function EntrarPage() {
 
           <p className="text-sm text-foreground/50 text-center mt-6">
             Ainda não és membro?{" "}
-            <Link href="/#precos" className="text-foreground hover:underline">
+            <Link href="/#como-ajudar" className="text-foreground hover:underline">
               Subscreve aqui
             </Link>
           </p>

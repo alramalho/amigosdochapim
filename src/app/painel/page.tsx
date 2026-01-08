@@ -111,7 +111,7 @@ export default function PainelPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/#precos"
+                href="/#como-ajudar"
                 className="px-6 py-3 bg-foreground text-background rounded-lg font-medium hover:opacity-90 transition-opacity"
               >
                 Ver opções de doação
