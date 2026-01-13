@@ -98,7 +98,7 @@ export default function Home() {
           <div className="space-y-4 text-base md:text-lg leading-relaxed mb-6">
             <p>
               O processo é simples e transparente. Anualmente abrimos
-              candidaturas para curtas-metragens. Cada candidato submete a sua
+              candidaturas para projetos artísticos. Sendo que o primeiro concurso será para curtas-metragens, cada candidato submete a sua
               proposta — sinopse, argumento, material visual e plano de produção.
               Um júri avalia o potencial artístico e a viabilidade de cada
               projeto, garantindo que os fundos apoiam as ideias mais prometedoras.
