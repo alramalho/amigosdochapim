@@ -89,7 +89,7 @@ export default function PainelPage() {
         <div className="max-w-4xl mx-auto w-full flex-1 py-12">
           <header className="flex justify-between items-center mb-12">
             <Link href="/">
-              <img src="/logo.png" alt="Amigos do Chapim" className="h-10" />
+              <img src="/logo_v2.png" alt="Amigos do Chapim" className="h-10" />
             </Link>
             <button
               onClick={async () => {
@@ -176,7 +176,7 @@ export default function PainelPage() {
       <div className="max-w-4xl mx-auto w-full flex-1 py-12">
         <header className="flex justify-between items-center mb-12">
           <Link href="/">
-            <img src="/logo.png" alt="Amigos do Chapim" className="h-10" />
+            <img src="/logo_v2.png" alt="Amigos do Chapim" className="h-10" />
           </Link>
           <button
             onClick={async () => {

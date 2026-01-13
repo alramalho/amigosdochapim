@@ -87,7 +87,7 @@ export default function EntrarPage() {
     <main className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Link href="/" className="flex justify-center mb-8">
-          <img src="/logo.png" alt="Amigos do Chapim" className="h-12" />
+          <img src="/logo_v2.png" alt="Amigos do Chapim" className="h-12" />
         </Link>
 
         <div className="border border-border rounded-xl p-8">

@@ -20,21 +20,21 @@ export default function Home() {
         </nav>
 
         <section className="max-w-5xl mx-auto px-4 pt-0 pb-10 md:pb-16 text-center relative z-10">
-          <div className="mb-4 mb:mb-8 flex justify-center">
+          <div className="mb-4 mb:mb-8 mt-2 flex justify-center opacity-80">
             <Image
-              src="/logo_beige.png"
+              src="/logo_v2_beige.png"
               alt="Amigos do Chapim"
               width={300}
               height={150}
               priority
-              className="w-48 h-24 md:w-64 md:h-37 object-contain"
+              className="w-48 h-20 md:w-64 md:h-32 object-contain"
             />
           </div>
           <div className="py-12 md:py-24">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold mb-4 md:mb-6 tracking-tight px-2">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold mb-4 md:mb-6 tracking-tight">
               Democratizar a arte.
             </h1>
-            <p className="text-base md:text-xl lg:text-2xl text-primary-foreground/80 max-w-3xl mx-auto font-normal px-4">
+            <p className="text-base md:text-xl lg:text-2xl text-primary-foreground/80 max-w-3xl mx-auto font-normal">
               Uma iniciativa dedicada a ajudar os jovens artistas portugueses
             </p>
           </div>
@@ -273,7 +273,7 @@ export default function Home() {
           <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border">
             <div className="flex gap-6 md:gap-8 items-center">
               <Image
-                src="/logo.png"
+                src="/logo_v2.png"
                 alt="Amigos do Chapim"
                 width={100}
                 height={50}
