@@ -19,8 +19,8 @@ export default function Home() {
           <AuthNavLink className="px-4 py-2 text-sm font-medium bg-background/10 hover:bg-background/20 rounded-lg transition-colors backdrop-blur-sm" />
         </nav>
 
-        <section className="max-w-5xl mx-auto px-4 pt-0 pb-10 md:pb-16 text-center relative z-10">
-          <div className="mb-4 mb:mb-8 mt-2 flex justify-center opacity-80">
+        <section className="max-w-5xl mx-auto px-4 pt-0 text-center relative z-10">
+          <div className="mb-4 mb:mb-8 mt-4 flex justify-center opacity-80">
             <Image
               src="/logo_v2_beige.png"
               alt="Amigos do Chapim"
@@ -30,7 +30,7 @@ export default function Home() {
               className="w-48 h-20 md:w-64 md:h-32 object-contain"
             />
           </div>
-          <div className="py-12 md:py-24">
+          <div className="py-20 md:py-32">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold mb-4 md:mb-6 tracking-tight">
               Democratizar a arte.
             </h1>
