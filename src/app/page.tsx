@@ -5,9 +5,7 @@ import { AuthNavLink } from "@/components/auth-nav-link";
 import { DonationSection } from "@/components/donation-section";
 import { FAQItem } from "@/components/faq-item";
 
-// Flag para mostrar logotipo da CM Odivelas (aguarda autorização)
-// true em dev para testar, false em prod até ter autorização
-const APROVADO_CM = process.env.NODE_ENV === "development";
+const APROVADO_CM = true;
 
 export default function Home() {
   return (
@@ -42,6 +40,7 @@ export default function Home() {
 
         {/* Parceiros */}
         <section className="py-6 md:py-8 overflow-hidden relative z-10">
+          <p className="text-xs md:text-sm text-primary-foreground/40 text-center mb-3 tracking-wide">Com o apoio de</p>
           <div className="flex gap-6 md:gap-12 items-center justify-center opacity-60 flex-wrap px-4">
             {APROVADO_CM ? (
               <Image
