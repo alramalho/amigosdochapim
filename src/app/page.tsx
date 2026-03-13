@@ -210,10 +210,11 @@ export default function Home() {
           </h2>
         </a>
         <div className="space-y-4">
-          <FAQItem question="Que tipos de projetos artísticos são elegíveis?">
+          <FAQItem question="Que tipos de projetos artísticos suportamos?">
             Aceitamos candidaturas de todas as áreas artísticas: cinema,
             música, teatro, artes plásticas, fotografia, dança, e outras
             formas de expressão criativa.
+            No entanto, o primeiro concurso focar-se-á apenas em curta-metragens.
           </FAQItem>
           <FAQItem question="Posso cancelar a minha subscrição a qualquer momento?">
             Sim, sem qualquer compromisso. Podes cancelar a tua subscrição a
