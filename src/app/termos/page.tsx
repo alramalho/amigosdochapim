@@ -47,7 +47,7 @@ export default function TermosPage() {
               Os Amigos do Chapim é um projeto dedicado a facilitar o acesso às artes através da entreajuda. A nossa missão é apoiar jovens talentos artísticos através de financiamento e recursos.
             </p>
             <p className="text-foreground/80 mb-3">
-              <strong>Enquadramento Legal Atual:</strong> O projeto opera atualmente através da atividade de trabalhador independente de José Valente (NIF 273131761), nos termos do Artigo 3.º do Código do IRS (Categoria B — Rendimentos Empresariais e Profissionais). Está em curso o processo de constituição de uma associação sem fins lucrativos, prevista para o início de 2025.
+              <strong>Enquadramento Legal Atual:</strong> O projeto opera atualmente através da atividade de trabalhador independente de José Valente (NIF 273131761), nos termos do Artigo 3.º do Código do IRS (Categoria B — Rendimentos Empresariais e Profissionais). Está em curso o processo de constituição de uma associação sem fins lucrativos, prevista para o meio de 2026.
             </p>
             <p className="text-foreground/80">
               Todos os fundos angariados são utilizados de forma transparente, conforme descrito na nossa política de transparência financeira.
