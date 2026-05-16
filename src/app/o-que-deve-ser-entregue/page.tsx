@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   description: "Descobre o que precisas de entregar para te candidatares ao financiamento dos Amigos do Chapim.",
 };
 
+const calendario = [
+  ["Candidatura inicial", "15 maio - 15 julho 2026"],
+  ["Avaliação da candidatura inicial", "16 - 31 julho 2026"],
+  ["Entrega dos requisitos da fase final", "1 - 15 agosto 2026"],
+  ["Entrevista online com o júri", "16 - 31 agosto 2026"],
+  ["Seleção da curta vencedora", "1 - 15 setembro 2026"],
+  ["Produção da curta", "16 setembro - 31 dezembro 2026"],
+];
+
 export default function OQueDeveSerEntreguePage() {
   return (
     <div className="min-h-screen">
@@ -27,197 +36,98 @@ export default function OQueDeveSerEntreguePage() {
           O que deve ser entregue
         </h1>
         <p className="text-base md:text-xl text-foreground/80 leading-relaxed">
-          Para te candidatares ao financiamento dos Amigos do Chapim, precisas de preparar os seguintes materiais.
+          O concurso tem duas fases. A primeira candidatura apresenta o candidato
+          e a proposta artística; só os candidatos selecionados avançam para a
+          entrega complementar da fase final.
         </p>
       </section>
 
-      {/* Dados do Candidato */}
+      {/* Fase 1 */}
       <section className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-        <div className="border border-border p-6 md:p-8 rounded-sm">
-          <div className="flex items-start gap-3 md:gap-4 mb-4">
-            <div className="bg-primary text-primary-foreground w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm md:text-base">
-              1
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-semibold mb-4">Dados do candidato</h2>
-              <ul className="space-y-2 text-sm md:text-base text-foreground/80">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Nome</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Idade</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Email</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Pequena motivação (um texto breve explicando o porquê de te candidatares)</span>
-                </li>
-              </ul>
-            </div>
+        <div className="mb-6">
+          <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
+            15 maio - 15 julho 2026
+          </p>
+          <h2 className="text-2xl md:text-3xl font-semibold">Candidatura inicial</h2>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="border border-border p-6 md:p-8 rounded-sm">
+            <h3 className="text-xl md:text-2xl font-semibold mb-4">Dados do candidato</h3>
+            <ul className="space-y-2 text-sm md:text-base text-foreground/80">
+              <li>Nome</li>
+              <li>Idade</li>
+              <li>Email</li>
+              <li>Contacto telefónico</li>
+              <li>CV</li>
+              <li>Carta de motivação de 1 a 2 páginas</li>
+            </ul>
+          </div>
+
+          <div className="border border-border p-6 md:p-8 rounded-sm">
+            <h3 className="text-xl md:text-2xl font-semibold mb-4">Componente artística</h3>
+            <p className="text-sm md:text-base text-foreground/70 mb-4">
+              Documento PDF com os seguintes elementos:
+            </p>
+            <ul className="space-y-2 text-sm md:text-base text-foreground/80">
+              <li>Sinopse</li>
+              <li>Plot points principais</li>
+              <li>Argumento resumido</li>
+              <li>Descrição das ideias visuais pretendidas</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* Componente Artística */}
-      <section className="bg-accent/30 py-8 md:py-12">
+      {/* Fase 2 */}
+      <section className="bg-accent/30 py-10 md:py-14">
         <div className="max-w-4xl mx-auto px-4">
+          <div className="mb-6">
+            <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
+              1 - 15 agosto 2026
+            </p>
+            <h2 className="text-2xl md:text-3xl font-semibold">Entrega dos requisitos da fase final</h2>
+          </div>
+
           <div className="border border-border bg-background p-6 md:p-8 rounded-sm">
-            <div className="flex items-start gap-3 md:gap-4 mb-4">
-              <div className="bg-primary text-primary-foreground w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm md:text-base">
-                2
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4">Componente artística</h2>
-                <p className="text-sm md:text-base text-foreground/70 mb-4">
-                  Documento PDF com os seguintes elementos:
-                </p>
-                <ul className="space-y-3 text-sm md:text-base text-foreground/80">
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <div>
-                      <strong>Sinopse:</strong> resumo básico da história
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <div>
-                      <strong>Plot points principais:</strong> os momentos-chave da narrativa
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <div>
-                      <strong>Argumento:</strong> versão completa ou quase completa do guião
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <div>
-                      <strong>Descrição das ideias visuais:</strong> o estilo e linguagem visual pretendidos
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
+            <h3 className="text-xl md:text-2xl font-semibold mb-4">Plano de produção detalhado</h3>
+            <p className="text-sm md:text-base text-foreground/70 mb-4">
+              Esta entrega é pedida apenas aos candidatos selecionados após a
+              candidatura inicial.
+            </p>
+            <ul className="space-y-2 text-sm md:text-base text-foreground/80">
+              <li>Listagem do material a utilizar</li>
+              <li>Orçamento de utilização do prémio de 1000€</li>
+              <li>Calendário de produção</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* Material Visual */}
-      <section className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-        <div className="border border-border p-6 md:p-8 rounded-sm">
-          <div className="flex items-start gap-3 md:gap-4 mb-4">
-            <div className="bg-primary text-primary-foreground w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm md:text-base">
-              3
+      {/* Calendário */}
+      <section className="max-w-4xl mx-auto px-4 py-10 md:py-14">
+        <h2 className="text-2xl md:text-3xl font-semibold mb-6">Calendário do concurso</h2>
+        <div className="border border-border rounded-sm overflow-hidden">
+          {calendario.map(([etapa, periodo], index) => (
+            <div
+              key={etapa}
+              className={`grid gap-1 md:grid-cols-[1fr_auto] px-4 py-4 md:px-6 ${
+                index > 0 ? "border-t border-border" : ""
+              }`}
+            >
+              <span className="font-medium text-sm md:text-base">{etapa}</span>
+              <span className="text-sm md:text-base text-foreground/70">{periodo}</span>
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-semibold mb-4">Material visual</h2>
-              <p className="text-sm md:text-base text-foreground/70 mb-4">
-                Uma das seguintes opções:
-              </p>
-              <ul className="space-y-3 text-sm md:text-base text-foreground/80">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <div>
-                    <strong>Teaser</strong> (1-2 minutos)
-                  </div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <div>
-                    <strong>Vídeo conceptual</strong>
-                  </div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <div>
-                    <strong>Storyboard</strong>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Portfólio */}
-      <section className="bg-accent/30 py-8 md:py-12">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="border border-border bg-background p-6 md:p-8 rounded-sm">
-            <div className="flex items-start gap-3 md:gap-4 mb-4">
-              <div className="bg-primary text-primary-foreground w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm md:text-base">
-                4
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4">Portfólio</h2>
-                <p className="text-sm md:text-base text-foreground/80">
-                  Trabalhos anteriores que demonstrem a tua experiência e capacidade artística (opcional mas recomendado).
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Plano de Produção */}
-      <section className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-        <div className="border border-border p-6 md:p-8 rounded-sm">
-          <div className="flex items-start gap-3 md:gap-4 mb-4">
-            <div className="bg-primary text-primary-foreground w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm md:text-base">
-              5
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-semibold mb-4">Plano de produção</h2>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3 text-base md:text-lg">Plano orçamental</h3>
-                  <p className="text-sm md:text-base text-foreground/70 mb-3">
-                    Como serão usados os 1000€. Pode incluir:
-                  </p>
-                  <ul className="space-y-2 text-sm md:text-base text-foreground/80 ml-4">
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span>Equipamento extra (hardware, software, alugueres e compras)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span>Deslocações</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span>Guarda-roupa e adereços</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span>Pagamento de pessoal</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3 text-base md:text-lg">Calendário de produção</h3>
-                  <p className="text-sm md:text-base text-foreground/80">
-                    Cronograma previsto para a execução do projeto.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* CTA */}
       <section className="bg-accent/30 py-12 md:py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-4 md:mb-6">Pronto para te candidatar?</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold mb-4 md:mb-6">Como é feita a escolha?</h2>
           <p className="text-base md:text-lg text-foreground/80 mb-6 md:mb-8">
-            Descobre como o júri avalia as candidaturas.
+            Descobre como o júri avalia as candidaturas e como funciona a votação final.
           </p>
           <Link
             href="/juri"
@@ -225,6 +135,14 @@ export default function OQueDeveSerEntreguePage() {
           >
             Como funciona o júri →
           </Link>
+          <div className="mt-5">
+            <Link
+              href="/regulamento-concurso-curtas-2026.docx"
+              className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
+            >
+              Consultar regulamento completo →
+            </Link>
+          </div>
         </div>
       </section>
 

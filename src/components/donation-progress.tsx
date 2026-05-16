@@ -54,7 +54,7 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
         {/* Left side: Title + Money info */}
         <div className="text-left">
           <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">Próximo concurso:</h1>
-          <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold mb-4 md:mb-6">Junho 2026</h1>
+          <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold mb-4 md:mb-6">15 Maio - 15 Julho 2026</h1>
 
           {/* Money info - below title */}
           <div className="space-y-2">

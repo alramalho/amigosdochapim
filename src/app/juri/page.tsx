@@ -63,7 +63,7 @@ export default function JuriPage() {
               <div>
                 <h3 className="text-xl md:text-2xl font-semibold mb-2">Parcela Interna</h3>
                 <p className="text-sm md:text-base text-foreground/70 mb-3 md:mb-4">
-                  Composta pelos membros fundadores e coordenadores da organização.
+                  Composta pelos sócios da Associação Amigos do Chapim.
                 </p>
                 <p className="text-sm md:text-base text-foreground/80 mb-4">
                   Esta parcela traz conhecimento profundo da missão e valores dos Amigos do Chapim, avaliando não apenas a qualidade artística mas também o alinhamento com os objetivos da organização e a viabilidade de execução.
@@ -110,10 +110,10 @@ export default function JuriPage() {
               <div>
                 <h3 className="text-xl md:text-2xl font-semibold mb-2">Parcela de Especialistas Externos</h3>
                 <p className="text-sm md:text-base text-foreground/70 mb-3 md:mb-4">
-                  Composta por artistas, cineastas e criadores convidados.
+                  Composta por especialistas em cinema convidados.
                 </p>
                 <p className="text-sm md:text-base text-foreground/80">
-                  Profissionais reconhecidos em diversas áreas artísticas trazem uma perspetiva técnica e crítica especializada. Esta parcela garante que os projetos escolhidos têm mérito artístico genuíno e potencial de impacto.
+                  Profissionais convidados da área do cinema trazem uma perspetiva técnica e crítica especializada. Esta parcela garante que os projetos escolhidos têm mérito artístico genuíno e potencial de impacto.
                 </p>
               </div>
             </div>
@@ -135,8 +135,8 @@ export default function JuriPage() {
               <h3 className="font-semibold mb-4 text-lg md:text-xl">Como funciona?</h3>
               <ol className="space-y-3 list-decimal list-inside text-sm md:text-base">
                 <li>Cada membro de cada parcela do júri ordena os projetos candidatos por ordem de preferência (1º, 2º, 3º, etc.).</li>
-                <li>Os votos são contabilizados de forma ponderada: a primeira escolha recebe mais peso, seguida da segunda, e assim sucessivamente.</li>
-                <li>O sistema elimina gradualmente os projetos com menor apoio, redistribuindo os votos até emergir um vencedor com apoio amplo.</li>
+                <li>Se nenhum candidato atingir a maioria absoluta, o candidato com menos votos é eliminado.</li>
+                <li>Os votos desse candidato são redistribuídos para a escolha seguinte de cada jurado. O processo repete-se até haver um vencedor.</li>
               </ol>
             </div>
 
@@ -157,15 +157,15 @@ export default function JuriPage() {
 
         <div className="grid gap-4 md:grid-cols-3 md:gap-6">
           <div className="text-center p-5 md:p-6 border border-border rounded-sm">
-            <div className="text-4xl md:text-5xl font-semibold mb-2">33%</div>
+            <div className="text-4xl md:text-5xl font-semibold mb-2">33,33%</div>
             <p className="text-sm md:text-base text-foreground/70">Parcela Pública</p>
           </div>
           <div className="text-center p-5 md:p-6 border border-border rounded-sm">
-            <div className="text-4xl md:text-5xl font-semibold mb-2">33%</div>
+            <div className="text-4xl md:text-5xl font-semibold mb-2">33,33%</div>
             <p className="text-sm md:text-base text-foreground/70">Parcela Interna</p>
           </div>
           <div className="text-center p-5 md:p-6 border border-border rounded-sm">
-            <div className="text-4xl md:text-5xl font-semibold mb-2">33%</div>
+            <div className="text-4xl md:text-5xl font-semibold mb-2">33,33%</div>
             <p className="text-sm md:text-base text-foreground/70">Especialistas Externos</p>
           </div>
         </div>
@@ -201,6 +201,14 @@ export default function JuriPage() {
           >
             Tornar-me um Amigo →
           </Link>
+          <div className="mt-5">
+            <Link
+              href="/regulamento-concurso-curtas-2026.docx"
+              className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
+            >
+              Consultar regulamento completo →
+            </Link>
+          </div>
         </div>
       </section>
 

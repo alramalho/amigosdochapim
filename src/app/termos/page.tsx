@@ -103,7 +103,7 @@ export default function TermosPage() {
             <ul className="list-disc list-inside space-y-2 text-foreground/80 ml-4">
               <li>Aceder a todas as candidaturas submetidas ao concurso anual</li>
               <li>Votar por ordem de preferência nos projetos candidatos</li>
-              <li>Participar na parcela pública do júri (33% do peso total)</li>
+              <li>Participar na parcela pública do júri (33,33% do peso total)</li>
             </ul>
             <p className="text-foreground/80 mt-3">
               A participação no júri requer subscrição ativa do nível "Amigo" no momento da votação.

@@ -97,10 +97,13 @@ export default function Home() {
           <div className="space-y-4 text-base md:text-lg leading-relaxed mb-6">
             <p>
               O processo é simples e transparente. Anualmente abrimos
-              candidaturas para projetos artísticos. Sendo que o primeiro concurso será para curtas-metragens, cada candidato submete a sua
-              proposta — sinopse, argumento, material visual e plano de produção.
-              Um júri avalia o potencial artístico e a viabilidade de cada
-              projeto, garantindo que os fundos apoiam as ideias mais prometedoras.
+              candidaturas para projetos artísticos. O primeiro concurso será
+              dedicado a curtas-metragens, com candidaturas iniciais abertas de
+              15 de maio a 15 de julho de 2026. Cada candidato submete os seus
+              dados, carta de motivação e uma proposta artística em PDF. Os
+              finalistas entregam depois um plano de produção com orçamento e
+              calendário, para que o júri avalie o potencial artístico e a
+              viabilidade de cada projeto.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">

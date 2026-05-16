@@ -5,13 +5,13 @@ import { differenceInCalendarMonths } from "date-fns";
 import { Check, CheckCheck } from "lucide-react";
 import { DonationProgress } from "./donation-progress";
 
-// Next concurso date
-const CONCURSO_DATE = new Date("2026-06-15");
-const CONCURSO_LABEL = "Junho 2026";
+// Next concurso application deadline
+const CONCURSO_DEADLINE_DATE = new Date("2026-07-15");
+const CONCURSO_DEADLINE_LABEL = "15 de Julho de 2026";
 
 // Calculate months until concurso (including current month)
 function getMonthsUntilConcurso(): number {
-  const months = differenceInCalendarMonths(CONCURSO_DATE, new Date()) + 1;
+  const months = differenceInCalendarMonths(CONCURSO_DEADLINE_DATE, new Date()) + 1;
   return Math.max(1, months); // At least 1 month
 }
 
@@ -429,7 +429,7 @@ export function DonationSection() {
             {selectedTier && (
               <div className="space-y-4 pt-2 animate-[fadeInPulse_0.3s_ease-out]">
                 <p className="text-sm text-foreground/60 text-center">
-                  Contribuirás <strong>{selectedAmount}€</strong> até {CONCURSO_LABEL} ({monthsUntilConcurso} meses)
+                  Contribuirás <strong>{selectedAmount}€</strong> até {CONCURSO_DEADLINE_LABEL} ({monthsUntilConcurso} meses)
                 </p>
                 <label className="flex items-center justify-center gap-2 cursor-pointer">
                   <input
@@ -536,7 +536,7 @@ export function DonationSection() {
             {selectedTier && (
               <div className="space-y-4 pt-2 flex flex-col items-center">
                 <p className="text-sm text-foreground/60 text-center">
-                  Contribuirás <strong>{selectedAmount}€</strong> até {CONCURSO_LABEL} ({monthsUntilConcurso} meses)
+                  Contribuirás <strong>{selectedAmount}€</strong> até {CONCURSO_DEADLINE_LABEL} ({monthsUntilConcurso} meses)
                 </p>
                 <label className="flex items-center justify-center gap-2 cursor-pointer">
                   <input
