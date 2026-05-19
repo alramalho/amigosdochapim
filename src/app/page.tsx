@@ -108,6 +108,12 @@ export default function Home() {
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
             <Link
+              href="/candidatar"
+              className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
+            >
+              Submeter candidatura →
+            </Link>
+            <Link
               href="/o-que-deve-ser-entregue"
               className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
             >

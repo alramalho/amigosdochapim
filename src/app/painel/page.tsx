@@ -46,11 +46,7 @@ export default function PainelPage() {
       setUserEmail(session.user.email!);
 
       // Fetch user data from API
-      const res = await fetch("/api/user/me", {
-        headers: {
-          "x-user-email": session.user.email!,
-        },
-      });
+      const res = await fetch("/api/user/me");
 
       if (res.ok) {
         const userData = await res.json();
@@ -268,7 +264,7 @@ export default function PainelPage() {
                 iniciativas culturais receberão apoio.
               </p>
               <Link
-                href="/em-construcao"
+                href="/painel/juri"
                 className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
               >
                 Ver candidaturas →
@@ -276,19 +272,32 @@ export default function PainelPage() {
             </div>
           )}
 
-          {/* Content Card - For users with jury access */}
-          {user.hasJuryAccess && (
+          {/* Candidate Card */}
+          <div className="bg-foreground/5 rounded-xl p-6">
+            <h2 className="text-lg font-medium mb-4">Candidatura</h2>
+            <p className="text-sm text-foreground/70 mb-4">
+              Submete ou acompanha a tua candidatura ao concurso de curtas-metragens de 2026.
+            </p>
+            <Link
+              href="/painel/candidatura"
+              className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
+            >
+              Ver candidatura →
+            </Link>
+          </div>
+
+          {/* Admin Card */}
+          {userEmail && process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",").map((email) => email.trim().toLowerCase()).includes(userEmail.toLowerCase()) && (
             <div className="bg-foreground/5 rounded-xl p-6">
-              <h2 className="text-lg font-medium mb-4">Conteúdo exclusivo</h2>
+              <h2 className="text-lg font-medium mb-4">Admin</h2>
               <p className="text-sm text-foreground/70 mb-4">
-                Tens acesso a conteúdo exclusivo e podes participar
-                como júri na seleção de projetos.
+                Gere candidaturas, finalistas e estados do concurso.
               </p>
               <Link
-                href="/em-construcao"
+                href="/admin/candidaturas"
                 className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
               >
-                Ver conteúdo →
+                Gerir candidaturas →
               </Link>
             </div>
           )}

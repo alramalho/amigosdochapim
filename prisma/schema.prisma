@@ -25,17 +25,40 @@ enum DonationType {
   SUBSCRIPTION
 }
 
-model User {
-  id                   String             @id @default(cuid())
-  email                String             @unique
-  name                 String?
-  supabaseId           String?            @unique @map("supabase_id")
-  stripeCustomerId     String?            @unique @map("stripe_customer_id")
-  createdAt            DateTime           @default(now()) @map("created_at")
-  updatedAt            DateTime           @updatedAt @map("updated_at")
+enum ContestStatus {
+  DRAFT
+  APPLICATIONS_OPEN
+  INITIAL_REVIEW
+  FINAL_MATERIALS
+  JURY_REVIEW
+  COMPLETED
+}
 
-  subscription         Subscription?
-  donations            Donation[]
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  SELECTED_FOR_FINAL
+  FINAL_MATERIALS_SUBMITTED
+  FINALIST
+  WINNER
+  REJECTED
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  name             String?
+  supabaseId       String?  @unique @map("supabase_id")
+  stripeCustomerId String?  @unique @map("stripe_customer_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  subscription Subscription?
+  donations    Donation[]
+  submissions  Submission[]
+  juryReviews  JuryReview[]
+  juryRankings JuryRanking[]
 
   @@map("users")
 }
@@ -52,21 +75,124 @@ model Subscription {
   createdAt            DateTime           @default(now()) @map("created_at")
   updatedAt            DateTime           @updatedAt @map("updated_at")
 
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
 }
 
 model Donation {
-  id                   String             @id @default(cuid())
-  userId               String             @map("user_id")
-  type                 DonationType       @default(ONE_OFF)
-  amount               Int                // Amount in cents
-  stripePaymentIntentId String?           @unique @map("stripe_payment_intent_id")
-  stripeInvoiceId      String?            @unique @map("stripe_invoice_id")
-  createdAt            DateTime           @default(now()) @map("created_at")
+  id                    String       @id @default(cuid())
+  userId                String       @map("user_id")
+  type                  DonationType @default(ONE_OFF)
+  amount                Int // Amount in cents
+  stripePaymentIntentId String?      @unique @map("stripe_payment_intent_id")
+  stripeInvoiceId       String?      @unique @map("stripe_invoice_id")
+  createdAt             DateTime     @default(now()) @map("created_at")
 
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("donations")
+}
+
+model Contest {
+  id                    String        @id @default(cuid())
+  title                 String
+  slug                  String        @unique
+  status                ContestStatus @default(DRAFT)
+  applicationsOpenAt    DateTime      @map("applications_open_at")
+  applicationsCloseAt   DateTime      @map("applications_close_at")
+  finalMaterialsOpenAt  DateTime      @map("final_materials_open_at")
+  finalMaterialsCloseAt DateTime      @map("final_materials_close_at")
+  juryReviewOpenAt      DateTime      @map("jury_review_open_at")
+  juryReviewCloseAt     DateTime      @map("jury_review_close_at")
+  productionStartsAt    DateTime      @map("production_starts_at")
+  productionEndsAt      DateTime      @map("production_ends_at")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  submissions  Submission[]
+  juryRankings JuryRanking[]
+
+  @@map("contests")
+}
+
+model Submission {
+  id                 String           @id @default(cuid())
+  contestId          String           @map("contest_id")
+  userId             String           @map("user_id")
+  status             SubmissionStatus @default(SUBMITTED)
+  candidateName      String           @map("candidate_name")
+  age                Int
+  email              String
+  phone              String
+  residentInPortugal Boolean          @default(false) @map("resident_in_portugal")
+  cvUrl              String?          @map("cv_url")
+  motivation         String
+  synopsis           String
+  plotPoints         String           @map("plot_points")
+  scriptSummary      String           @map("script_summary")
+  visualIdeas        String           @map("visual_ideas")
+  externalLinks      String?          @map("external_links")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  contest        Contest                   @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user           User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  finalMaterials SubmissionFinalMaterials?
+  juryReviews    JuryReview[]
+
+  @@unique([contestId, userId])
+  @@map("submissions")
+}
+
+model SubmissionFinalMaterials {
+  id                 String   @id @default(cuid())
+  submissionId       String   @unique @map("submission_id")
+  materialList       String   @map("material_list")
+  budgetPlan         String   @map("budget_plan")
+  productionCalendar String   @map("production_calendar")
+  externalLinks      String?  @map("external_links")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("submission_final_materials")
+}
+
+model JuryReview {
+  id              String   @id @default(cuid())
+  submissionId    String   @map("submission_id")
+  jurorId         String   @map("juror_id")
+  artisticQuality Int?     @map("artistic_quality")
+  originality     Int?
+  argumentClarity Int?     @map("argument_clarity")
+  aestheticVision Int?     @map("aesthetic_vision")
+  budgetViability Int?     @map("budget_viability")
+  motivation      Int?
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  juror      User       @relation(fields: [jurorId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, jurorId])
+  @@map("jury_reviews")
+}
+
+model JuryRanking {
+  id                   String    @id @default(cuid())
+  contestId            String    @map("contest_id")
+  jurorId              String    @map("juror_id")
+  orderedSubmissionIds String[]  @map("ordered_submission_ids")
+  submittedAt          DateTime? @map("submitted_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  juror   User    @relation(fields: [jurorId], references: [id], onDelete: Cascade)
+
+  @@unique([contestId, jurorId])
+  @@map("jury_rankings")
 }
