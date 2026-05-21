@@ -82,49 +82,64 @@ export default function JuriPainelPage() {
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <section>
             <h2 className="text-xl font-semibold mb-4">Candidaturas para avaliação</h2>
-            <div className="space-y-3">
-              {submissions.map((submission) => (
-                <Link
-                  key={submission.id}
-                  href={`/painel/juri/${submission.id}`}
-                  className="block border border-border rounded-sm p-5 hover:bg-accent/30 transition-colors"
-                >
-                  <div className="flex justify-between gap-4">
-                    <div>
-                      <h3 className="font-semibold">{submission.candidateName}</h3>
-                      <p className="text-sm text-foreground/70 mt-1 line-clamp-2">{submission.synopsis}</p>
+            {submissions.length === 0 ? (
+              <div className="border border-border bg-accent/20 rounded-sm p-6">
+                <h3 className="font-semibold mb-2">Ainda não há candidaturas para avaliação.</h3>
+                <p className="text-sm text-foreground/70">
+                  As candidaturas aparecerão aqui quando a organização marcar os projetos finalistas para a fase do júri.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {submissions.map((submission) => (
+                  <Link
+                    key={submission.id}
+                    href={`/painel/juri/${submission.id}`}
+                    className="block border border-border rounded-sm p-5 hover:bg-accent/30 transition-colors"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold">{submission.candidateName}</h3>
+                        <p className="text-sm text-foreground/70 mt-1 line-clamp-2">{submission.synopsis}</p>
+                      </div>
+                      <span className="text-xs text-foreground/50 whitespace-nowrap">
+                        {submission.juryReviews?.length ? "Revista" : "Por rever"}
+                      </span>
                     </div>
-                    <span className="text-xs text-foreground/50 whitespace-nowrap">
-                      {submission.juryReviews?.length ? "Revista" : "Por rever"}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
 
           <aside className="border border-border rounded-sm p-5 h-fit">
             <h2 className="text-xl font-semibold mb-4">Ranking final</h2>
-            <div className="space-y-2">
-              {ranking.map((id, index) => {
-                const submission = submissions.find((item) => item.id === id);
-                if (!submission) return null;
-                return (
-                  <div key={id} className="flex items-center gap-3 border border-border rounded-sm p-3">
-                    <span className="font-semibold w-6">{index + 1}</span>
-                    <span className="text-sm flex-1">{submission.candidateName}</span>
-                    <button onClick={() => move(id, -1)} className="text-xs text-foreground/60 hover:text-foreground">↑</button>
-                    <button onClick={() => move(id, 1)} className="text-xs text-foreground/60 hover:text-foreground">↓</button>
-                  </div>
-                );
-              })}
-            </div>
+            {ranking.length === 0 ? (
+              <p className="text-sm text-foreground/70">
+                O ranking abre quando existirem candidaturas finalistas.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {ranking.map((id, index) => {
+                  const submission = submissions.find((item) => item.id === id);
+                  if (!submission) return null;
+                  return (
+                    <div key={id} className="flex items-center gap-3 border border-border rounded-sm p-3">
+                      <span className="font-semibold w-6">{index + 1}</span>
+                      <span className="text-sm flex-1">{submission.candidateName}</span>
+                      <button onClick={() => move(id, -1)} className="text-xs text-foreground/60 hover:text-foreground">↑</button>
+                      <button onClick={() => move(id, 1)} className="text-xs text-foreground/60 hover:text-foreground">↓</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             {message && <p className="text-sm text-foreground/70 mt-4">{message}</p>}
             <div className="flex gap-3 mt-5">
-              <button onClick={() => saveRanking(false)} className="px-4 py-2 border border-border rounded-sm text-sm">
+              <button disabled={ranking.length === 0} onClick={() => saveRanking(false)} className="px-4 py-2 border border-border rounded-sm text-sm disabled:opacity-50">
                 Guardar
               </button>
-              <button onClick={() => saveRanking(true)} className="px-4 py-2 bg-primary text-primary-foreground rounded-sm text-sm">
+              <button disabled={ranking.length === 0} onClick={() => saveRanking(true)} className="px-4 py-2 bg-primary text-primary-foreground rounded-sm text-sm disabled:opacity-50">
                 Submeter
               </button>
             </div>
