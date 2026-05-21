@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
 
 const initialForm = {
   candidateName: "",
@@ -29,28 +27,11 @@ type UploadedFile = {
 };
 
 export default function CandidatarPage() {
-  const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cvFile, setCvFile] = useState<File | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const devEmail = process.env.NEXT_PUBLIC_DEV_AUTH_EMAIL;
-      if (!session && !devEmail) {
-        router.push("/entrar");
-        return;
-      }
-      if (session?.user.email) {
-        setForm((current) => ({ ...current, email: session.user.email! }));
-      } else if (devEmail) {
-        setForm((current) => ({ ...current, email: devEmail }));
-      }
-      setCheckingAuth(false);
-    });
-  }, [router]);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const update = (field: keyof typeof form, value: string | boolean) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -85,13 +66,30 @@ export default function CandidatarPage() {
       return;
     }
 
-    router.push("/painel/candidatura");
+    setSubmittedEmail(form.email);
+    setForm(initialForm);
+    setCvFile(null);
+    setLoading(false);
   };
 
-  if (checkingAuth) {
+  if (submittedEmail) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p className="text-foreground/70">A verificar acesso...</p>
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="max-w-xl text-center">
+          <p className="text-sm uppercase tracking-wide text-primary font-medium mb-3">Candidatura recebida</p>
+          <h1 className="text-3xl md:text-5xl font-semibold mb-4">Obrigado pela submissão.</h1>
+          <p className="text-foreground/70 mb-6">
+            Guardámos a candidatura associada a <strong>{submittedEmail}</strong>. Se precisares de acompanhar ou editar a candidatura mais tarde, entra com esse email no painel.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
+            <Link href="/" className="px-5 py-3 border border-border rounded-sm">
+              Voltar ao início
+            </Link>
+            <Link href="/entrar" className="px-5 py-3 bg-primary text-primary-foreground rounded-sm">
+              Entrar no painel
+            </Link>
+          </div>
+        </div>
       </main>
     );
   }

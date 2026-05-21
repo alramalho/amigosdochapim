@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ensureCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { getOrCreateCurrentContest } from "@/lib/contest-db";
 import { createPresignedUploadUrl, validateUploadRequest, type UploadPurpose } from "@/lib/s3";
 
 export async function POST(request: NextRequest) {
-  const user = await ensureCurrentUser(request);
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+  const user = await getCurrentUser(request);
   const body = await request.json();
   const upload = validateUploadRequest(body);
 
@@ -19,7 +14,7 @@ export async function POST(request: NextRequest) {
 
   const contest = await getOrCreateCurrentContest();
   const presigned = await createPresignedUploadUrl({
-    userId: user.id,
+    ownerSegment: user ? `users/${user.id}` : `pending/${crypto.randomUUID()}`,
     contestSlug: contest.slug,
     purpose: upload.purpose as UploadPurpose,
     fileName: upload.fileName,

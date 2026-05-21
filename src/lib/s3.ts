@@ -81,13 +81,13 @@ export function sanitizeFileName(fileName: string) {
 }
 
 export async function createPresignedUploadUrl({
-  userId,
+  ownerSegment,
   contestSlug,
   purpose,
   fileName,
   contentType,
 }: {
-  userId: string;
+  ownerSegment: string;
   contestSlug: string;
   purpose: UploadPurpose;
   fileName: string;
@@ -96,7 +96,7 @@ export async function createPresignedUploadUrl({
   const { bucket, region, keyPrefix, publicBaseUrl } = getS3Config();
   const safeName = sanitizeFileName(fileName);
   const purposePath = purpose === "CV" ? "cv" : "final-materials";
-  const objectKey = `${keyPrefix}/submissions/${contestSlug}/${userId}/${purposePath}/${crypto.randomUUID()}-${safeName}`;
+  const objectKey = `${keyPrefix}/submissions/${contestSlug}/${ownerSegment}/${purposePath}/${crypto.randomUUID()}-${safeName}`;
 
   const client = new S3Client({ region });
   const command = new PutObjectCommand({

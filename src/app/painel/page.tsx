@@ -100,20 +100,20 @@ export default function PainelPage() {
 
           <div className="text-center py-12 max-w-lg mx-auto">
             <h1 className="text-3xl font-semibold mb-4">
-              Obrigado por te juntares!
+              Bem-vindo ao teu painel
             </h1>
             <p className="text-foreground/70 mb-8">
-              Ainda não fizeste uma doação. Contribui e ajuda-nos a democratizar o acesso à arte em Portugal.
+              Não encontrámos contribuições associadas a este email. Podes submeter ou acompanhar uma candidatura, ou falar connosco se o teu acesso ao júri deveria aparecer aqui.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/#como-ajudar"
+                href="/painel/candidatura"
                 className="px-6 py-3 bg-foreground text-background rounded-lg font-medium hover:opacity-90 transition-opacity"
               >
-                Ver opções de doação
+                Ver candidatura
               </Link>
               <a
-                href="mailto:geral@amigosdochapim.org"
+                href={`mailto:geral@amigosdochapim.org?subject=Acesso ao painel&body=Email: ${encodeURIComponent(userEmail || "")}`}
                 className="px-6 py-3 border border-foreground/20 rounded-lg font-medium hover:border-foreground/40 transition-colors"
               >
                 Falar connosco

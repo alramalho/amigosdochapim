@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ensureCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest } from "@/lib/contest-db";
 import { isWithinWindow } from "@/lib/contest";
@@ -22,12 +21,6 @@ function text(value: unknown) {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await ensureCurrentUser(request);
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const contest = await getOrCreateCurrentContest();
 
   if (
@@ -39,10 +32,21 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
   const missing = requiredFields.filter((field) => !text(body[field]));
+  const email = text(body.email).toLowerCase();
 
-  if (missing.length > 0 || Number.isNaN(Number(body.age)) || !body.residentInPortugal) {
+  if (missing.length > 0 || !email.includes("@") || Number.isNaN(Number(body.age)) || !body.residentInPortugal) {
     return NextResponse.json({ error: "Preenche todos os campos obrigatórios." }, { status: 400 });
   }
+
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: { email },
+    include: {
+      subscription: true,
+      donations: true,
+    },
+  });
 
   const cvFile = parseUploadDescriptor(body.cvFile);
   const { bucket } = getS3Config();

@@ -20,7 +20,7 @@ export async function getCurrentUserEmail(request?: NextRequest) {
     return null;
   }
 
-  return email;
+  return email.toLowerCase();
 }
 
 export async function getCurrentUser(request?: NextRequest) {
