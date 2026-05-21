@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { JURY_ACCESS_ONE_OFF_THRESHOLD } from "@/lib/contest";
@@ -13,6 +14,24 @@ export async function getCurrentUserEmail(request?: NextRequest) {
 
   if (process.env.NODE_ENV !== "production") {
     email = request?.headers.get("x-dev-user-email") || process.env.NEXT_PUBLIC_DEV_AUTH_EMAIL || undefined;
+  }
+
+  if (!email && request) {
+    const [scheme, token] = (request.headers.get("authorization") || "").split(" ");
+    if (scheme?.toLowerCase() === "bearer" && token) {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        }
+      );
+      const { data } = await supabase.auth.getUser(token);
+      email = data.user?.email || undefined;
+    }
   }
 
   if (!email) {

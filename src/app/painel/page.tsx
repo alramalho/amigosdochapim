@@ -46,7 +46,11 @@ export default function PainelPage() {
       setUserEmail(session.user.email!);
 
       // Fetch user data from API
-      const res = await fetch("/api/user/me");
+      const res = await fetch("/api/user/me", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
       if (res.ok) {
         const userData = await res.json();

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type Submission = {
   id: string;
@@ -19,7 +20,9 @@ export default function JuriPainelPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/jury/submissions")
+    supabase.auth.getSession().then(({ data: { session } }) => fetch("/api/jury/submissions", {
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    }))
       .then((response) => response.json())
       .then((data) => {
         setSubmissions(data.submissions || []);
@@ -41,9 +44,13 @@ export default function JuriPainelPage() {
 
   const saveRanking = async (submit = false) => {
     setMessage(null);
+    const { data: { session } } = await supabase.auth.getSession();
     const response = await fetch("/api/jury/ranking", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      },
       body: JSON.stringify({ orderedSubmissionIds: ranking, submit }),
     });
     setMessage(response.ok ? (submit ? "Ranking final submetido." : "Rascunho guardado.") : "Não foi possível guardar o ranking.");

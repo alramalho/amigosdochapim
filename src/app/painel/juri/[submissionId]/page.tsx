@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type Submission = {
   id: string;
@@ -51,7 +52,9 @@ export default function JurySubmissionPage() {
 
   useEffect(() => {
     if (!submissionId) return;
-    fetch("/api/jury/submissions")
+    supabase.auth.getSession().then(({ data: { session } }) => fetch("/api/jury/submissions", {
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    }))
       .then((response) => response.json())
       .then((data) => {
         const item = data.submissions?.find((submission: Submission) => submission.id === submissionId);
@@ -66,9 +69,13 @@ export default function JurySubmissionPage() {
 
   const save = async () => {
     if (!submissionId) return;
+    const { data: { session } } = await supabase.auth.getSession();
     const response = await fetch(`/api/jury/reviews/${submissionId}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      },
       body: JSON.stringify({ ...scores, notes }),
     });
     setMessage(response.ok ? "Avaliação guardada." : "Não foi possível guardar a avaliação.");

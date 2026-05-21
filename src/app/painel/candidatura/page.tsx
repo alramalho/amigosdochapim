@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type Submission = {
   id: string;
@@ -42,7 +43,9 @@ export default function CandidaturaPainelPage() {
   const [finalFiles, setFinalFiles] = useState<File[]>([]);
 
   useEffect(() => {
-    fetch("/api/submissions/me")
+    supabase.auth.getSession().then(({ data: { session } }) => fetch("/api/submissions/me", {
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    }))
       .then((response) => response.json())
       .then((data) => {
         setSubmission(data.submission);
@@ -74,7 +77,10 @@ export default function CandidaturaPainelPage() {
 
     const response = await fetch("/api/submissions/me", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(await getAuthHeader()),
+      },
       body: JSON.stringify({ ...finalForm, files: uploadedFiles }),
     });
 
@@ -173,6 +179,11 @@ export default function CandidaturaPainelPage() {
       </div>
     </main>
   );
+}
+
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session ? { Authorization: `Bearer ${session.access_token}` } : {};
 }
 
 async function uploadFile(file: File, purpose: "CV" | "FINAL_MATERIAL"): Promise<UploadedFile> {
