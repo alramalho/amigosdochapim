@@ -3,6 +3,11 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { JURY_ACCESS_ONE_OFF_THRESHOLD } from "@/lib/contest";
 
+const userAccessInclude = {
+  subscription: true,
+  donations: true,
+} as const;
+
 export async function getCurrentUserEmail(request?: NextRequest) {
   let email: string | undefined;
 
@@ -30,12 +35,21 @@ export async function getCurrentUser(request?: NextRequest) {
     return null;
   }
 
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { email },
-    include: {
-      subscription: true,
-      donations: true,
+    include: userAccessInclude,
+  });
+
+  if (user) return user;
+
+  return prisma.user.findFirst({
+    where: {
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
     },
+    include: userAccessInclude,
   });
 }
 
@@ -46,14 +60,21 @@ export async function ensureCurrentUser(request?: NextRequest) {
     return null;
   }
 
-  return prisma.user.upsert({
-    where: { email },
-    update: {},
-    create: { email },
-    include: {
-      subscription: true,
-      donations: true,
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
     },
+    include: userAccessInclude,
+  });
+
+  if (existingUser) return existingUser;
+
+  return prisma.user.create({
+    data: { email },
+    include: userAccessInclude,
   });
 }
 

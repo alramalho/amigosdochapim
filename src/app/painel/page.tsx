@@ -272,19 +272,21 @@ export default function PainelPage() {
             </div>
           )}
 
-          {/* Candidate Card */}
-          <div className="bg-foreground/5 rounded-xl p-6">
-            <h2 className="text-lg font-medium mb-4">Candidatura</h2>
-            <p className="text-sm text-foreground/70 mb-4">
-              Submete ou acompanha a tua candidatura ao concurso de curtas-metragens de 2026.
-            </p>
-            <Link
-              href="/painel/candidatura"
-              className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
-            >
-              Ver candidatura →
-            </Link>
-          </div>
+          {/* Candidate Card - Jury members cannot submit */}
+          {!user.hasJuryAccess && (
+            <div className="bg-foreground/5 rounded-xl p-6">
+              <h2 className="text-lg font-medium mb-4">Candidatura</h2>
+              <p className="text-sm text-foreground/70 mb-4">
+                Submete ou acompanha a tua candidatura ao concurso de curtas-metragens de 2026.
+              </p>
+              <Link
+                href="/painel/candidatura"
+                className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
+              >
+                Ver candidatura →
+              </Link>
+            </div>
+          )}
 
           {/* Admin Card */}
           {userEmail && process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",").map((email) => email.trim().toLowerCase()).includes(userEmail.toLowerCase()) && (

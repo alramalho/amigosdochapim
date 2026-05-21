@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest } from "@/lib/contest-db";
 import { isWithinWindow } from "@/lib/contest";
 import { getS3Config, parseUploadDescriptor } from "@/lib/s3";
+import { userHasJuryAccess } from "@/lib/auth";
 
 const requiredFields = [
   "candidateName",
@@ -47,6 +48,10 @@ export async function POST(request: NextRequest) {
       donations: true,
     },
   });
+
+  if (userHasJuryAccess(user)) {
+    return NextResponse.json({ error: "Membros do júri não podem submeter candidaturas." }, { status: 403 });
+  }
 
   const cvFile = parseUploadDescriptor(body.cvFile);
   const { bucket } = getS3Config();
