@@ -119,7 +119,7 @@ export default function CandidatarPage() {
         </div>
 
         <form onSubmit={submit} className="space-y-8">
-          <section className="border border-border rounded-sm p-5 md:p-6">
+          <section className="border border-border bg-accent/20 rounded-sm p-5 md:p-6">
             <h2 className="text-xl font-semibold mb-5">Dados do candidato</h2>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Nome" value={form.candidateName} onChange={(value) => update("candidateName", value)} required />
@@ -141,7 +141,7 @@ export default function CandidatarPage() {
             </label>
           </section>
 
-          <section className="border border-border rounded-sm p-5 md:p-6">
+          <section className="border border-border bg-accent/20 rounded-sm p-5 md:p-6">
             <h2 className="text-xl font-semibold mb-5">Componente artística</h2>
             <div className="space-y-4">
               <TextArea label="Carta de motivação" value={form.motivation} onChange={(value) => update("motivation", value)} required />
