@@ -20,12 +20,21 @@ const initialForm = {
   externalLinks: "",
 };
 
+type UploadedFile = {
+  objectKey: string;
+  publicUrl: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+};
+
 export default function CandidatarPage() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cvFile, setCvFile] = useState<File | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -52,10 +61,21 @@ export default function CandidatarPage() {
     setLoading(true);
     setError(null);
 
+    let uploadedCv: UploadedFile | null = null;
+    try {
+      if (cvFile) {
+        uploadedCv = await uploadFile(cvFile, "CV");
+      }
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Não foi possível enviar o ficheiro.");
+      setLoading(false);
+      return;
+    }
+
     const response = await fetch("/api/submissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, cvFile: uploadedCv }),
     });
 
     if (!response.ok) {
@@ -109,6 +129,7 @@ export default function CandidatarPage() {
               <Field label="Email" type="email" value={form.email} onChange={(value) => update("email", value)} required />
               <Field label="Contacto telefónico" value={form.phone} onChange={(value) => update("phone", value)} required />
               <Field label="Link para CV" value={form.cvUrl} onChange={(value) => update("cvUrl", value)} placeholder="Drive, PDF público ou website" />
+              <FileField label="Upload do CV" file={cvFile} onChange={setCvFile} />
             </div>
             <label className="flex gap-3 mt-5 text-sm text-foreground/80">
               <input
@@ -149,6 +170,42 @@ export default function CandidatarPage() {
   );
 }
 
+async function uploadFile(file: File, purpose: "CV" | "FINAL_MATERIAL"): Promise<UploadedFile> {
+  const presignResponse = await fetch("/api/uploads/presign", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      purpose,
+      fileName: file.name,
+      contentType: file.type,
+      sizeBytes: file.size,
+    }),
+  });
+
+  const presign = await presignResponse.json().catch(() => ({}));
+  if (!presignResponse.ok) {
+    throw new Error(presign.error || "Não foi possível preparar o upload.");
+  }
+
+  const uploadResponse = await fetch(presign.uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("Não foi possível enviar o ficheiro.");
+  }
+
+  return {
+    objectKey: presign.objectKey,
+    publicUrl: presign.publicUrl,
+    fileName: presign.fileName,
+    contentType: presign.contentType,
+    sizeBytes: presign.sizeBytes,
+  };
+}
+
 function Field({
   label,
   value,
@@ -175,6 +232,29 @@ function Field({
         placeholder={placeholder}
         className="w-full px-3 py-2 border border-border rounded-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
       />
+    </label>
+  );
+}
+
+function FileField({
+  label,
+  file,
+  onChange,
+}: {
+  label: string;
+  file: File | null;
+  onChange: (file: File | null) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-medium mb-2">{label}</span>
+      <input
+        type="file"
+        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+        onChange={(event) => onChange(event.target.files?.[0] || null)}
+        className="w-full px-3 py-2 border border-border rounded-sm bg-background text-sm file:mr-3 file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm"
+      />
+      {file && <span className="block text-xs text-foreground/60 mt-2">{file.name}</span>}
     </label>
   );
 }

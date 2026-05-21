@@ -45,6 +45,11 @@ enum SubmissionStatus {
   REJECTED
 }
 
+enum SubmissionFilePurpose {
+  CV
+  FINAL_MATERIAL
+}
+
 model User {
   id               String   @id @default(cuid())
   email            String   @unique
@@ -54,11 +59,12 @@ model User {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  subscription Subscription?
-  donations    Donation[]
-  submissions  Submission[]
-  juryReviews  JuryReview[]
-  juryRankings JuryRanking[]
+  subscription    Subscription?
+  donations       Donation[]
+  submissions     Submission[]
+  submissionFiles SubmissionFile[]
+  juryReviews     JuryReview[]
+  juryRankings    JuryRanking[]
 
   @@map("users")
 }
@@ -139,6 +145,7 @@ model Submission {
   contest        Contest                   @relation(fields: [contestId], references: [id], onDelete: Cascade)
   user           User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   finalMaterials SubmissionFinalMaterials?
+  files          SubmissionFile[]
   juryReviews    JuryReview[]
 
   @@unique([contestId, userId])
@@ -158,6 +165,26 @@ model SubmissionFinalMaterials {
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@map("submission_final_materials")
+}
+
+model SubmissionFile {
+  id           String                @id @default(cuid())
+  submissionId String                @map("submission_id")
+  userId       String                @map("user_id")
+  purpose      SubmissionFilePurpose
+  bucket       String
+  objectKey    String                @map("object_key")
+  publicUrl    String                @map("public_url")
+  fileName     String                @map("file_name")
+  contentType  String                @map("content_type")
+  sizeBytes    Int                   @map("size_bytes")
+  createdAt    DateTime              @default(now()) @map("created_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([objectKey])
+  @@map("submission_files")
 }
 
 model JuryReview {

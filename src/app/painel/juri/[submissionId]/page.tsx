@@ -17,6 +17,12 @@ type Submission = {
   scriptSummary: string;
   visualIdeas: string;
   externalLinks: string | null;
+  files?: Array<{
+    objectKey: string;
+    publicUrl: string;
+    fileName: string;
+    purpose: "CV" | "FINAL_MATERIAL";
+  }>;
   finalMaterials: null | {
     materialList: string;
     budgetPlan: string;
@@ -104,11 +110,16 @@ export default function JurySubmissionPage() {
                 <Section title="Calendário" content={submission.finalMaterials.productionCalendar} nested />
               </section>
             )}
-            {(submission.cvUrl || submission.externalLinks || submission.finalMaterials?.externalLinks) && (
+            {(submission.cvUrl || submission.externalLinks || submission.finalMaterials?.externalLinks || submission.files?.length) && (
               <section className="border border-border rounded-sm p-5">
-                <h2 className="text-xl font-semibold mb-3">Links externos</h2>
+                <h2 className="text-xl font-semibold mb-3">Links e ficheiros</h2>
                 <div className="space-y-2 text-sm">
                   {submission.cvUrl && <ExternalLink href={submission.cvUrl}>CV</ExternalLink>}
+                  {submission.files?.map((file) => (
+                    <ExternalLink key={file.objectKey} href={file.publicUrl}>
+                      {file.purpose === "CV" ? "CV" : "Ficheiro"} - {file.fileName}
+                    </ExternalLink>
+                  ))}
                   {submission.externalLinks && <p className="whitespace-pre-line text-foreground/70">{submission.externalLinks}</p>}
                   {submission.finalMaterials?.externalLinks && <p className="whitespace-pre-line text-foreground/70">{submission.finalMaterials.externalLinks}</p>}
                 </div>
@@ -168,7 +179,7 @@ function Section({ title, content, nested = false }: { title: string; content: s
 
 function ExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-4">
+    <a href={href} target="_blank" rel="noopener noreferrer" className="block text-primary underline underline-offset-4">
       {children}
     </a>
   );

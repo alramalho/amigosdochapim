@@ -26,5 +26,11 @@ export function formatSubmission(submission: any) {
           updatedAt: submission.finalMaterials.updatedAt?.toISOString?.() ?? submission.finalMaterials.updatedAt,
         }
       : null,
+    files: Array.isArray(submission.files)
+      ? submission.files.map((file: any) => ({
+          ...file,
+          createdAt: file.createdAt?.toISOString?.() ?? file.createdAt,
+        }))
+      : submission.files,
   };
 }

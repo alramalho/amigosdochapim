@@ -10,6 +10,7 @@ type Submission = {
   status: string;
   synopsis: string;
   finalMaterials: unknown | null;
+  files?: unknown[];
   juryReviews: unknown[];
 };
 
@@ -89,6 +90,7 @@ export default function AdminCandidaturasPage() {
               </div>
               <div className="text-sm text-foreground/60">
                 <p>{submission.finalMaterials ? "Entrega final recebida" : "Sem entrega final"}</p>
+                <p>{submission.files?.length || 0} ficheiros</p>
                 <p>{submission.juryReviews?.length || 0} avaliações</p>
               </div>
               <label className="block">

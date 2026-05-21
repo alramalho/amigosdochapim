@@ -111,14 +111,27 @@ export default function TermosPage() {
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">5. Propriedade Intelectual</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">5. Candidaturas e Ficheiros Submetidos</h2>
+            <p className="text-foreground/80 mb-3">
+              Ao submeter uma candidatura ao concurso, o candidato autoriza os Amigos do Chapim a armazenar, consultar, apresentar e partilhar os materiais submetidos para efeitos de avaliação, seleção, votação, comunicação com o candidato e gestão do concurso.
+            </p>
+            <p className="text-foreground/80 mb-3">
+              Os ficheiros enviados através da Plataforma, incluindo CVs, documentos de candidatura, imagens e materiais complementares, podem ser armazenados num bucket de armazenamento público da Amazon S3. Isto significa que esses ficheiros podem ficar acessíveis através de links diretos públicos, sem autenticação, a quem possua o respetivo endereço.
+            </p>
+            <p className="text-foreground/80">
+              O candidato é responsável por garantir que os ficheiros submetidos não contêm informação confidencial, sensível ou de terceiros sem autorização adequada. Se pretender remover ou substituir um ficheiro submetido, deve contactar-nos através de geral@amigosdochapim.org.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">6. Propriedade Intelectual</h2>
             <p className="text-foreground/80">
               Todos os conteúdos da Plataforma, incluindo textos, gráficos, logótipos e design, são propriedade dos Amigos do Chapim e estão protegidos por leis de propriedade intelectual. Não é permitida a reprodução sem autorização prévia.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">6. Limitação de Responsabilidade</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">7. Limitação de Responsabilidade</h2>
             <p className="text-foreground/80 mb-3">
               Os Amigos do Chapim empenha-se em fornecer informação precisa e atualizada, mas não garante que a Plataforma estará sempre disponível ou livre de erros.
             </p>
@@ -128,21 +141,21 @@ export default function TermosPage() {
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">7. Alterações aos Termos</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">8. Alterações aos Termos</h2>
             <p className="text-foreground/80">
               Reservamo-nos o direito de alterar estes Termos e Condições a qualquer momento. As alterações entrarão em vigor após publicação na Plataforma. A utilização continuada após alterações constitui aceitação dos novos termos.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">8. Lei Aplicável</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">9. Lei Aplicável</h2>
             <p className="text-foreground/80">
               Estes Termos e Condições são regidos pela lei portuguesa. Qualquer litígio será da competência exclusiva dos tribunais portugueses.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">9. Contacto</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">10. Contacto</h2>
             <p className="text-foreground/80">
               Para questões sobre estes Termos e Condições, contacte-nos através de:
             </p>

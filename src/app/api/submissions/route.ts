@@ -3,6 +3,7 @@ import { ensureCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest } from "@/lib/contest-db";
 import { isWithinWindow } from "@/lib/contest";
+import { getS3Config, parseUploadDescriptor } from "@/lib/s3";
 
 const requiredFields = [
   "candidateName",
@@ -42,6 +43,9 @@ export async function POST(request: NextRequest) {
   if (missing.length > 0 || Number.isNaN(Number(body.age)) || !body.residentInPortugal) {
     return NextResponse.json({ error: "Preenche todos os campos obrigatórios." }, { status: 400 });
   }
+
+  const cvFile = parseUploadDescriptor(body.cvFile);
+  const { bucket } = getS3Config();
 
   const submission = await prisma.submission.upsert({
     where: {
@@ -83,6 +87,33 @@ export async function POST(request: NextRequest) {
       status: "SUBMITTED",
     },
   });
+
+  if (cvFile) {
+    await prisma.submissionFile.upsert({
+      where: { objectKey: cvFile.objectKey },
+      update: {
+        submissionId: submission.id,
+        userId: user.id,
+        purpose: "CV",
+        bucket,
+        publicUrl: cvFile.publicUrl,
+        fileName: cvFile.fileName,
+        contentType: cvFile.contentType,
+        sizeBytes: cvFile.sizeBytes,
+      },
+      create: {
+        submissionId: submission.id,
+        userId: user.id,
+        purpose: "CV",
+        bucket,
+        objectKey: cvFile.objectKey,
+        publicUrl: cvFile.publicUrl,
+        fileName: cvFile.fileName,
+        contentType: cvFile.contentType,
+        sizeBytes: cvFile.sizeBytes,
+      },
+    });
+  }
 
   return NextResponse.json({ submission });
 }

@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     },
     include: {
       finalMaterials: true,
+      files: true,
       juryReviews: {
         where: { jurorId: user.id },
       },

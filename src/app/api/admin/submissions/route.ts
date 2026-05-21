@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     where: { contestId: contest.id },
     include: {
       finalMaterials: true,
+      files: true,
       juryReviews: true,
       user: { select: { email: true, name: true } },
     },
@@ -55,6 +56,7 @@ export async function PATCH(request: NextRequest) {
     data: { status: body.status },
     include: {
       finalMaterials: true,
+      files: true,
       juryReviews: true,
       user: { select: { email: true, name: true } },
     },

@@ -8,12 +8,22 @@ type Submission = {
   status: string;
   candidateName: string;
   synopsis: string;
+  files?: UploadedFile[];
   finalMaterials: null | {
     materialList: string;
     budgetPlan: string;
     productionCalendar: string;
     externalLinks: string | null;
   };
+};
+
+type UploadedFile = {
+  objectKey: string;
+  publicUrl: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  purpose?: "CV" | "FINAL_MATERIAL";
 };
 
 const finalInitial = {
@@ -29,6 +39,7 @@ export default function CandidaturaPainelPage() {
   const [finalForm, setFinalForm] = useState(finalInitial);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [finalFiles, setFinalFiles] = useState<File[]>([]);
 
   useEffect(() => {
     fetch("/api/submissions/me")
@@ -52,10 +63,19 @@ export default function CandidaturaPainelPage() {
     setSaving(true);
     setMessage(null);
 
+    let uploadedFiles: UploadedFile[] = [];
+    try {
+      uploadedFiles = await Promise.all(finalFiles.map((file) => uploadFile(file, "FINAL_MATERIAL")));
+    } catch (uploadError) {
+      setMessage(uploadError instanceof Error ? uploadError.message : "Não foi possível enviar os ficheiros.");
+      setSaving(false);
+      return;
+    }
+
     const response = await fetch("/api/submissions/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(finalForm),
+      body: JSON.stringify({ ...finalForm, files: uploadedFiles }),
     });
 
     const data = await response.json().catch(() => ({}));
@@ -119,6 +139,21 @@ export default function CandidaturaPainelPage() {
                   <TextArea label="Orçamento de utilização do prémio de 1000€" value={finalForm.budgetPlan} onChange={(value) => setFinalForm((current) => ({ ...current, budgetPlan: value }))} />
                   <TextArea label="Calendário de produção" value={finalForm.productionCalendar} onChange={(value) => setFinalForm((current) => ({ ...current, productionCalendar: value }))} />
                   <TextArea label="Links externos complementares" value={finalForm.externalLinks} onChange={(value) => setFinalForm((current) => ({ ...current, externalLinks: value }))} required={false} />
+                  <FileField label="Ficheiros complementares" files={finalFiles} onChange={setFinalFiles} />
+                  {submission.files?.filter((file) => file.purpose === "FINAL_MATERIAL").length ? (
+                    <div className="text-sm text-foreground/70">
+                      <p className="font-medium mb-2">Ficheiros submetidos</p>
+                      <div className="space-y-1">
+                        {submission.files
+                          ?.filter((file) => file.purpose === "FINAL_MATERIAL")
+                          .map((file) => (
+                            <a key={file.objectKey} href={file.publicUrl} target="_blank" rel="noopener noreferrer" className="block text-primary underline underline-offset-4">
+                              {file.fileName}
+                            </a>
+                          ))}
+                      </div>
+                    </div>
+                  ) : null}
                   {message && <p className="text-sm text-foreground/70">{message}</p>}
                   <button disabled={saving} className="px-5 py-3 bg-primary text-primary-foreground rounded-sm disabled:opacity-50">
                     {saving ? "A guardar..." : "Guardar entrega final"}
@@ -138,6 +173,42 @@ export default function CandidaturaPainelPage() {
       </div>
     </main>
   );
+}
+
+async function uploadFile(file: File, purpose: "CV" | "FINAL_MATERIAL"): Promise<UploadedFile> {
+  const presignResponse = await fetch("/api/uploads/presign", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      purpose,
+      fileName: file.name,
+      contentType: file.type,
+      sizeBytes: file.size,
+    }),
+  });
+
+  const presign = await presignResponse.json().catch(() => ({}));
+  if (!presignResponse.ok) {
+    throw new Error(presign.error || "Não foi possível preparar o upload.");
+  }
+
+  const uploadResponse = await fetch(presign.uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("Não foi possível enviar o ficheiro.");
+  }
+
+  return {
+    objectKey: presign.objectKey,
+    publicUrl: presign.publicUrl,
+    fileName: presign.fileName,
+    contentType: presign.contentType,
+    sizeBytes: presign.sizeBytes,
+  };
 }
 
 function statusLabel(status: string) {
@@ -175,6 +246,34 @@ function TextArea({
         required={required}
         className="w-full px-3 py-2 border border-border rounded-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
       />
+    </label>
+  );
+}
+
+function FileField({
+  label,
+  files,
+  onChange,
+}: {
+  label: string;
+  files: File[];
+  onChange: (files: File[]) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-medium mb-2">{label}</span>
+      <input
+        type="file"
+        multiple
+        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+        onChange={(event) => onChange(Array.from(event.target.files || []))}
+        className="w-full px-3 py-2 border border-border rounded-sm bg-background text-sm file:mr-3 file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm"
+      />
+      {files.length > 0 && (
+        <span className="block text-xs text-foreground/60 mt-2">
+          {files.map((file) => file.name).join(", ")}
+        </span>
+      )}
     </label>
   );
 }
