@@ -22,6 +22,15 @@ const FIGURE_FILL_TOP = 4;
 const FIGURE_FILL_BOTTOM = 156;
 const FIGURE_FILL_HEIGHT = FIGURE_FILL_BOTTOM - FIGURE_FILL_TOP;
 
+const euroFormatter = new Intl.NumberFormat("pt-PT", {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+});
+
+function formatEuros(value: number) {
+  return `${euroFormatter.format(value)}€`;
+}
+
 function getFutureContestLabel(fundedFutureContests: number) {
   const year = FIRST_FUTURE_CONTEST_YEAR + Math.floor(fundedFutureContests / FUTURE_CONTESTS_PER_YEAR);
   const edition = (fundedFutureContests % FUTURE_CONTESTS_PER_YEAR) + 1;
@@ -78,9 +87,9 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
 
   return (
     <div className="flex flex-col items-center gap-4 md:gap-6">
-      <div className="flex flex-row justify-between items-start md:gap-15 gap-4 w-full">
+      <div className="flex flex-row justify-between items-start gap-4 md:gap-8 w-full overflow-hidden">
         {/* Left side: Title + Money info */}
-        <div className="text-left">
+        <div className="text-left min-w-0 flex-1">
           <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">Próximo concurso:</h1>
           {isFunded ? (
             <div className="mb-4 md:mb-6">
@@ -97,18 +106,18 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
 
           {/* Money info - below title */}
           <div className="space-y-2">
-            <div className="text-xl md:text-2xl font-semibold">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xl md:text-2xl font-semibold">
               {loading ? (
                 <span className="text-foreground/50">...</span>
               ) : (
                 <>
-                  <span>{displayBaseTotal.toFixed(0)}€</span>
+                  <span>{formatEuros(displayBaseTotal)}</span>
                   {selectedForDisplayedContest > 0 && (
-                    <span className="text-primary/70"> +{selectedForDisplayedContest}€</span>
+                    <span className="text-primary/70">+{formatEuros(selectedForDisplayedContest)}</span>
                   )}
                 </>
               )}
-              <span className="text-foreground/50 text-base md:text-lg"> / {goal}€</span>
+              <span className="text-foreground/50 text-base md:text-lg">/ {formatEuros(goal)}</span>
             </div>
             {/* Legend */}
             {!loading && data && (
@@ -116,17 +125,17 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
                 {!isFunded && (
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 md:w-3 md:h-3 rounded-sm bg-primary" />
-                    <span className="text-foreground/60">Fundos próprios: <strong>{data.fundosProprios}€</strong></span>
+                    <span className="text-foreground/60">Fundos próprios: <strong>{formatEuros(data.fundosProprios)}</strong></span>
                   </div>
                 )}
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 md:w-3 md:h-3 rounded-sm" style={{ backgroundColor: '#722F37' }} />
-                  <span className="text-foreground/60">Doações: <strong>{displayDonations.toFixed(0)}€</strong></span>
+                  <span className="text-foreground/60">Doações: <strong>{formatEuros(displayDonations)}</strong></span>
                 </div>
                 {selectedForDisplayedContest > 0 && (
                   <div className="flex items-center gap-1.5 animate-[fadeInPulse_0.5s_ease-out]">
                     <div className="w-2 h-2 md:w-3 md:h-3 rounded-sm border border-[#5a7247]" style={{ backgroundColor: '#5a7247' }} />
-                    <span className="font-medium" style={{ color: '#5a7247' }}>A tua contribuição: <strong>{selectedForDisplayedContest}€</strong></span>
+                    <span className="font-medium break-words" style={{ color: '#5a7247' }}>A tua contribuição: <strong>{formatEuros(selectedForDisplayedContest)}</strong></span>
                   </div>
                 )}
               </div>
@@ -137,15 +146,15 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
               ) : displayTotalWithSelected >= goal ? (
                 "Com esta contribuição, o concurso fica financiado."
               ) : (
-                <>{selectedForDisplayedContest > 0 ? "Faltam " : "Faltam "}<strong>{(goal - displayTotalWithSelected).toFixed(0)}€</strong></>
+                <>{selectedForDisplayedContest > 0 ? "Faltam " : "Faltam "}<strong>{formatEuros(goal - displayTotalWithSelected)}</strong></>
               )}
             </p>
           </div>
         </div>
 
         {/* Figure */}
-        <div className="flex items-end">
-          <div className="relative w-32 h-64 md:w-40 md:h-80">
+        <div className="flex items-end shrink-0">
+          <div className="relative w-24 h-48 sm:w-32 sm:h-64 md:w-40 md:h-80">
             <HumanFigure
               ariaLabel={`Progresso de financiamento: ${(currentProgress + selectedProgress).toFixed(0)}%`}
               donationsProgress={donationsProgress}
