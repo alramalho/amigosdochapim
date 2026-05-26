@@ -2,11 +2,24 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
 // Own funds (fundos próprios) - seed money from the organization
-const FUNDOS_PROPRIOS = 588;
+const FUNDOS_PROPRIOS = 780;
 const GOAL = 1300;
+const LOCAL_FAKE_DONATIONS = 650;
 
 export async function GET() {
   try {
+    if (process.env.NODE_ENV === "development") {
+      const total = FUNDOS_PROPRIOS + LOCAL_FAKE_DONATIONS;
+
+      return NextResponse.json({
+        total,
+        donations: LOCAL_FAKE_DONATIONS,
+        fundosProprios: FUNDOS_PROPRIOS,
+        goal: GOAL,
+        progress: Math.min((total / GOAL) * 100, 100),
+      });
+    }
+
     // Get the Stripe balance
     const balance = await stripe.balance.retrieve();
 

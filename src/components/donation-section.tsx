@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { differenceInCalendarMonths } from "date-fns";
 import { Check, CheckCheck } from "lucide-react";
-import { DonationProgress } from "./donation-progress";
+import { DonationProgress, FundedContestCard } from "./donation-progress";
 
 // Next concurso application deadline
 const CONCURSO_DEADLINE_DATE = new Date("2026-06-30");
@@ -565,6 +565,10 @@ export function DonationSection() {
           </div>
         </>
       )}
+
+      <div className="mt-10 md:mt-12">
+        <FundedContestCard />
+      </div>
     </div>
   );
 }
