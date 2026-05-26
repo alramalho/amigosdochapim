@@ -4,7 +4,7 @@ import { CONTEST_SLUG, CONTEST_WINDOWS } from "@/lib/contest";
 export async function getOrCreateCurrentContest() {
   return prisma.contest.upsert({
     where: { slug: CONTEST_SLUG },
-    update: {},
+    update: CONTEST_WINDOWS,
     create: {
       title: "Concurso de Curtas-metragens dos Amigos do Chapim - 2026",
       slug: CONTEST_SLUG,

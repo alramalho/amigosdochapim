@@ -110,7 +110,7 @@ export default function CandidatarPage() {
       <section className="max-w-5xl mx-auto px-4 py-10 md:py-14">
         <div className="max-w-3xl mb-8">
           <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
-            15 maio - 15 julho 2026
+            15 maio - 30 junho 2026
           </p>
           <h1 className="text-3xl md:text-5xl font-semibold mb-4">Candidatura inicial</h1>
           <p className="text-foreground/70 md:text-lg">

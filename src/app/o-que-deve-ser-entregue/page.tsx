@@ -7,12 +7,12 @@ export const metadata: Metadata = {
 };
 
 const calendario = [
-  ["Candidatura inicial", "15 maio - 15 julho 2026"],
-  ["Avaliação da candidatura inicial", "16 - 31 julho 2026"],
-  ["Entrega dos requisitos da fase final", "1 - 15 agosto 2026"],
-  ["Entrevista online com o júri", "16 - 31 agosto 2026"],
-  ["Seleção da curta vencedora", "1 - 15 setembro 2026"],
-  ["Produção da curta", "16 setembro - 31 dezembro 2026"],
+  ["Candidatura inicial", "15 maio - 30 junho 2026"],
+  ["Avaliação da candidatura inicial", "1 - 15 julho 2026"],
+  ["Entrega dos requisitos da fase final", "16 - 31 julho 2026"],
+  ["Entrevista online com o júri", "1 - 15 agosto 2026"],
+  ["Seleção da curta vencedora", "16 - 31 agosto 2026"],
+  ["Produção da curta", "1 setembro - 15 dezembro 2026"],
 ];
 
 export default function OQueDeveSerEntreguePage() {
@@ -46,7 +46,7 @@ export default function OQueDeveSerEntreguePage() {
       <section className="max-w-4xl mx-auto px-4 py-8 md:py-12">
         <div className="mb-6">
           <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
-            15 maio - 15 julho 2026
+            15 maio - 30 junho 2026
           </p>
           <h2 className="text-2xl md:text-3xl font-semibold">Candidatura inicial</h2>
         </div>
@@ -84,7 +84,7 @@ export default function OQueDeveSerEntreguePage() {
         <div className="max-w-4xl mx-auto px-4">
           <div className="mb-6">
             <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
-              1 - 15 agosto 2026
+              16 - 31 julho 2026
             </p>
             <h2 className="text-2xl md:text-3xl font-semibold">Entrega dos requisitos da fase final</h2>
           </div>
