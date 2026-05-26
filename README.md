@@ -30,24 +30,3 @@ pnpm dev
 ```
 
 O site corre em `http://localhost:3027`.
-
-## Uploads
-
-As candidaturas usam uploads diretos para S3 através de `POST /api/uploads/presign`.
-
-```env
-S3_BUCKET=alramalhosandbox
-S3_REGION=eu-central-1
-S3_KEY_PREFIX=amigos_do_chapim/local
-S3_PUBLIC_BASE_URL=https://alramalhosandbox.s3.eu-central-1.amazonaws.com
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-```
-
-Em produção:
-
-```env
-S3_KEY_PREFIX=amigos_do_chapim/prod
-```
-
-Ficheiros aceites: PDF, Word, JPEG, PNG e WebP. Limite atual: 25 MB por ficheiro.
