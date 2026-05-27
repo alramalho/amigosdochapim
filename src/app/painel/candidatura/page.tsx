@@ -9,6 +9,7 @@ type Submission = {
   status: string;
   candidateName: string;
   synopsis: string;
+  createdAt: string;
   files?: UploadedFile[];
   finalMaterials: null | {
     materialList: string;
@@ -127,6 +128,9 @@ export default function CandidaturaPainelPage() {
                 <div>
                   <h2 className="text-2xl font-semibold">{submission.candidateName}</h2>
                   <p className="text-sm text-foreground/60 mt-1">{submission.synopsis}</p>
+                  <p className="text-sm text-foreground/50 mt-3">
+                    Submetida em {formatDateTime(submission.createdAt)}
+                  </p>
                 </div>
                 <span className="text-xs uppercase tracking-wide border border-border rounded-sm px-3 py-1 self-start">
                   {statusLabel(submission.status)}
@@ -170,7 +174,7 @@ export default function CandidaturaPainelPage() {
               <section className="bg-accent/30 rounded-sm p-6">
                 <h2 className="text-xl font-semibold mb-2">Próximo passo</h2>
                 <p className="text-foreground/70">
-                  A candidatura será avaliada pela associação. Se fores selecionado, esta página abre a entrega do plano de produção final.
+                  A candidatura será avaliada pela associação. Avisaremos por email quando houver novidades; se fores selecionado, esta página abre a entrega do plano de produção final.
                 </p>
               </section>
             )}
@@ -179,6 +183,13 @@ export default function CandidaturaPainelPage() {
       </div>
     </main>
   );
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-PT", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 async function getAuthHeader(): Promise<Record<string, string>> {
