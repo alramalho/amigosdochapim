@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import {
+  SUBMISSION_EDIT_WINDOW_DAYS,
+  canEditSubmission,
+  getSubmissionEditDeadline,
+} from "@/lib/submission-editing";
 
 type Submission = {
   id: string;
@@ -100,6 +105,9 @@ export default function CandidaturaPainelPage() {
     return <main className="min-h-screen flex items-center justify-center">A carregar...</main>;
   }
 
+  const editAllowed = submission ? canEditSubmission(submission.createdAt) : true;
+  const editDeadline = submission ? getSubmissionEditDeadline(submission.createdAt) : null;
+
   return (
     <main className="min-h-screen px-4 py-10">
       <div className="max-w-4xl mx-auto">
@@ -107,9 +115,13 @@ export default function CandidaturaPainelPage() {
           <Link href="/painel" className="text-sm text-foreground/60 hover:text-foreground">
             ← Painel
           </Link>
-          <Link href="/candidatar" className="text-sm text-foreground/60 hover:text-foreground">
-            Editar candidatura
-          </Link>
+          {submission && !editAllowed ? (
+            <span className="text-sm text-foreground/40">Edição fechada</span>
+          ) : (
+            <Link href="/candidatar" className="text-sm text-foreground/60 hover:text-foreground">
+              {submission ? "Editar candidatura" : "Submeter candidatura"}
+            </Link>
+          )}
         </header>
 
         <h1 className="text-3xl md:text-5xl font-semibold mb-4">A tua candidatura</h1>
@@ -130,6 +142,10 @@ export default function CandidaturaPainelPage() {
                   <p className="text-sm text-foreground/60 mt-1">{submission.synopsis}</p>
                   <p className="text-sm text-foreground/50 mt-3">
                     Submetida em {formatDateTime(submission.createdAt)}
+                  </p>
+                  <p className="text-sm text-foreground/50 mt-1">
+                    Só é possível editar até {SUBMISSION_EDIT_WINDOW_DAYS} dias após a submissão
+                    {editDeadline ? `, ou seja, até ${formatDateTime(editDeadline)}.` : "."}
                   </p>
                 </div>
                 <span className="text-xs uppercase tracking-wide border border-border rounded-sm px-3 py-1 self-start">
@@ -185,7 +201,7 @@ export default function CandidaturaPainelPage() {
   );
 }
 
-function formatDateTime(value: string) {
+function formatDateTime(value: string | Date) {
   return new Intl.DateTimeFormat("pt-PT", {
     dateStyle: "long",
     timeStyle: "short",

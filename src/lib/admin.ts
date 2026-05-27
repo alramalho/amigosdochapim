@@ -1,6 +1,7 @@
 export const DEFAULT_ADMIN_EMAILS = [
   "alexandre.ramalho.1998@gmail.com",
   "liavilelaborges@gmail.com",
+  "geral@amigosdochapim.org",
 ];
 
 export function parseEmailList(value?: string | null) {

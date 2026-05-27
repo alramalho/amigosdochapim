@@ -5,6 +5,7 @@ import { isWithinWindow } from "@/lib/contest";
 import { getS3Config, parseUploadDescriptor } from "@/lib/s3";
 import { userHasJuryAccess } from "@/lib/auth";
 import { sendSubmissionAdminEmails, sendSubmissionConfirmationEmail } from "@/lib/loops";
+import { SUBMISSION_EDIT_WINDOW_DAYS, canEditSubmission } from "@/lib/submission-editing";
 
 const requiredFields = [
   "candidateName",
@@ -64,6 +65,13 @@ export async function POST(request: NextRequest) {
       },
     },
   });
+
+  if (existingSubmission && !canEditSubmission(existingSubmission.createdAt)) {
+    return NextResponse.json(
+      { error: `Só é possível editar a candidatura até ${SUBMISSION_EDIT_WINDOW_DAYS} dias depois da submissão.` },
+      { status: 403 }
+    );
+  }
 
   const submission = await prisma.submission.upsert({
     where: {
