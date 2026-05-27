@@ -4,6 +4,7 @@ import { getOrCreateCurrentContest } from "@/lib/contest-db";
 import { isWithinWindow } from "@/lib/contest";
 import { getS3Config, parseUploadDescriptor } from "@/lib/s3";
 import { userHasJuryAccess } from "@/lib/auth";
+import { sendSubmissionAdminEmails, sendSubmissionConfirmationEmail } from "@/lib/loops";
 
 const requiredFields = [
   "candidateName",
@@ -55,6 +56,14 @@ export async function POST(request: NextRequest) {
 
   const cvFile = parseUploadDescriptor(body.cvFile);
   const { bucket } = getS3Config();
+  const existingSubmission = await prisma.submission.findUnique({
+    where: {
+      contestId_userId: {
+        contestId: contest.id,
+        userId: user.id,
+      },
+    },
+  });
 
   const submission = await prisma.submission.upsert({
     where: {
@@ -123,6 +132,37 @@ export async function POST(request: NextRequest) {
       },
     });
   }
+
+  const emailResults = await Promise.allSettled([
+    sendSubmissionConfirmationEmail({
+      submissionId: submission.id,
+      candidateName: submission.candidateName,
+      email: submission.email,
+      phone: submission.phone,
+      age: submission.age,
+      synopsis: submission.synopsis,
+      contestTitle: contest.title,
+      submittedAt: submission.updatedAt,
+      isUpdate: Boolean(existingSubmission),
+    }),
+    sendSubmissionAdminEmails({
+      submissionId: submission.id,
+      candidateName: submission.candidateName,
+      email: submission.email,
+      phone: submission.phone,
+      age: submission.age,
+      synopsis: submission.synopsis,
+      contestTitle: contest.title,
+      submittedAt: submission.updatedAt,
+      isUpdate: Boolean(existingSubmission),
+    }),
+  ]);
+
+  emailResults.forEach((result) => {
+    if (result.status === "rejected") {
+      console.error("Failed to send submission email:", result.reason);
+    }
+  });
 
   return NextResponse.json({ submission });
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FileSpreadsheet, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { getAdminEmails } from "@/lib/admin";
 
 //note to self
 // stripe + supabase finished locally. now was a matter of testing it out in prod in the Real Goncalos account (double check env vars)
@@ -162,6 +163,7 @@ export default function PainelPage() {
   }
 
   const hasSubscription = !!user.subscription;
+  const isAdmin = !!userEmail && getAdminEmails(process.env.NEXT_PUBLIC_ADMIN_EMAILS).includes(userEmail.toLowerCase());
 
   // Determine user tier for display purposes
   const getUserTier = () => {
@@ -293,7 +295,7 @@ export default function PainelPage() {
           )}
 
           {/* Admin Card */}
-          {userEmail && process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",").map((email) => email.trim().toLowerCase()).includes(userEmail.toLowerCase()) && (
+          {isAdmin && (
             <div className="bg-foreground/5 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Admin</h2>
               <p className="text-sm text-foreground/70 mb-4">

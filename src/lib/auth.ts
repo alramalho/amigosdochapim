@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { JURY_ACCESS_ONE_OFF_THRESHOLD } from "@/lib/contest";
+import { getAdminEmails } from "@/lib/admin";
 
 const userAccessInclude = {
   subscription: true,
@@ -106,10 +107,5 @@ export function userHasJuryAccess(user: NonNullable<Awaited<ReturnType<typeof ge
 }
 
 export function isAdminEmail(email: string) {
-  const emails = (process.env.ADMIN_EMAILS || "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-
-  return emails.includes(email.toLowerCase());
+  return getAdminEmails(process.env.ADMIN_EMAILS).includes(email.toLowerCase());
 }
