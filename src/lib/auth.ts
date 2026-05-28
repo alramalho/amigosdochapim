@@ -103,7 +103,12 @@ export function userHasJuryAccess(user: NonNullable<Awaited<ReturnType<typeof ge
     .filter((donation) => donation.type === "ONE_OFF")
     .reduce((sum, donation) => sum + donation.amount, 0);
 
-  return user.subscription?.tier === "AMIGO" || totalOneOff >= JURY_ACCESS_ONE_OFF_THRESHOLD;
+  return (user.subscription?.tier === "AMIGO" && isSubscriptionActive(user.subscription)) || totalOneOff >= JURY_ACCESS_ONE_OFF_THRESHOLD;
+}
+
+export function isSubscriptionActive(subscription: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>["subscription"]) {
+  if (!subscription) return false;
+  return subscription.status === "ACTIVE" && subscription.currentPeriodEnd > new Date();
 }
 
 export function isAdminEmail(email: string) {

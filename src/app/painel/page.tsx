@@ -15,7 +15,10 @@ interface UserData {
   name: string | null;
   subscription: {
     tier: "APOIANTE" | "AMIGO";
+    status: "ACTIVE" | "CANCELLED" | "PAST_DUE" | "INCOMPLETE";
     currentPeriodEnd: string;
+    cancelAtPeriodEnd: boolean;
+    isActive: boolean;
   } | null;
   donations: {
     total: number;
@@ -203,13 +206,14 @@ export default function PainelPage() {
   }
 
   const hasSubscription = !!user.subscription;
+  const activeSubscription = user.subscription?.isActive;
   const isAdmin = !!userEmail && getAdminEmails(process.env.NEXT_PUBLIC_ADMIN_EMAILS).includes(userEmail.toLowerCase());
 
   // Determine user tier for display purposes
   const getUserTier = () => {
     if (user.hasCreditsAccess) return "Patrocinador";
     if (user.hasJuryAccess) return "Amigo";
-    if (hasSubscription || user.contributions.total > 0) return "Apoiante";
+    if (activeSubscription || user.contributions.total > 0) return "Apoiante";
     return "Membro";
   };
 
@@ -309,10 +313,16 @@ export default function PainelPage() {
                 </p>
                 <p>
                   <span className="text-foreground/70">Estado:</span>{" "}
-                  <span className="text-green-600">Ativo</span>
+                  <span className={subscriptionStatusClass(user.subscription!)}>
+                    {subscriptionStatusLabel(user.subscription!)}
+                  </span>
                 </p>
                 <p>
-                  <span className="text-foreground/70">Próxima renovação:</span>{" "}
+                  <span className="text-foreground/70">
+                    {user.subscription!.isActive && !user.subscription!.cancelAtPeriodEnd
+                      ? "Próxima renovação:"
+                      : "Termina em:"}
+                  </span>{" "}
                   {new Date(user.subscription!.currentPeriodEnd).toLocaleDateString("pt-PT")}
                 </p>
               </div>
@@ -457,4 +467,35 @@ export default function PainelPage() {
       </footer>
     </main>
   );
+}
+
+function subscriptionStatusLabel(subscription: NonNullable<UserData["subscription"]>) {
+  if (subscription.status === "ACTIVE" && subscription.cancelAtPeriodEnd) {
+    return "Ativa até ao fim do período";
+  }
+
+  if (subscription.status === "ACTIVE" && subscription.isActive) {
+    return "Ativa";
+  }
+
+  const labels: Record<NonNullable<UserData["subscription"]>["status"], string> = {
+    ACTIVE: "Expirada",
+    CANCELLED: "Cancelada",
+    PAST_DUE: "Pagamento em atraso",
+    INCOMPLETE: "Incompleta",
+  };
+
+  return labels[subscription.status];
+}
+
+function subscriptionStatusClass(subscription: NonNullable<UserData["subscription"]>) {
+  if (subscription.status === "ACTIVE" && subscription.isActive) {
+    return subscription.cancelAtPeriodEnd ? "text-amber-700" : "text-green-600";
+  }
+
+  if (subscription.status === "PAST_DUE") {
+    return "text-amber-700";
+  }
+
+  return "text-red-600";
 }

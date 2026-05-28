@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, userHasJuryAccess } from "@/lib/auth";
+import { getCurrentUser, isSubscriptionActive, userHasJuryAccess } from "@/lib/auth";
 import { CREDITS_THRESHOLD } from "@/lib/contest";
 import { prisma } from "@/lib/prisma";
 
@@ -23,7 +23,10 @@ function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>) {
     subscription: user.subscription
       ? {
           tier: user.subscription.tier,
+          status: user.subscription.status,
           currentPeriodEnd: user.subscription.currentPeriodEnd.toISOString(),
+          cancelAtPeriodEnd: user.subscription.cancelAtPeriodEnd,
+          isActive: isSubscriptionActive(user.subscription),
         }
       : null,
     donations: {

@@ -117,17 +117,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     update: {
       stripeSubscriptionId: subscriptionId,
       tier,
-      status: "ACTIVE",
+      status: mapStripeStatus(stripeSubscription.status),
       currentPeriodStart: new Date(firstItem.current_period_start * 1000),
       currentPeriodEnd: new Date(firstItem.current_period_end * 1000),
+      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
     },
     create: {
       userId: user.id,
       stripeSubscriptionId: subscriptionId,
       tier,
-      status: "ACTIVE",
+      status: mapStripeStatus(stripeSubscription.status),
       currentPeriodStart: new Date(firstItem.current_period_start * 1000),
       currentPeriodEnd: new Date(firstItem.current_period_end * 1000),
+      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
     },
   });
 
@@ -265,6 +267,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     where: { stripeSubscriptionId: subscription.id },
     data: {
       status: "CANCELLED",
+      cancelAtPeriodEnd: false,
     },
   });
 }
@@ -272,16 +275,19 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 function mapStripeStatus(status: Stripe.Subscription.Status) {
   switch (status) {
     case "active":
+    case "trialing":
       return "ACTIVE";
     case "canceled":
       return "CANCELLED";
     case "past_due":
+    case "unpaid":
+    case "paused":
       return "PAST_DUE";
     case "incomplete":
     case "incomplete_expired":
       return "INCOMPLETE";
     default:
-      return "ACTIVE";
+      return "INCOMPLETE";
   }
 }
 
