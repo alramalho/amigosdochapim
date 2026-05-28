@@ -254,7 +254,13 @@ export default function Home() {
               <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">
                 Contacto
               </h3>
-              <p className="text-xs md:text-sm text-foreground/60">
+              <Link
+                href="/contacto"
+                className="block text-xs md:text-sm text-foreground/60 hover:text-foreground"
+              >
+                Contacte-nos
+              </Link>
+              <p className="mt-2 text-xs md:text-sm text-foreground/60">
                 geral@amigosdochapim.org
               </p>
             </div>

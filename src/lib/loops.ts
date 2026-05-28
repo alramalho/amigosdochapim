@@ -86,6 +86,17 @@ type SubmissionEmailParams = {
   isUpdate: boolean;
 };
 
+type ContactHelpEmailParams = {
+  requesterName: string;
+  requesterEmail: string;
+  subject: string;
+  message: string;
+  context: string;
+  pageUrl: string;
+  userAgent: string;
+  submittedAt: Date;
+};
+
 export async function sendSubmissionConfirmationEmail({
   candidateName,
   email,
@@ -145,6 +156,49 @@ export async function sendSubmissionAdminEmails({
       })
     )
   );
+}
+
+export function isContactHelpEmailConfigured() {
+  return Boolean(process.env.LOOPS_API_KEY && process.env.LOOPS_CONTACT_HELP_EMAIL_ID);
+}
+
+export async function sendContactHelpAdminEmails({
+  requesterName,
+  requesterEmail,
+  subject,
+  message,
+  context,
+  pageUrl,
+  userAgent,
+  submittedAt,
+}: ContactHelpEmailParams) {
+  if (!isContactHelpEmailConfigured()) {
+    return { sent: false, recipients: [] };
+  }
+
+  const adminEmails = getAdminEmails(process.env.ADMIN_NOTIFICATION_EMAILS || process.env.ADMIN_EMAILS);
+
+  await Promise.all(
+    adminEmails.map((adminEmail) =>
+      sendTransactionalEmail({
+        transactionalId: process.env.LOOPS_CONTACT_HELP_EMAIL_ID,
+        email: adminEmail,
+        description: "contact help request",
+        dataVariables: {
+          requesterName,
+          requesterEmail,
+          subject,
+          message,
+          context,
+          pageUrl,
+          userAgent,
+          submittedAt: submittedAt.toLocaleString("pt-PT", { timeZone: "Europe/Lisbon" }),
+        },
+      })
+    )
+  );
+
+  return { sent: true, recipients: adminEmails };
 }
 
 // Add contact to Loops for future campaigns

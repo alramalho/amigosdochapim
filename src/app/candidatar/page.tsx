@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ContactHelpWidget } from "@/components/contact-help-widget";
 import { supabase } from "@/lib/supabase";
 import {
   SUBMISSION_EDIT_WINDOW_DAYS,
@@ -23,6 +24,8 @@ const initialForm = {
   visualIdeas: "",
   externalLinks: "",
 };
+
+const CONTACT_EMAIL = "geral@amigosdochapim.org";
 
 type UploadedFile = {
   objectKey: string;
@@ -133,15 +136,24 @@ export default function CandidatarPage() {
       return;
     }
 
-    const response = await fetch("/api/submissions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, cvFile: uploadedCv }),
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, cvFile: uploadedCv }),
+      });
+    } catch (submitError) {
+      console.error("Submission request failed:", submitError);
+      setError(
+        `Não conseguimos contactar o servidor para guardar a candidatura. Confirma a ligação à internet e tenta novamente. Se o problema continuar, contacta ${CONTACT_EMAIL}.`
+      );
+      setLoading(false);
+      return;
+    }
 
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      setError(data.error || "Não foi possível submeter a candidatura.");
+      setError(await errorFromResponse(response, "Não foi possível submeter a candidatura."));
       setLoading(false);
       return;
     }
@@ -265,6 +277,7 @@ export default function CandidatarPage() {
           </button>
         </form>
       </section>
+      <ContactHelpWidget />
     </main>
   );
 }
@@ -277,30 +290,48 @@ function formatDateTime(value: string | Date) {
 }
 
 async function uploadFile(file: File, purpose: "CV" | "FINAL_MATERIAL"): Promise<UploadedFile> {
-  const presignResponse = await fetch("/api/uploads/presign", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      purpose,
-      fileName: file.name,
-      contentType: file.type,
-      sizeBytes: file.size,
-    }),
-  });
+  let presignResponse: Response;
+  try {
+    presignResponse = await fetch("/api/uploads/presign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        purpose,
+        fileName: file.name,
+        contentType: file.type,
+        sizeBytes: file.size,
+      }),
+    });
+  } catch (presignError) {
+    console.error("Upload preparation request failed:", presignError);
+    throw new Error(
+      `Não conseguimos preparar o envio do ficheiro. Confirma a ligação à internet e tenta novamente. Se o problema continuar, contacta ${CONTACT_EMAIL}.`
+    );
+  }
 
   const presign = await presignResponse.json().catch(() => ({}));
   if (!presignResponse.ok) {
     throw new Error(presign.error || "Não foi possível preparar o upload.");
   }
 
-  const uploadResponse = await fetch(presign.uploadUrl, {
-    method: "PUT",
-    headers: { "Content-Type": file.type },
-    body: file,
-  });
+  let uploadResponse: Response;
+  try {
+    uploadResponse = await fetch(presign.uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+  } catch (uploadError) {
+    console.error("Direct file upload failed:", uploadError);
+    throw new Error(
+      `Não conseguimos enviar o ficheiro. Confirma a ligação à internet e tenta novamente. Também podes submeter a candidatura sem upload e colocar um link público para o CV.`
+    );
+  }
 
   if (!uploadResponse.ok) {
-    throw new Error("Não foi possível enviar o ficheiro.");
+    throw new Error(
+      `Não foi possível enviar o ficheiro (${uploadResponse.status}). Tenta novamente ou coloca um link público para o CV.`
+    );
   }
 
   return {
@@ -310,6 +341,11 @@ async function uploadFile(file: File, purpose: "CV" | "FINAL_MATERIAL"): Promise
     contentType: presign.contentType,
     sizeBytes: presign.sizeBytes,
   };
+}
+
+async function errorFromResponse(response: Response, fallback: string) {
+  const data = await response.json().catch(() => null);
+  return data && typeof data.error === "string" ? data.error : fallback;
 }
 
 function Field({

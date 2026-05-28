@@ -1,7 +1,7 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const DEFAULT_REGION = "eu-central-1";
+const DEFAULT_REGION = "eu-west-1";
 const DEFAULT_BUCKET = "alramalhosandbox";
 const DEFAULT_PREFIX = "amigos_do_chapim/local";
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
