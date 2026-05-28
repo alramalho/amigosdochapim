@@ -280,10 +280,11 @@ export default function PainelPage() {
                     setEditingName(true);
                     setNameMessage(null);
                   }}
-                  className="inline-flex w-fit items-center gap-1.5 text-sm text-foreground/60 hover:text-foreground"
+                  aria-label="Alterar nome"
+                  title="Alterar nome"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-sm text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
                 >
                   <Edit3 className="h-4 w-4" />
-                  Alterar nome
                 </button>
               </div>
             )}
