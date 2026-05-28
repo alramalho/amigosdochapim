@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FileSpreadsheet, ExternalLink } from "lucide-react";
+import { Check, Edit3, ExternalLink, FileSpreadsheet, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getAdminEmails } from "@/lib/admin";
 
@@ -34,6 +34,10 @@ export default function PainelPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [nameMessage, setNameMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -56,6 +60,7 @@ export default function PainelPage() {
       if (res.ok) {
         const userData = await res.json();
         setUser(userData);
+        setNameDraft(userData.name || "");
       }
       // If not ok (404), user exists in Supabase but not in our DB - that's fine, show no subscription state
       setLoading(false);
@@ -73,6 +78,41 @@ export default function PainelPage() {
     });
     const { url } = await res.json();
     if (url) window.location.href = url;
+  };
+
+  const saveName = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSavingName(true);
+    setNameMessage(null);
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/entrar");
+      return;
+    }
+
+    const response = await fetch("/api/user/me", {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: nameDraft }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    setSavingName(false);
+
+    if (!response.ok) {
+      setNameMessage(data.error || "Não foi possível guardar o nome.");
+      return;
+    }
+
+    setUser(data);
+    setNameDraft(data.name || "");
+    setEditingName(false);
+    setNameMessage("Nome atualizado.");
   };
 
   if (loading) {
@@ -192,10 +232,64 @@ export default function PainelPage() {
         </header>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1">
-            Olá, {user.name || "Amigo"}!
-          </h1>
+          <div className="mb-1">
+            {editingName ? (
+              <form onSubmit={saveName} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <label className="sr-only" htmlFor="member-name">
+                  Nome
+                </label>
+                <input
+                  id="member-name"
+                  value={nameDraft}
+                  onChange={(event) => setNameDraft(event.target.value)}
+                  maxLength={80}
+                  placeholder="O teu nome"
+                  className="w-full sm:max-w-sm border border-border rounded-sm bg-background px-3 py-2 text-2xl font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={savingName}
+                    className="inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
+                  >
+                    <Check className="h-4 w-4" />
+                    Guardar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNameDraft(user.name || "");
+                      setEditingName(false);
+                      setNameMessage(null);
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-sm border border-border px-3 py-2 text-sm text-foreground/70"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <h1 className="text-3xl font-semibold">
+                  Olá, {user.name || "Amigo"}!
+                </h1>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingName(true);
+                    setNameMessage(null);
+                  }}
+                  className="inline-flex w-fit items-center gap-1.5 text-sm text-foreground/60 hover:text-foreground"
+                >
+                  <Edit3 className="h-4 w-4" />
+                  Alterar nome
+                </button>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-foreground/50 mb-2">{userEmail}</p>
+          {nameMessage && <p className="text-sm text-foreground/60 mb-2">{nameMessage}</p>}
           <p className="text-foreground/70">
             Bem-vindo à tua área de membro. És um{" "}
             <span className="font-medium">{getUserTier()}</span>.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, userHasJuryAccess } from "@/lib/auth";
 import { CREDITS_THRESHOLD } from "@/lib/contest";
+import { prisma } from "@/lib/prisma";
 
 function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>) {
   if (!user) {
@@ -47,4 +48,30 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(userData);
+}
+
+export async function PATCH(request: NextRequest) {
+  const user = await getCurrentUser(request);
+
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const body = await request.json();
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+
+  if (name.length > 80) {
+    return NextResponse.json({ error: "O nome não pode ter mais de 80 caracteres." }, { status: 400 });
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: { name: name || null },
+    include: {
+      subscription: true,
+      donations: true,
+    },
+  });
+
+  return NextResponse.json(getUserData(updatedUser));
 }
