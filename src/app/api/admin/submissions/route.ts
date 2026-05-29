@@ -3,6 +3,17 @@ import { getCurrentUser, isAdminEmail } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest, formatSubmission } from "@/lib/contest-db";
 
+const submissionStatuses = new Set([
+  "DRAFT",
+  "SUBMITTED",
+  "IN_REVIEW",
+  "SELECTED_FOR_FINAL",
+  "FINAL_MATERIALS_SUBMITTED",
+  "FINALIST",
+  "WINNER",
+  "REJECTED",
+]);
+
 async function requireAdmin(request: NextRequest) {
   const user = await getCurrentUser(request);
 
@@ -49,6 +60,10 @@ export async function PATCH(request: NextRequest) {
 
   if (typeof body.submissionId !== "string" || typeof body.status !== "string") {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
+
+  if (!submissionStatuses.has(body.status)) {
+    return NextResponse.json({ error: "Invalid status." }, { status: 400 });
   }
 
   const submission = await prisma.submission.update({

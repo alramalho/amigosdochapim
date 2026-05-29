@@ -15,6 +15,7 @@ type Submission = {
 };
 
 const statuses = [
+  "DRAFT",
   "SUBMITTED",
   "IN_REVIEW",
   "SELECTED_FOR_FINAL",
@@ -24,14 +25,47 @@ const statuses = [
   "REJECTED",
 ];
 
-const statusLabels: Record<string, string> = {
-  SUBMITTED: "Submetida",
-  IN_REVIEW: "Em avaliação",
-  SELECTED_FOR_FINAL: "Selecionada para fase final",
-  FINAL_MATERIALS_SUBMITTED: "Entrega final submetida",
-  FINALIST: "Finalista",
-  WINNER: "Vencedora",
-  REJECTED: "Não selecionada",
+const statusMeta: Record<string, { label: string; description: string; className: string }> = {
+  DRAFT: {
+    label: "Rascunho",
+    description: "Ainda não deve ser considerada para avaliação.",
+    className: "border-stone-200 bg-stone-100/60 text-stone-700",
+  },
+  SUBMITTED: {
+    label: "Recebida",
+    description: "Candidatura submetida e pronta para triagem.",
+    className: "border-sky-200 bg-sky-50 text-sky-800",
+  },
+  IN_REVIEW: {
+    label: "Em análise",
+    description: "A equipa está a rever a candidatura.",
+    className: "border-amber-200 bg-amber-50 text-amber-800",
+  },
+  SELECTED_FOR_FINAL: {
+    label: "Selecionada para final",
+    description: "O candidato pode entregar os materiais finais.",
+    className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  },
+  FINAL_MATERIALS_SUBMITTED: {
+    label: "Materiais finais recebidos",
+    description: "Entrega final recebida e disponível para avaliação.",
+    className: "border-teal-200 bg-teal-50 text-teal-800",
+  },
+  FINALIST: {
+    label: "Finalista",
+    description: "Candidatura confirmada como finalista.",
+    className: "border-violet-200 bg-violet-50 text-violet-800",
+  },
+  WINNER: {
+    label: "Vencedora",
+    description: "Projeto vencedor do concurso.",
+    className: "border-yellow-200 bg-yellow-50 text-yellow-800",
+  },
+  REJECTED: {
+    label: "Não selecionada",
+    description: "Candidatura fora da fase seguinte.",
+    className: "border-rose-200 bg-rose-50 text-rose-800",
+  },
 };
 
 export default function AdminCandidaturasPage() {
@@ -73,18 +107,28 @@ export default function AdminCandidaturasPage() {
         </header>
 
         <h1 className="text-3xl md:text-5xl font-semibold mb-3">Gestão de candidaturas</h1>
-        <p className="text-foreground/70 mb-8">
-          Acompanha submissões, marca finalistas e controla o estado usado pela área do júri.
+        <p className="text-foreground/70 mb-4 max-w-3xl">
+          Esta vista está disponível para admins durante todo o concurso. Os estados ajudam a acompanhar
+          internamente a fase de cada candidatura e controlam quando certos materiais ficam visíveis ou disponíveis.
         </p>
 
-        <div className="border border-border rounded-sm overflow-hidden">
+        <div className="mb-8 flex flex-wrap gap-2">
+          {statuses.map((status) => (
+            <StatusPill key={status} status={status} />
+          ))}
+        </div>
+
+        <div className="border border-border rounded-sm overflow-hidden bg-background">
           {submissions.map((submission, index) => (
             <div
               key={submission.id}
               className={`grid gap-4 md:grid-cols-[1fr_220px_260px] p-5 ${index > 0 ? "border-t border-border" : ""}`}
             >
               <div>
-                <h2 className="font-semibold">{submission.candidateName}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-semibold">{submission.candidateName}</h2>
+                  <StatusPill status={submission.status} />
+                </div>
                 <p className="text-sm text-foreground/50">{submission.email}</p>
                 <p className="text-sm text-foreground/70 mt-2">{submission.synopsis}</p>
               </div>
@@ -102,15 +146,35 @@ export default function AdminCandidaturasPage() {
                 >
                   {statuses.map((status) => (
                     <option key={status} value={status}>
-                      {statusLabels[status]}
+                      {statusMeta[status].label}
                     </option>
                   ))}
                 </select>
+                <p className="mt-2 text-xs text-foreground/50">
+                  {statusMeta[submission.status]?.description || "Estado interno da candidatura."}
+                </p>
               </label>
             </div>
           ))}
         </div>
       </div>
     </main>
+  );
+}
+
+function StatusPill({ status }: { status: string }) {
+  const meta = statusMeta[status] || {
+    label: status,
+    description: "Estado interno da candidatura.",
+    className: "border-border bg-accent/30 text-foreground/70",
+  };
+
+  return (
+    <span
+      title={meta.description}
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium leading-none ${meta.className}`}
+    >
+      {meta.label}
+    </span>
   );
 }
