@@ -74,6 +74,7 @@ const statusMeta: Record<string, { label: string; description: string; className
 export default function AdminCandidaturasPage() {
   const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [excludedCount, setExcludedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -83,7 +84,10 @@ export default function AdminCandidaturasPage() {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => response.json())
-      .then((data) => setSubmissions(data.submissions || []));
+      .then((data) => {
+        setSubmissions(data.submissions || []);
+        setExcludedCount(data.excludedCount || 0);
+      });
   };
 
   useEffect(() => {
@@ -168,6 +172,9 @@ export default function AdminCandidaturasPage() {
           Esta vista está disponível para admins durante todo o concurso. Os estados ajudam a acompanhar
           internamente a fase de cada candidatura e controlam quando certos materiais ficam visíveis ou disponíveis.
         </p>
+        <p className="text-sm text-foreground/55 mb-4">
+          Excluídas: {excludedCount} candidaturas de teste/admin.
+        </p>
 
         <div className="mb-8 flex flex-wrap gap-2">
           {statuses.map((status) => (
@@ -193,6 +200,12 @@ export default function AdminCandidaturasPage() {
                 <p>{submission.finalMaterials ? "Entrega final recebida" : "Sem entrega final"}</p>
                 <p>{submission.files?.length || 0} ficheiros</p>
                 <p>{submission.juryReviews?.length || 0} avaliações</p>
+                <Link
+                  href={`/admin/candidaturas/${submission.id}`}
+                  className="mt-3 inline-block text-primary underline underline-offset-4 hover:no-underline"
+                >
+                  Ver candidatura completa →
+                </Link>
               </div>
               <label className="block">
                 <span className="block text-xs uppercase tracking-wide text-foreground/50 mb-2">Estado</span>

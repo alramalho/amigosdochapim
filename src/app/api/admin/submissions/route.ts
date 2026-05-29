@@ -14,6 +14,11 @@ const submissionStatuses = new Set([
   "REJECTED",
 ]);
 
+const excludedSubmissionEmails = new Set([
+  "alexandre.ramalho.1998@gmail.com",
+  "lia.borges@icloud.com",
+]);
+
 async function requireAdmin(request: NextRequest) {
   const user = await getCurrentUser(request);
 
@@ -22,6 +27,16 @@ async function requireAdmin(request: NextRequest) {
   }
 
   return user;
+}
+
+function canonicalEmail(email: string) {
+  const [local, domain] = email.toLowerCase().split("@");
+  if (!local || !domain) return email.toLowerCase();
+  return `${local.split("+")[0]}@${domain}`;
+}
+
+function shouldExcludeSubmission(submission: { email: string }) {
+  return excludedSubmissionEmails.has(canonicalEmail(submission.email));
 }
 
 export async function GET(request: NextRequest) {
@@ -42,10 +57,12 @@ export async function GET(request: NextRequest) {
     },
     orderBy: { createdAt: "asc" },
   });
+  const visibleSubmissions = submissions.filter((submission) => !shouldExcludeSubmission(submission));
 
   return NextResponse.json({
     contest,
-    submissions: submissions.map(formatSubmission),
+    submissions: visibleSubmissions.map(formatSubmission),
+    excludedCount: submissions.length - visibleSubmissions.length,
   });
 }
 
