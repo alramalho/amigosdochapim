@@ -274,7 +274,7 @@ export default function PainelPage() {
                 </div>
               </form>
             ) : (
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-semibold">
                   Olá, {user.name || "Amigo"}!
                 </h1>

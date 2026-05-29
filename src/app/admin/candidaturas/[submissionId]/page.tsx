@@ -169,9 +169,9 @@ export default function AdminCandidaturaDetailPage() {
                     {file.purpose === "CV" ? "CV" : "Ficheiro"} - {file.fileName}
                   </ExternalLink>
                 ))}
-                {submission.externalLinks && <p className="whitespace-pre-line text-foreground/70">{submission.externalLinks}</p>}
+                {submission.externalLinks && <LinkText content={submission.externalLinks} />}
                 {submission.finalMaterials?.externalLinks && (
-                  <p className="whitespace-pre-line text-foreground/70">{submission.finalMaterials.externalLinks}</p>
+                  <LinkText content={submission.finalMaterials.externalLinks} />
                 )}
               </div>
             </section>
@@ -189,11 +189,19 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function Section({ title, content, nested = false }: { title: string; content: string; nested?: boolean }) {
+function Section({
+  title,
+  content,
+  nested = false,
+}: {
+  title: string;
+  content: string;
+  nested?: boolean;
+}) {
   return (
     <section className={nested ? "mb-4 last:mb-0" : "border border-border rounded-sm p-5"}>
       <h2 className={nested ? "font-semibold mb-2" : "text-xl font-semibold mb-3"}>{title}</h2>
-      <p className="whitespace-pre-line text-foreground/75 leading-relaxed">{content}</p>
+      <LinkText content={content} />
     </section>
   );
 }
@@ -203,5 +211,29 @@ function ExternalLink({ href, children }: { href: string; children: React.ReactN
     <a href={href} target="_blank" rel="noopener noreferrer" className="block text-primary underline underline-offset-4">
       {children}
     </a>
+  );
+}
+
+function LinkText({ content }: { content: string }) {
+  const parts = content.split(/(https?:\/\/\S+)/g);
+
+  return (
+    <p className="whitespace-pre-line text-foreground/70">
+      {parts.map((part, index) => {
+        if (!part.startsWith("http")) return part;
+
+        return (
+          <a
+            key={`${part}-${index}`}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline underline-offset-4"
+          >
+            {part}
+          </a>
+        );
+      })}
+    </p>
   );
 }
