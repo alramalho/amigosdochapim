@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getAdminEmails } from "@/lib/admin";
+import { supabase } from "@/lib/supabase";
 
 type Submission = {
   id: string;
@@ -69,29 +72,83 @@ const statusMeta: Record<string, { label: string; description: string; className
 };
 
 export default function AdminCandidaturasPage() {
+  const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  const load = () => {
-    fetch("/api/admin/submissions")
+  const load = (token: string) => {
+    return fetch("/api/admin/submissions", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((response) => response.json())
-      .then((data) => setSubmissions(data.submissions || []))
-      .finally(() => setLoading(false));
+      .then((data) => setSubmissions(data.submissions || []));
   };
 
-  useEffect(load, []);
+  useEffect(() => {
+    async function checkAccess() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace("/entrar");
+        return;
+      }
+
+      const email = session.user.email?.toLowerCase();
+      const isAdmin = !!email && getAdminEmails(process.env.NEXT_PUBLIC_ADMIN_EMAILS).includes(email);
+
+      if (!isAdmin) {
+        setAuthorized(false);
+        setLoading(false);
+        return;
+      }
+
+      setAuthorized(true);
+      setAccessToken(session.access_token);
+      await load(session.access_token)
+        .catch(() => {
+          setAuthorized(false);
+        })
+      .finally(() => setLoading(false));
+    }
+
+    checkAccess();
+  }, [router]);
 
   const updateStatus = async (submissionId: string, status: string) => {
+    if (!accessToken) return;
+
     await fetch("/api/admin/submissions", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ submissionId, status }),
     });
-    load();
+    await load(accessToken);
   };
 
   if (loading) {
     return <main className="min-h-screen flex items-center justify-center">A carregar candidaturas...</main>;
+  }
+
+  if (!authorized) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">Sem autorização</p>
+          <h1 className="text-3xl font-semibold mb-4">Não tens acesso a esta página.</h1>
+          <p className="text-foreground/70 mb-6">
+            Esta área é reservada aos administradores dos Amigos do Chapim.
+          </p>
+          <Link href="/painel" className="inline-flex px-5 py-3 border border-border rounded-sm hover:bg-accent/30">
+            Voltar ao painel
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   return (
