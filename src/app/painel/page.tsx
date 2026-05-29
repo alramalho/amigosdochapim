@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Check, Edit3, ExternalLink, FileSpreadsheet, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getAdminEmails } from "@/lib/admin";
+import { InstagramLink } from "@/components/instagram-link";
 
 //note to self
 // stripe + supabase finished locally. now was a matter of testing it out in prod in the Real Goncalos account (double check env vars)
@@ -189,7 +190,7 @@ export default function PainelPage() {
         </div>
 
         <footer className="py-6 text-center text-sm text-foreground/50">
-          <div className="flex justify-center gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             <Link href="/termos" className="hover:text-foreground transition-colors">
               Termos
             </Link>
@@ -199,6 +200,7 @@ export default function PainelPage() {
             <a href="mailto:geral@amigosdochapim.org" className="hover:text-foreground transition-colors">
               Contacto
             </a>
+            <InstagramLink className="text-sm" />
           </div>
         </footer>
       </main>
@@ -453,7 +455,7 @@ export default function PainelPage() {
       </div>
 
       <footer className="py-6 text-center text-sm text-foreground/50">
-        <div className="flex justify-center gap-6">
+        <div className="flex flex-wrap justify-center gap-6">
           <Link href="/termos" className="hover:text-foreground transition-colors">
             Termos
           </Link>
@@ -463,6 +465,7 @@ export default function PainelPage() {
           <a href="mailto:geral@amigosdochapim.org" className="hover:text-foreground transition-colors">
             Contacto
           </a>
+          <InstagramLink className="text-sm" />
         </div>
       </footer>
     </main>

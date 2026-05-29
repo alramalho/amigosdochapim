@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ContactForm } from "@/components/contact-form";
+import { InstagramLink } from "@/components/instagram-link";
 
 export const metadata = {
   title: "Contacto | Amigos do Chapim",
@@ -24,6 +25,7 @@ export default function ContactoPage() {
           <p className="text-foreground/70 md:text-lg">
             Para dúvidas sobre candidaturas, júri, apoios ou funcionamento da plataforma.
           </p>
+          <InstagramLink className="mt-4 text-sm md:text-base" />
         </div>
 
         <section className="border border-border bg-accent/20 rounded-sm p-5 md:p-6">

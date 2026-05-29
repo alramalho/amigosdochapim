@@ -4,6 +4,7 @@ import { AuroraBackground } from "@/components/ui/aurora-background";
 import { AuthNavLink } from "@/components/auth-nav-link";
 import { DonationSection } from "@/components/donation-section";
 import { FAQItem } from "@/components/faq-item";
+import { InstagramLink } from "@/components/instagram-link";
 
 const APROVADO_CM = true;
 
@@ -263,6 +264,7 @@ export default function Home() {
               <p className="mt-2 text-xs md:text-sm text-foreground/60">
                 geral@amigosdochapim.org
               </p>
+              <InstagramLink className="mt-3 text-xs md:text-sm" />
             </div>
             <div>
               <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">

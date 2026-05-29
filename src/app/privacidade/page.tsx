@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { InstagramLink } from "@/components/instagram-link";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade | Amigos do Chapim",
@@ -198,13 +199,14 @@ export default function PrivacidadePage() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 md:py-12 mt-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
+        <div className="max-w-4xl mx-auto px-4 flex flex-wrap justify-center gap-6 text-center">
           <Link
             href="/"
             className="text-sm md:text-base text-foreground/60 hover:text-foreground transition-colors"
           >
             ← Voltar à página principal
           </Link>
+          <InstagramLink className="text-sm md:text-base" />
         </div>
       </footer>
     </div>
