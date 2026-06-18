@@ -208,6 +208,16 @@ model JuryReview {
   @@map("jury_reviews")
 }
 
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([path])
+  @@index([createdAt])
+  @@map("page_views")
+}
+
 model JuryRanking {
   id                   String    @id @default(cuid())
   contestId            String    @map("contest_id")

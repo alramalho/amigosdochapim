@@ -410,9 +410,15 @@ export default function PainelPage() {
               </p>
               <Link
                 href="/admin/candidaturas"
-                className="inline-block text-sm text-foreground/70 hover:text-foreground transition-colors"
+                className="block text-sm text-foreground/70 hover:text-foreground transition-colors"
               >
                 Gerir candidaturas →
+              </Link>
+              <Link
+                href="/admin/views"
+                className="mt-2 block text-sm text-foreground/70 hover:text-foreground transition-colors"
+              >
+                Ver visualizações →
               </Link>
             </div>
           )}

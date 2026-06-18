@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lora } from "next/font/google";
 import "./globals.css";
 import { AuthHandler } from "@/components/auth-handler";
+import { ViewTracker } from "@/components/view-tracker";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -36,6 +37,7 @@ export default function RootLayout({
         className={`${lora.variable} antialiased`}
       >
         <AuthHandler />
+        <ViewTracker />
         {children}
       </body>
     </html>
