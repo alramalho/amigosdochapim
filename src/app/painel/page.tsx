@@ -177,7 +177,7 @@ export default function PainelPage() {
               href="https://docs.google.com/spreadsheets/d/1eKD3LuBVSBuWO2aAKzYMNsrtAU6dnwcImb7ELD-tDjw"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-accent/40 border border-border shadow-sm rounded-xl p-4 hover:bg-accent/60 transition-colors"
+              className="flex items-center gap-3 bg-foreground/5 rounded-xl p-4 hover:bg-foreground/10 transition-colors"
             >
               <FileSpreadsheet className="w-8 h-8 text-green-600" />
               <div>
@@ -306,7 +306,7 @@ export default function PainelPage() {
         <div className="grid gap-6 md:grid-cols-2">
           {/* Subscription Card - Only if has subscription */}
           {hasSubscription && (
-            <div className="bg-accent/40 border border-border shadow-sm rounded-xl p-6">
+            <div className="bg-foreground/5 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">A tua subscrição</h2>
               <div className="space-y-2 text-sm">
                 <p>
@@ -338,7 +338,7 @@ export default function PainelPage() {
           )}
 
           {/* Contributions Card */}
-          <div className="bg-accent/40 border border-border shadow-sm rounded-xl p-6">
+          <div className="bg-foreground/5 rounded-xl p-6">
             <h2 className="text-lg font-medium mb-4">As tuas contribuições</h2>
             <div className="space-y-2 text-sm">
               <p>
@@ -370,7 +370,7 @@ export default function PainelPage() {
 
           {/* Jury Card - For users with jury access */}
           {user.hasJuryAccess && (
-            <div className="bg-accent/40 border border-border shadow-sm rounded-xl p-6">
+            <div className="bg-foreground/5 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Júri</h2>
               <p className="text-sm text-foreground/70 mb-4">
                 Participa na votação de projetos e ajuda a decidir quais
@@ -387,7 +387,7 @@ export default function PainelPage() {
 
           {/* Candidate Card - Jury members cannot submit */}
           {!user.hasJuryAccess && (
-            <div className="bg-accent/40 border border-border shadow-sm rounded-xl p-6">
+            <div className="bg-foreground/5 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Candidatura</h2>
               <p className="text-sm text-foreground/70 mb-4">
                 Submete ou acompanha a tua candidatura ao concurso de curtas-metragens de 2026.
@@ -403,7 +403,7 @@ export default function PainelPage() {
 
           {/* Admin Card */}
           {isAdmin && (
-            <div className="bg-accent/40 border border-border shadow-sm rounded-xl p-6">
+            <div className="bg-foreground/5 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Admin</h2>
               <p className="text-sm text-foreground/70 mb-4">
                 Gere candidaturas, finalistas e estados do concurso.
@@ -425,7 +425,7 @@ export default function PainelPage() {
 
           {/* Upgrade Card - For users without jury access */}
           {!user.hasJuryAccess && (
-            <div className="bg-accent/70 border border-border shadow-sm rounded-xl p-6">
+            <div className="bg-foreground/10 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Desbloqueia o acesso ao júri</h2>
               <p className="text-sm text-foreground/70 mb-4">
                 Subscreve o plano Amigo (12€/mês) ou faz uma doação única de 25€ ou mais
@@ -448,7 +448,7 @@ export default function PainelPage() {
             href="https://docs.google.com/spreadsheets/d/1eKD3LuBVSBuWO2aAKzYMNsrtAU6dnwcImb7ELD-tDjw"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-accent/40 border border-border shadow-sm rounded-xl p-4 hover:bg-accent/60 transition-colors"
+            className="flex items-center gap-3 bg-foreground/5 rounded-xl p-4 hover:bg-foreground/10 transition-colors"
           >
             <FileSpreadsheet className="w-8 h-8 text-green-600" />
             <div>
