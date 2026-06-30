@@ -157,7 +157,7 @@ export default function CandidaturaPainelPage() {
             {submission.status === "SELECTED_FOR_FINAL" || submission.finalMaterials ? (
               <section className="border border-border rounded-sm p-6">
                 <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
-                  16 - 31 julho 2026
+                  16 - 31 agosto 2026
                 </p>
                 <h2 className="text-2xl font-semibold mb-4">Entrega dos requisitos da fase final</h2>
                 <form onSubmit={saveFinalMaterials} className="space-y-4">

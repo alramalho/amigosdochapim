@@ -8,12 +8,12 @@ export const metadata: Metadata = {
 };
 
 const calendario = [
-  ["Candidatura inicial", "15 maio - 30 junho 2026"],
-  ["Avaliação da candidatura inicial", "1 - 15 julho 2026"],
-  ["Entrega dos requisitos da fase final", "16 - 31 julho 2026"],
-  ["Entrevista online com o júri", "1 - 15 agosto 2026"],
-  ["Seleção da curta vencedora", "16 - 31 agosto 2026"],
-  ["Produção da curta", "1 setembro - 15 dezembro 2026"],
+  ["Candidatura inicial", "15 maio - 30 julho 2026"],
+  ["Avaliação da candidatura inicial", "1 - 15 agosto 2026"],
+  ["Entrega dos requisitos da fase final", "16 - 31 agosto 2026"],
+  ["Entrevista online com o júri", "1 - 15 setembro 2026"],
+  ["Seleção da curta vencedora", "16 - 30 setembro 2026"],
+  ["Produção da curta", "1 outubro - 15 dezembro 2026"],
 ];
 
 export default function OQueDeveSerEntreguePage() {
@@ -47,7 +47,7 @@ export default function OQueDeveSerEntreguePage() {
       <section className="max-w-4xl mx-auto px-4 py-8 md:py-12">
         <div className="mb-6">
           <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
-            15 maio - 30 junho 2026
+            15 maio - 30 julho 2026
           </p>
           <h2 className="text-2xl md:text-3xl font-semibold">Candidatura inicial</h2>
         </div>
@@ -85,7 +85,7 @@ export default function OQueDeveSerEntreguePage() {
         <div className="max-w-4xl mx-auto px-4">
           <div className="mb-6">
             <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
-              16 - 31 julho 2026
+              16 - 31 agosto 2026
             </p>
             <h2 className="text-2xl md:text-3xl font-semibold">Entrega dos requisitos da fase final</h2>
           </div>
@@ -131,12 +131,18 @@ export default function OQueDeveSerEntreguePage() {
             Descobre como o júri avalia as candidaturas e como funciona a votação final.
           </p>
           <Link
-            href="/juri"
+            href="/candidatar"
             className="inline-block bg-primary text-primary-foreground px-6 py-3 md:px-8 md:py-3 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
           >
-            Como funciona o júri →
+            Submeter candidatura →
           </Link>
-          <div className="mt-5">
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+            <Link
+              href="/juri"
+              className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
+            >
+              Como funciona o júri →
+            </Link>
             <Link
               href="/regulamento-concurso-curtas-2026.docx"
               className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"

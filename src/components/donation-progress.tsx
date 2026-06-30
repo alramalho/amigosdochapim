@@ -101,7 +101,7 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
               </p>
             </div>
           ) : (
-            <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold mb-4 md:mb-6">15 Maio - 30 Junho 2026</h1>
+            <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold mb-4 md:mb-6">15 Maio - 30 Julho 2026</h1>
           )}
 
           {/* Money info - below title */}

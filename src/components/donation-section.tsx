@@ -6,8 +6,8 @@ import { Check, CheckCheck } from "lucide-react";
 import { DonationProgress, FundedContestCard } from "./donation-progress";
 
 // Next concurso application deadline
-const CONCURSO_DEADLINE_DATE = new Date("2026-06-30");
-const CONCURSO_DEADLINE_LABEL = "30 de Junho de 2026";
+const CONCURSO_DEADLINE_DATE = new Date("2026-07-30");
+const CONCURSO_DEADLINE_LABEL = "30 de Julho de 2026";
 
 // Calculate months until concurso (including current month)
 function getMonthsUntilConcurso(): number {

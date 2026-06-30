@@ -100,17 +100,17 @@ export default function Home() {
               O processo é simples e transparente. Anualmente abrimos
               candidaturas para projetos artísticos. O primeiro concurso será
               dedicado a curtas-metragens, com candidaturas iniciais abertas de
-              15 de maio a 30 de junho de 2026. Cada candidato submete os seus
+              15 de maio a 30 de julho de 2026. Cada candidato submete os seus
               dados, carta de motivação e uma proposta artística em PDF. Os
               finalistas entregam depois um plano de produção com orçamento e
               calendário, para que o júri avalie o potencial artístico e a
               viabilidade de cada projeto.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
             <Link
               href="/candidatar"
-              className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
+              className="inline-flex w-fit items-center justify-center bg-primary text-primary-foreground px-5 py-2.5 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
             >
               Submeter candidatura →
             </Link>
