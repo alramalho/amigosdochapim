@@ -191,14 +191,14 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 md:py-12">
+      <footer className="bg-panel text-background py-8 md:py-12">
         <div className="max-w-4xl mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-3 md:gap-12">
             <div>
               <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">
                 Amigos do Chapim
               </h3>
-              <p className="text-xs md:text-sm text-foreground/60">
+              <p className="text-xs md:text-sm text-background/70">
                 A democratizar a arte.
               </p>
             </div>
@@ -208,14 +208,14 @@ export default function Home() {
               </h3>
               <Link
                 href="/contacto"
-                className="block text-xs md:text-sm text-foreground/60 hover:text-foreground"
+                className="block text-xs md:text-sm text-background/70 hover:text-background"
               >
                 Contacte-nos
               </Link>
-              <p className="mt-2 text-xs md:text-sm text-foreground/60">
+              <p className="mt-2 text-xs md:text-sm text-background/70">
                 geral@amigosdochapim.org
               </p>
-              <InstagramLink className="mt-3 text-xs md:text-sm" />
+              <InstagramLink className="mt-3 text-xs md:text-sm text-background/70 hover:text-background" />
             </div>
             <div>
               <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">
@@ -224,13 +224,13 @@ export default function Home() {
               <div className="space-y-2 text-xs md:text-sm">
                 <Link
                   href="/termos"
-                  className="block text-foreground/60 hover:text-foreground"
+                  className="block text-background/70 hover:text-background"
                 >
                   Termos e Condições
                 </Link>
                 <Link
                   href="/privacidade"
-                  className="block text-foreground/60 hover:text-foreground"
+                  className="block text-background/70 hover:text-background"
                 >
                   Política de Privacidade
                 </Link>
@@ -238,26 +238,26 @@ export default function Home() {
             </div>
           </div>
           {/* Logos + Copyright */}
-          <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border">
+          <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-background/20">
             <div className="flex gap-6 md:gap-8 items-center">
               <Image
-                src="/logo_v2.png"
+                src="/logo_v2_beige.png"
                 alt="Amigos do Chapim"
                 width={100}
                 height={50}
-                className="h-8 md:h-10 w-auto object-contain opacity-40"
+                className="h-8 md:h-10 w-auto object-contain opacity-60"
               />
               {APROVADO_CM && (
                 <Image
-                  src="/cm_odivelas_preto.png"
+                  src="/cm_odivelas_branco.png"
                   alt="Câmara Municipal de Odivelas"
                   width={120}
                   height={40}
-                  className="h-6 md:h-8 w-auto object-contain opacity-30"
+                  className="h-6 md:h-8 w-auto object-contain opacity-50"
                 />
               )}
             </div>
-            <div className="mt-4 md:mt-6 text-xs md:text-sm text-foreground/40">
+            <div className="mt-4 md:mt-6 text-xs md:text-sm text-background/50">
               © 2025 Amigos do Chapim. Todos os direitos reservados.
             </div>
           </div>
