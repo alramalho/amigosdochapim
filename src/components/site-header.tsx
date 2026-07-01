@@ -35,32 +35,31 @@ export function SiteHeader({ aprovadoCM }: SiteHeaderProps) {
               priority
               className="w-40 md:w-48 h-auto object-contain"
             />
-            <div className="mt-1 text-xs text-background/70 tracking-wide uppercase">
-              Associação
-            </div>
           </div>
 
           <div>
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight">
               Democratizar a arte.
             </h1>
-            <p className="text-base md:text-lg text-background/80 max-w-sm mb-6">
+            <p className="text-base md:text-lg text-background/80 max-w-sm mb-10">
               Uma iniciativa dedicada a ajudar os jovens artistas portugueses
             </p>
 
-            <p className="text-xs md:text-sm text-background/60 mb-2 tracking-wide uppercase">
-              1º Concurso de Curtas-Metragens
-            </p>
-            <p className="text-sm md:text-base text-background/80 max-w-sm mb-5">
-              Candidaturas abertas até {CANDIDATURAS_FECHAM}. Financiamos a
-              curta-metragem vencedora de um jovem artista português.
-            </p>
-            <Link
-              href="/o-que-deve-ser-entregue"
-              className="inline-flex w-fit items-center gap-2 bg-background text-foreground px-5 py-2.5 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
-            >
-              Candidatar →
-            </Link>
+            <div className="bg-background/10 rounded-sm p-6 md:p-7">
+              <p className="text-xs md:text-sm text-background/60 mb-2 tracking-wide uppercase">
+                1º Concurso de Curtas-Metragens
+              </p>
+              <p className="text-sm md:text-base text-background/80 max-w-sm mb-5">
+                Candidaturas abertas até {CANDIDATURAS_FECHAM}. Financiamos a
+                curta-metragem vencedora de um jovem artista português.
+              </p>
+              <Link
+                href="/o-que-deve-ser-entregue"
+                className="inline-flex w-fit items-center gap-2 bg-background text-foreground px-5 py-2.5 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
+              >
+                Candidatar →
+              </Link>
+            </div>
           </div>
 
           <div>
