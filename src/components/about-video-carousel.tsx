@@ -42,7 +42,9 @@ export function AboutVideoCarousel() {
     let frame = 0;
 
     const updateTrackPosition = () => {
-      if (reduceMotion.matches) {
+      const isSwipeViewport = window.innerWidth < 768;
+
+      if (reduceMotion.matches || isSwipeViewport) {
         track.style.transform = "translate3d(0, 0, 0)";
         return;
       }
@@ -98,10 +100,10 @@ export function AboutVideoCarousel() {
 
   return (
     <div ref={sectionRef} className="mt-10 md:mt-14" aria-label="Videos dos Amigos do Chapim">
-      <div className="-mx-4 overflow-hidden px-4 py-2 md:-mx-8 md:px-8">
+      <div className="-mx-4 overflow-x-auto px-4 py-2 [scrollbar-width:none] md:-mx-8 md:overflow-hidden md:px-8 [&::-webkit-scrollbar]:hidden">
         <div
           ref={trackRef}
-          className="flex w-max gap-4 transition-transform duration-500 ease-out will-change-transform md:gap-6"
+          className="flex w-max snap-x snap-mandatory gap-4 transition-transform duration-500 ease-out will-change-transform md:snap-none md:gap-6"
         >
           {ABOUT_VIDEOS.map((video) => {
             const isPlaying = playingId === video.id;
@@ -109,7 +111,7 @@ export function AboutVideoCarousel() {
             return (
               <article
                 key={video.id}
-                className="relative aspect-[9/16] w-[min(72vw,18rem)] shrink-0 overflow-hidden rounded-sm border border-border/70 bg-primary/5 shadow-sm sm:w-60 md:w-64 lg:w-72"
+                className="relative aspect-[9/16] w-[min(72vw,18rem)] shrink-0 snap-center overflow-hidden rounded-sm border border-border/70 bg-primary/5 shadow-sm sm:w-60 md:w-64 lg:w-72"
               >
                 <video
                   ref={(node) => {
