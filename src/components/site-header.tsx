@@ -45,21 +45,19 @@ export function SiteHeader({ aprovadoCM }: SiteHeaderProps) {
               Uma iniciativa dedicada a ajudar os jovens artistas portugueses
             </p>
 
-            <div className="bg-background/10 rounded-sm p-6 md:p-7">
-              <p className="text-xs md:text-sm text-background/60 mb-2 tracking-wide uppercase">
-                1º Concurso de Curtas-Metragens
-              </p>
-              <p className="text-sm md:text-base text-background/80 max-w-sm mb-5">
-                Candidaturas abertas até {CANDIDATURAS_FECHAM}. Financiamos a
-                curta-metragem vencedora de um jovem artista português.
-              </p>
-              <Link
-                href="/o-que-deve-ser-entregue"
-                className="inline-flex w-fit items-center gap-2 bg-background text-foreground px-5 py-2.5 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
-              >
-                Candidatar →
-              </Link>
-            </div>
+            <p className="text-xs md:text-sm text-background/60 mb-2 tracking-wide uppercase">
+              1º Concurso de Curtas-Metragens
+            </p>
+            <p className="text-sm md:text-base text-background/80 max-w-sm mb-5">
+              Candidaturas abertas até {CANDIDATURAS_FECHAM}. Financiamos a
+              curta-metragem vencedora de um jovem artista português.
+            </p>
+            <Link
+              href="/o-que-deve-ser-entregue"
+              className="inline-flex w-fit items-center gap-2 bg-background text-foreground px-5 py-2.5 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
+            >
+              Candidatar →
+            </Link>
           </div>
 
           <div>
