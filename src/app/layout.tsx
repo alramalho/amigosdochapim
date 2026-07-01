@@ -3,6 +3,7 @@ import { Lora } from "next/font/google";
 import "./globals.css";
 import { AuthHandler } from "@/components/auth-handler";
 import { ViewTracker } from "@/components/view-tracker";
+import { ConsentBanner } from "@/components/consent-banner";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         <AuthHandler />
         <ViewTracker />
+        <ConsentBanner />
         {children}
       </body>
     </html>

@@ -211,10 +211,19 @@ model JuryReview {
 model PageView {
   id        String   @id @default(cuid())
   path      String
+  // Coarse, IP-derived estimate (no raw IP stored).
+  country   String?
+  region    String?
+  city      String?
+  // Precise location, only stored with explicit opt-in consent.
+  latitude  Float?
+  longitude Float?
+  precise   Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([path])
   @@index([createdAt])
+  @@index([country])
   @@map("page_views")
 }
 

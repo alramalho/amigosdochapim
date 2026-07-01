@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase";
 import { sendWelcomeEmail, addContactToLoops } from "@/lib/loops";
 import type Stripe from "stripe";
 import { SubscriptionTier } from "@prisma/client";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -169,6 +170,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     magicLink,
   });
 
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: email,
+    event: "subscription_checkout_completed",
+    properties: { tier, email },
+  });
+  await posthog.shutdown();
+
   console.log(`New subscriber: ${email} (${tier})`);
 }
 
@@ -244,6 +253,14 @@ async function handleDonationCompleted(
     magicLink,
   });
 
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: email,
+    event: "donation_checkout_completed",
+    properties: { amount: amount / 100, tier, email },
+  });
+  await posthog.shutdown();
+
   console.log(`New donation: ${email} - ${amount / 100}€ (${tier})`);
 }
 
@@ -263,13 +280,22 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  await prisma.subscription.update({
+  const record = await prisma.subscription.update({
     where: { stripeSubscriptionId: subscription.id },
     data: {
       status: "CANCELLED",
       cancelAtPeriodEnd: false,
     },
+    include: { user: true },
   });
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: record.user.email,
+    event: "subscription_cancelled",
+    properties: { tier: record.tier, email: record.user.email },
+  });
+  await posthog.shutdown();
 }
 
 function mapStripeStatus(status: Stripe.Subscription.Status) {

@@ -2,6 +2,7 @@
 
 import { Send } from "lucide-react";
 import { useState } from "react";
+import posthog from "posthog-js";
 
 type ContactFormProps = {
   defaultContext?: string;
@@ -61,6 +62,7 @@ export function ContactForm({
         throw new Error(data.error || "Não foi possível enviar a mensagem.");
       }
 
+      posthog.capture("contact_form_submitted", { context: defaultContext });
       setStatus("success");
       setFeedback("Mensagem enviada. Vamos responder por email assim que possível.");
       setForm({ ...initialForm, subject: defaultSubject });

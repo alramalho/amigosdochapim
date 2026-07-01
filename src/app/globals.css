@@ -10,6 +10,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
   --color-muted-foreground: var(--muted-foreground);
+  --color-brand-red: var(--brand-red);
+  --color-panel: var(--panel);
 
   /* Aurora animation */
   --animate-aurora: aurora 60s ease infinite;
@@ -25,6 +27,12 @@
   --accent-foreground: #2C2416;
   --border: #D4C5A9;
   --muted-foreground: #faf7f2bd;
+
+  /* Vermelho de destaque - crachá do logótipo / cartaz serigrafado */
+  --brand-red: #8f181e;
+
+  /* Fundo do painel do cabeçalho */
+  --panel: var(--brand-red);
 }
 
 @layer base {

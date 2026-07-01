@@ -6,12 +6,16 @@ import { useEffect, useState } from "react";
 import { format, startOfDay, subDays } from "date-fns";
 import { getAdminEmails } from "@/lib/admin";
 import { supabase } from "@/lib/supabase";
+import { ViewsMap } from "@/components/views-map";
 
 type ViewsData = {
   days: number;
   total: number;
   daily: { day: string; count: number }[];
   byPath: { path: string; count: number }[];
+  byDistrict: { code: string; district: string; count: number }[];
+  byCountry: { country: string; count: number }[];
+  precisePoints: { lat: number; lng: number; country: string | null }[];
 };
 
 const ranges = [7, 30, 90];
@@ -132,7 +136,7 @@ export default function AdminViewsPage() {
           </p>
         </div>
 
-        <div className="border border-border rounded-sm p-5 bg-background mb-10">
+        <div className="border border-border rounded-sm p-5 bg-foreground/5 mb-10">
           <h2 className="text-sm uppercase tracking-wide text-foreground/50 mb-4">Por dia</h2>
           <div className="flex items-end gap-[2px] h-48">
             {series.map((point) => (
@@ -150,7 +154,17 @@ export default function AdminViewsPage() {
           </div>
         </div>
 
-        <div className="border border-border rounded-sm overflow-hidden bg-background">
+        {data && (
+          <div className="mb-10">
+            <ViewsMap
+              byDistrict={data.byDistrict || []}
+              byCountry={data.byCountry || []}
+              precisePoints={data.precisePoints || []}
+            />
+          </div>
+        )}
+
+        <div className="border border-border rounded-sm overflow-hidden bg-foreground/5">
           <div className="grid grid-cols-[1fr_120px] p-4 border-b border-border text-xs uppercase tracking-wide text-foreground/50">
             <span>Página</span>
             <span className="text-right">Visualizações</span>

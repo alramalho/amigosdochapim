@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import posthog from "posthog-js";
 
 export default function EntrarPage() {
   const router = useRouter();
@@ -45,7 +46,10 @@ export default function EntrarPage() {
 
     if (error) {
       setError(error.message);
+      posthog.captureException(error);
     } else {
+      posthog.capture("login_otp_requested", { email });
+      posthog.identify(email, { email });
       setSent(true);
     }
     setLoading(false);

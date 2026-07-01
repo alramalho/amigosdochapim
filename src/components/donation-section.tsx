@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { differenceInCalendarMonths } from "date-fns";
 import { Check, CheckCheck } from "lucide-react";
+import posthog from "posthog-js";
 import { DonationProgress, FundedContestCard } from "./donation-progress";
 
 // Next concurso application deadline
@@ -42,6 +43,11 @@ export function DonationSection() {
     setLoading(true);
     try {
       if (donationType === "subscription" && selectedTier) {
+        posthog.capture("donation_checkout_started", {
+          donation_type: "subscription",
+          tier: selectedTier,
+          amount_per_month: TIER_PRICES[selectedTier],
+        });
         const response = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -57,6 +63,10 @@ export function DonationSection() {
           alert("Erro ao processar. Por favor, tente novamente.");
         }
       } else if (donationType === "one-off" && selectedOneOff) {
+        posthog.capture("donation_checkout_started", {
+          donation_type: "one-off",
+          amount: selectedOneOff,
+        });
         const response = await fetch("/api/stripe/checkout-donation", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

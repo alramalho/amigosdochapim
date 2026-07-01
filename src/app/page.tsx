@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { AuroraBackground } from "@/components/ui/aurora-background";
-import { AuthNavLink } from "@/components/auth-nav-link";
+import { SiteHeader } from "@/components/site-header";
+import { AboutVideoCarousel } from "@/components/about-video-carousel";
 import { DonationSection } from "@/components/donation-section";
 import { FAQItem } from "@/components/faq-item";
 import { InstagramLink } from "@/components/instagram-link";
@@ -11,57 +11,7 @@ const APROVADO_CM = true;
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <AuroraBackground className="w-full bg-primary text-primary-foreground">
-        {/* Navigation */}
-        <nav className="absolute top-0 left-0 right-0 z-20 px-4 py-4 flex justify-end">
-          <AuthNavLink className="px-4 py-2 text-sm font-medium bg-background/10 hover:bg-background/20 rounded-lg transition-colors backdrop-blur-sm" />
-        </nav>
-
-        <section className="max-w-5xl mx-auto px-4 pt-0 text-center relative z-10">
-          <div className="mb-4 mb:mb-8 mt-4 flex justify-center opacity-80">
-            <Image
-              src="/logo_v2_beige.png"
-              alt="Amigos do Chapim"
-              width={300}
-              height={150}
-              priority
-              className="w-48 h-20 md:w-64 md:h-32 object-contain"
-            />
-          </div>
-          <div className="py-20 md:py-32">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold mb-4 md:mb-6 tracking-tight">
-              Democratizar a arte.
-            </h1>
-            <p className="text-base md:text-xl lg:text-2xl text-primary-foreground/80 max-w-3xl mx-auto font-normal">
-              Uma iniciativa dedicada a ajudar os jovens artistas portugueses
-            </p>
-          </div>
-        </section>
-
-        {/* Parceiros */}
-        <section className="py-6 md:py-8 overflow-hidden relative z-10">
-          <p className="text-xs md:text-sm text-primary-foreground/40 text-center mb-3 tracking-wide">Com o apoio de</p>
-          <div className="flex gap-6 md:gap-12 items-center justify-center opacity-60 flex-wrap px-4">
-            {APROVADO_CM ? (
-              <Image
-                src="/cm_odivelas_branco.png"
-                alt="Câmara Municipal de Odivelas"
-                width={100}
-                height={40}
-                className="h-8 md:h-10 w-auto object-contain"
-              />
-            ) : (
-              <>
-                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 1</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 2</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 3</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest">Parceiro 4</div>
-              </>
-            )}
-          </div>
-        </section>
-      </AuroraBackground>
+      <SiteHeader aprovadoCM={APROVADO_CM} />
 
       {/* Quem Somos */}
       <section id="quem-somos" className="max-w-4xl mx-auto px-4 py-12 md:py-24 scroll-mt-4">
@@ -84,6 +34,7 @@ export default function Home() {
             deveria ser.
           </p>
         </div>
+        <AboutVideoCarousel />
       </section>
 
       {/* Como Funciona */}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ContactHelpWidget } from "@/components/contact-help-widget";
 import { supabase } from "@/lib/supabase";
+import posthog from "posthog-js";
 import {
   SUBMISSION_EDIT_WINDOW_DAYS,
   canEditSubmission,
@@ -108,6 +109,15 @@ export default function CandidatarPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!loadingExisting) {
+      posthog.capture("candidatura_page_viewed", {
+        has_existing_submission: Boolean(existingSubmission),
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingExisting]);
+
   const update = (field: keyof typeof form, value: string | boolean) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
@@ -131,7 +141,9 @@ export default function CandidatarPage() {
         uploadedCv = await uploadFile(cvFile, "CV");
       }
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Não foi possível enviar o ficheiro.");
+      const errorMessage = uploadError instanceof Error ? uploadError.message : "Não foi possível enviar o ficheiro.";
+      posthog.capture("submission_error", { error: errorMessage, step: "cv_upload" });
+      setError(errorMessage);
       setLoading(false);
       return;
     }
@@ -145,19 +157,26 @@ export default function CandidatarPage() {
       });
     } catch (submitError) {
       console.error("Submission request failed:", submitError);
-      setError(
-        `Não conseguimos contactar o servidor para guardar a candidatura. Confirma a ligação à internet e tenta novamente. Se o problema continuar, contacta ${CONTACT_EMAIL}.`
-      );
+      const errorMessage = `Não conseguimos contactar o servidor para guardar a candidatura. Confirma a ligação à internet e tenta novamente. Se o problema continuar, contacta ${CONTACT_EMAIL}.`;
+      posthog.capture("submission_error", { error: "network_error", step: "submit" });
+      setError(errorMessage);
       setLoading(false);
       return;
     }
 
     if (!response.ok) {
-      setError(await errorFromResponse(response, "Não foi possível submeter a candidatura."));
+      const errorMessage = await errorFromResponse(response, "Não foi possível submeter a candidatura.");
+      posthog.capture("submission_error", { error: errorMessage, step: "submit", status: response.status });
+      setError(errorMessage);
       setLoading(false);
       return;
     }
 
+    posthog.capture("submission_submitted", {
+      is_update: Boolean(existingSubmission),
+      has_cv_upload: Boolean(uploadedCv),
+      has_cv_url: Boolean(form.cvUrl),
+    });
     setSubmittedEmail(form.email);
     setForm(initialForm);
     setCvFile(null);
