@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { InstagramLink } from "@/components/instagram-link";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 
 export const metadata: Metadata = {
   title: "O Que Deve Ser Entregue | Amigos do Chapim",
@@ -152,6 +153,13 @@ export default function OQueDeveSerEntreguePage() {
           </div>
         </div>
       </section>
+
+      <NewsletterSignup
+        title="Ainda não estás pronto para candidatar?"
+        description="Fica na lista para receber apenas novidades importantes: novos concursos, alterações de datas e avisos essenciais. Nada de spam."
+        source="delivery_page_bottom"
+        buttonLabel="Ficar a par"
+      />
 
       {/* Footer */}
       <footer className="border-t border-border py-8 md:py-12">

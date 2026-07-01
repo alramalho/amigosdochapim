@@ -5,6 +5,7 @@ import { AboutVideoCarousel } from "@/components/about-video-carousel";
 import { DonationSection } from "@/components/donation-section";
 import { FAQItem } from "@/components/faq-item";
 import { InstagramLink } from "@/components/instagram-link";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 
 const APROVADO_CM = true;
 
@@ -189,6 +190,12 @@ export default function Home() {
           </FAQItem>
         </div>
       </section>
+
+      <NewsletterSignup
+        title="Acompanha os próximos passos"
+        description="Só usamos esta lista para novidades importantes: novos concursos, alterações de datas e avisos essenciais. Nada de spam."
+        source="homepage_bottom"
+      />
 
       {/* Footer */}
       <footer className="bg-panel text-background py-8 md:py-12">

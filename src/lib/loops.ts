@@ -1,6 +1,7 @@
 import { getAdminEmails } from "@/lib/admin";
 
 const LOOPS_API_URL = "https://app.loops.so/api/v1";
+const NEWSLETTER_LIST_ID = process.env.LOOPS_NEWSLETTER_LIST_ID;
 
 if (!process.env.LOOPS_API_KEY) {
   console.warn("LOOPS_API_KEY is not set - emails will not be sent");
@@ -95,6 +96,12 @@ type ContactHelpEmailParams = {
   pageUrl: string;
   userAgent: string;
   submittedAt: Date;
+};
+
+type NewsletterSignupParams = {
+  email: string;
+  source: string;
+  pagePath?: string;
 };
 
 export async function sendSubmissionConfirmationEmail({
@@ -201,7 +208,52 @@ export async function sendContactHelpAdminEmails({
   return { sent: true, recipients: adminEmails };
 }
 
-// Add contact to Loops for future campaigns
+export function isNewsletterConfigured() {
+  return Boolean(process.env.LOOPS_API_KEY && NEWSLETTER_LIST_ID);
+}
+
+export async function subscribeToNewsletter({
+  email,
+  source,
+  pagePath,
+}: NewsletterSignupParams) {
+  if (!process.env.LOOPS_API_KEY) {
+    throw new Error("LOOPS_API_KEY is not set");
+  }
+
+  if (!NEWSLETTER_LIST_ID) {
+    throw new Error("LOOPS_NEWSLETTER_LIST_ID is not set");
+  }
+
+  const response = await fetch(`${LOOPS_API_URL}/contacts/update`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      subscribed: true,
+      mailingLists: {
+        [NEWSLETTER_LIST_ID]: true,
+      },
+      newsletterSource: source,
+      newsletterSignupPath: pagePath || null,
+      newsletterSignupAt: new Date().toISOString(),
+    }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    console.error("Failed to subscribe contact to newsletter:", data);
+    throw new Error("Failed to subscribe contact to newsletter");
+  }
+
+  return data;
+}
+
+// Add or update contact in Loops for future campaigns
 export async function addContactToLoops({
   email,
   name,
@@ -216,8 +268,8 @@ export async function addContactToLoops({
     return;
   }
 
-  const response = await fetch(`${LOOPS_API_URL}/contacts/create`, {
-    method: "POST",
+  const response = await fetch(`${LOOPS_API_URL}/contacts/update`, {
+    method: "PUT",
     headers: {
       Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
       "Content-Type": "application/json",
@@ -227,17 +279,19 @@ export async function addContactToLoops({
       firstName: name,
       subscribed: true,
       userGroup: tier,
+      ...(NEWSLETTER_LIST_ID
+        ? {
+            mailingLists: {
+              [NEWSLETTER_LIST_ID]: true,
+            },
+          }
+        : {}),
     }),
   });
 
   const data = await response.json();
 
   if (!response.ok) {
-    // "Email is already in your audience" is fine, not an error
-    if (data.message?.includes("already")) {
-      console.log(`Contact ${email} already exists in Loops`);
-      return data;
-    }
     console.error("Failed to add contact to Loops:", data);
   }
 

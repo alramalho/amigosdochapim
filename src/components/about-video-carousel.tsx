@@ -16,8 +16,8 @@ const ABOUT_VIDEOS = [
   {
     id: "cinematografia",
     label: "Gostas de cinematografia?",
-    src: `${MEDIA_BASE}/quem-somos-cinematografia.mp4`,
-    poster: `${MEDIA_BASE}/quem-somos-cinematografia.jpg`,
+    src: `${MEDIA_BASE}/quem-somos-cinematografia-musica.mp4`,
+    poster: `${MEDIA_BASE}/quem-somos-cinematografia-musica.jpg`,
   },
   {
     id: "manifesto",
