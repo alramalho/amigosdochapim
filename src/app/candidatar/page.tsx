@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ContactHelpWidget } from "@/components/contact-help-widget";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { supabase } from "@/lib/supabase";
 import posthog from "posthog-js";
 import {
@@ -296,6 +297,12 @@ export default function CandidatarPage() {
           </button>
         </form>
       </section>
+      <NewsletterSignup
+        title="Ainda não tens tudo pronto?"
+        description="Deixa o teu email e avisamos-te apenas sobre novidades importantes: novos concursos, alterações de datas e avisos essenciais. Nada de spam."
+        source="candidatar_page_bottom"
+        buttonLabel="Avisar-me"
+      />
       <ContactHelpWidget />
     </main>
   );

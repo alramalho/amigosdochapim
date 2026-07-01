@@ -4,7 +4,12 @@ import { getOrCreateCurrentContest } from "@/lib/contest-db";
 import { isWithinWindow } from "@/lib/contest";
 import { getS3Config, parseUploadDescriptor } from "@/lib/s3";
 import { userHasJuryAccess } from "@/lib/auth";
-import { sendSubmissionAdminEmails, sendSubmissionConfirmationEmail } from "@/lib/loops";
+import {
+  isNewsletterConfigured,
+  sendSubmissionAdminEmails,
+  sendSubmissionConfirmationEmail,
+  subscribeToNewsletter,
+} from "@/lib/loops";
 import { SUBMISSION_EDIT_WINDOW_DAYS, canEditSubmission } from "@/lib/submission-editing";
 
 const requiredFields = [
@@ -141,7 +146,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const emailResults = await Promise.allSettled([
+  const notificationTasks: Promise<unknown>[] = [
     sendSubmissionConfirmationEmail({
       submissionId: submission.id,
       candidateName: submission.candidateName,
@@ -164,11 +169,23 @@ export async function POST(request: NextRequest) {
       submittedAt: submission.updatedAt,
       isUpdate: Boolean(existingSubmission),
     }),
-  ]);
+  ];
 
-  emailResults.forEach((result) => {
+  if (isNewsletterConfigured()) {
+    notificationTasks.push(
+      subscribeToNewsletter({
+        email: submission.email,
+        source: existingSubmission ? "candidatura_update" : "candidatura_submission",
+        pagePath: "/candidatar",
+      })
+    );
+  }
+
+  const notificationResults = await Promise.allSettled(notificationTasks);
+
+  notificationResults.forEach((result) => {
     if (result.status === "rejected") {
-      console.error("Failed to send submission email:", result.reason);
+      console.error("Failed to run submission notification:", result.reason);
     }
   });
 
