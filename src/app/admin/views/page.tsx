@@ -25,6 +25,7 @@ export default function AdminViewsPage() {
   const [data, setData] = useState<ViewsData | null>(null);
   const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(true);
+  const [rangeLoading, setRangeLoading] = useState(false);
   const [authorized, setAuthorized] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
@@ -66,8 +67,16 @@ export default function AdminViewsPage() {
   }, [router]);
 
   const changeRange = async (range: number) => {
+    if (range === days || rangeLoading) return;
     setDays(range);
-    if (accessToken) await load(accessToken, range);
+    if (!accessToken) return;
+
+    setRangeLoading(true);
+    try {
+      await load(accessToken, range);
+    } finally {
+      setRangeLoading(false);
+    }
   };
 
   if (loading) {
@@ -121,22 +130,35 @@ export default function AdminViewsPage() {
               <button
                 key={range}
                 onClick={() => changeRange(range)}
+                disabled={rangeLoading}
                 className={`px-3 py-1.5 text-sm rounded-sm border ${
                   days === range
                     ? "border-foreground bg-foreground text-background"
                     : "border-border hover:bg-accent/30"
-                }`}
+                } disabled:cursor-wait`}
               >
                 {range} dias
               </button>
             ))}
           </div>
-          <p className="text-sm text-foreground/60">
-            Total no período: <span className="font-semibold text-foreground">{data?.total ?? 0}</span>
+          <p className="inline-flex items-center gap-2 text-sm text-foreground/60" aria-live="polite">
+            Total no período:
+            {rangeLoading ? (
+              <span
+                className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground"
+                role="status"
+                aria-label="A atualizar total"
+              />
+            ) : (
+              <span className="font-semibold text-foreground">{data?.total ?? 0}</span>
+            )}
           </p>
         </div>
 
-        <div className="border border-border rounded-sm p-5 bg-foreground/5 mb-10">
+        <div
+          className="relative border border-border rounded-sm p-5 bg-foreground/5 mb-10 overflow-hidden"
+          aria-busy={rangeLoading}
+        >
           <h2 className="text-sm uppercase tracking-wide text-foreground/50 mb-4">Por dia</h2>
           <div className="flex items-end gap-[2px] h-48">
             {series.map((point) => (
@@ -152,6 +174,15 @@ export default function AdminViewsPage() {
             <span>{series.length ? format(series[0].date, "dd/MM") : ""}</span>
             <span>{series.length ? format(series[series.length - 1].date, "dd/MM") : ""}</span>
           </div>
+          {rangeLoading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/25">
+              <div
+                className="h-7 w-7 animate-spin rounded-full border-2 border-foreground/25 border-t-foreground"
+                role="status"
+                aria-label="A atualizar gráfico"
+              />
+            </div>
+          )}
         </div>
 
         {data && (

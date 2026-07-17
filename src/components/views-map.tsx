@@ -1,6 +1,6 @@
 "use client";
 
-import { geoMercator, geoNaturalEarth1, geoPath, type ExtendedFeatureCollection } from "d3-geo";
+import { geoArea, geoMercator, geoNaturalEarth1, geoPath, type ExtendedFeatureCollection } from "d3-geo";
 import { useEffect, useMemo, useState } from "react";
 
 type District = { code: string; district: string; count: number };
@@ -8,11 +8,50 @@ type Country = { country: string; count: number };
 type Point = { lat: number; lng: number; country: string | null };
 
 type FeatureCollection = {
-  features: { properties: Record<string, string>; geometry: unknown; type: string }[];
+  type: "FeatureCollection";
+  features: MapFeature[];
 };
 
-const W = 640;
-const H = 560;
+type Position = number[];
+type PolygonCoordinates = Position[][];
+type MapGeometry =
+  | { type: "Polygon"; coordinates: PolygonCoordinates }
+  | { type: "MultiPolygon"; coordinates: PolygonCoordinates[] };
+type MapFeature = {
+  type: "Feature";
+  properties: Record<string, string>;
+  geometry: MapGeometry;
+};
+
+const W = 960;
+const H = 500;
+const MAP_PADDING = 20;
+
+// D3's spherical polygon convention is the inverse of standard GeoJSON's
+// right-hand rule. Reverse only polygons that D3 currently reads as the
+// complement of the intended region (an area larger than a hemisphere).
+function normalizePolygonWinding(collection: FeatureCollection): FeatureCollection {
+  const normalizePolygon = (coordinates: PolygonCoordinates): PolygonCoordinates => {
+    const polygon = { type: "Polygon" as const, coordinates };
+    return geoArea(polygon as GeoJSON.Polygon) > 2 * Math.PI
+      ? coordinates.map((ring) => [...ring].reverse())
+      : coordinates;
+  };
+
+  return {
+    ...collection,
+    features: collection.features.map((feature) => ({
+      ...feature,
+      geometry:
+        feature.geometry.type === "Polygon"
+          ? { ...feature.geometry, coordinates: normalizePolygon(feature.geometry.coordinates) }
+          : {
+              ...feature.geometry,
+              coordinates: feature.geometry.coordinates.map(normalizePolygon),
+            },
+    })),
+  };
+}
 
 export function ViewsMap({
   byDistrict,
@@ -29,8 +68,14 @@ export function ViewsMap({
   const [tooltip, setTooltip] = useState<{ x: number; y: number; label: string } | null>(null);
 
   useEffect(() => {
-    fetch("/maps/pt-districts.json").then((r) => r.json()).then(setPt).catch(() => {});
-    fetch("/maps/world-countries.json").then((r) => r.json()).then(setWorld).catch(() => {});
+    fetch("/maps/pt-districts.json")
+      .then((r) => r.json())
+      .then((data: FeatureCollection) => setPt(normalizePolygonWinding(data)))
+      .catch((error) => console.error("Failed to load Portugal map", error));
+    fetch("/maps/world-countries.json")
+      .then((r) => r.json())
+      .then((data: FeatureCollection) => setWorld(normalizePolygonWinding(data)))
+      .catch((error) => console.error("Failed to load world map", error));
   }, []);
 
   const districtByCode = useMemo(() => new Map(byDistrict.map((d) => [d.code, d])), [byDistrict]);
@@ -41,7 +86,13 @@ export function ViewsMap({
   const projection = useMemo(() => {
     if (!geo) return null;
     const p = mode === "pt" ? geoMercator() : geoNaturalEarth1();
-    p.fitSize([W, H], geo as unknown as ExtendedFeatureCollection);
+    p.fitExtent(
+      [
+        [MAP_PADDING, MAP_PADDING],
+        [W - MAP_PADDING, H - MAP_PADDING],
+      ],
+      geo as unknown as ExtendedFeatureCollection
+    );
     return p;
   }, [geo, mode]);
 
