@@ -90,7 +90,7 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
       <div className="flex flex-row justify-between items-start gap-4 md:gap-8 w-full overflow-hidden">
         {/* Left side: Title + Money info */}
         <div className="text-left min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">Próximo concurso:</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">Concurso de Curtas 2026:</h1>
           {isFunded ? (
             <div className="mb-4 md:mb-6">
               <h1 className="text-4xl sm:text-5xl md:text-5xl text-foreground/70 font-bold">
