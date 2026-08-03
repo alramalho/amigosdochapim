@@ -18,6 +18,7 @@ type EmailDraft = {
   previewText: string | null;
   body: string;
   audienceSegments: EmailAudienceSegment[];
+  recipientEmail: string | null;
   createdByEmail: string;
   createdAt: string;
   updatedAt: string;
@@ -32,7 +33,11 @@ type FormState = {
   previewText: string;
   body: string;
   audienceSegments: EmailAudienceSegment[];
+  recipientEmail: string;
 };
+
+type Person = { email: string; name: string | null };
+type RecipientMode = "segments" | "single";
 
 const EMPTY_FORM: FormState = {
   id: null,
@@ -41,6 +46,7 @@ const EMPTY_FORM: FormState = {
   previewText: "",
   body: "",
   audienceSegments: [],
+  recipientEmail: "",
 };
 
 export default function AdminCommunicationsPage() {
@@ -48,6 +54,8 @@ export default function AdminCommunicationsPage() {
   const [drafts, setDrafts] = useState<EmailDraft[]>([]);
   const [audiences, setAudiences] = useState<AudienceStats | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [people, setPeople] = useState<Person[]>([]);
+  const [recipientMode, setRecipientMode] = useState<RecipientMode>("segments");
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(true);
@@ -93,15 +101,18 @@ export default function AdminCommunicationsPage() {
 
       setDrafts(data.drafts || []);
       setAudiences(data.audiences || null);
+      setPeople(data.people || []);
       setLoading(false);
     }
 
     load();
   }, [router]);
 
-  const selectedAudienceLabel = useMemo(
-    () => form.audienceSegments.map((segment) => EMAIL_AUDIENCE_META[segment].label).join(", "),
-    [form.audienceSegments]
+  const selectedRecipientLabel = useMemo(
+    () =>
+      form.recipientEmail ||
+      form.audienceSegments.map((segment) => EMAIL_AUDIENCE_META[segment].label).join(", "),
+    [form.audienceSegments, form.recipientEmail]
   );
 
   const selectDraft = (draft: EmailDraft) => {
@@ -112,13 +123,16 @@ export default function AdminCommunicationsPage() {
       previewText: draft.previewText || "",
       body: draft.body,
       audienceSegments: draft.audienceSegments,
+      recipientEmail: draft.recipientEmail || "",
     });
+    setRecipientMode(draft.recipientEmail ? "single" : "segments");
     setFeedback(null);
     setCopyFeedback(null);
   };
 
   const newDraft = () => {
     setForm(EMPTY_FORM);
+    setRecipientMode("segments");
     setFeedback(null);
     setCopyFeedback(null);
   };
@@ -129,6 +143,15 @@ export default function AdminCommunicationsPage() {
       audienceSegments: current.audienceSegments.includes(segment)
         ? current.audienceSegments.filter((value) => value !== segment)
         : [...current.audienceSegments, segment],
+    }));
+  };
+
+  const changeRecipientMode = (mode: RecipientMode) => {
+    setRecipientMode(mode);
+    setForm((current) => ({
+      ...current,
+      audienceSegments: mode === "single" ? [] : current.audienceSegments,
+      recipientEmail: mode === "segments" ? "" : current.recipientEmail,
     }));
   };
 
@@ -171,7 +194,7 @@ export default function AdminCommunicationsPage() {
 
   const copyDraft = async () => {
     const content = [
-      `Público: ${selectedAudienceLabel || "Por definir"}`,
+      `Para: ${selectedRecipientLabel || "Por definir"}`,
       `Assunto: ${form.subject || "Por definir"}`,
       form.previewText ? `Pré-visualização: ${form.previewText}` : "",
       "",
@@ -226,7 +249,7 @@ export default function AdminCommunicationsPage() {
           </p>
         </div>
 
-        <div className="mb-8 rounded-sm border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+        <div className="mb-8 rounded-sm border border-amber-300/70 bg-white/30 p-4 text-sm text-amber-950 shadow-sm">
           <strong>Modo rascunho:</strong> não existe qualquer ação de envio nesta página. Depois da revisão,
           copia o conteúdo para o Loops e confirma aí o público antes de enviar.
         </div>
@@ -249,7 +272,7 @@ export default function AdminCommunicationsPage() {
                 <FilePlus2 className="h-4 w-4" /> Novo
               </button>
             </div>
-            <div className="overflow-hidden rounded-sm border border-border bg-background">
+            <div className="overflow-hidden rounded-sm border border-border/80 bg-white/30 shadow-sm">
               {drafts.length === 0 ? (
                 <p className="p-4 text-sm text-foreground/60">Ainda não existem rascunhos.</p>
               ) : (
@@ -274,9 +297,92 @@ export default function AdminCommunicationsPage() {
           </aside>
 
           <form onSubmit={saveDraft} className="space-y-6">
-            <section className="rounded-sm border border-border p-5 md:p-6">
+            <section className="rounded-sm border border-border/80 bg-white/30 p-5 shadow-sm md:p-6">
+              <h2 className="text-xl font-semibold">Destinatários</h2>
+              <div className="mb-5 mt-4 inline-flex rounded-sm border border-border bg-white/30 p-1">
+                <button
+                  type="button"
+                  onClick={() => changeRecipientMode("segments")}
+                  className={`rounded-sm px-3 py-2 text-sm transition-colors ${
+                    recipientMode === "segments" ? "bg-foreground text-background" : "hover:bg-white/50"
+                  }`}
+                >
+                  Públicos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changeRecipientMode("single")}
+                  className={`rounded-sm px-3 py-2 text-sm transition-colors ${
+                    recipientMode === "single" ? "bg-foreground text-background" : "hover:bg-white/50"
+                  }`}
+                >
+                  Uma pessoa
+                </button>
+              </div>
+
+              {recipientMode === "single" ? (
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium">Pessoa ou email</span>
+                  <input
+                    type="email"
+                    list="known-email-recipients"
+                    value={form.recipientEmail}
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, recipientEmail: event.target.value }))
+                    }
+                    required
+                    placeholder="nome@email.com"
+                    className="w-full rounded-sm border border-border bg-white/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <datalist id="known-email-recipients">
+                    {people.map((person) => (
+                      <option key={person.email} value={person.email}>
+                        {person.name || person.email}
+                      </option>
+                    ))}
+                  </datalist>
+                  <span className="mt-2 block text-xs text-foreground/55">
+                    Escolhe uma pessoa conhecida ou escreve qualquer email válido.
+                  </span>
+                </label>
+              ) : (
+                <>
+                  <p className="mb-4 text-sm text-foreground/60">
+                    Podes selecionar mais do que um. A mesma pessoa pode pertencer a vários públicos.
+                  </p>
+                  <div className="space-y-3">
+                    {EMAIL_AUDIENCE_SEGMENTS.map((segment) => {
+                      const stats = audiences?.[segment];
+                      return (
+                        <label key={segment} className="flex cursor-pointer gap-3 rounded-sm border border-border/80 bg-white/25 p-4 hover:bg-white/45">
+                          <input
+                            type="checkbox"
+                            checked={form.audienceSegments.includes(segment)}
+                            onChange={() => toggleAudience(segment)}
+                            className="mt-1 h-4 w-4 accent-primary"
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-center justify-between gap-2 font-medium">
+                              {EMAIL_AUDIENCE_META[segment].label}
+                              <span className="text-xs font-normal text-foreground/50">
+                                {stats?.count === null ? "Contagem no Loops" : `${stats?.count ?? 0} contactos`}
+                              </span>
+                            </span>
+                            <span className="mt-1 block text-sm text-foreground/60">
+                              {EMAIL_AUDIENCE_META[segment].description}
+                            </span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </section>
+
+            <section className="rounded-sm border border-border/80 bg-white/30 p-5 shadow-sm md:p-6">
               <h2 className="mb-5 text-xl font-semibold">Conteúdo do rascunho</h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Field
                   label="Nome interno"
                   value={form.name}
@@ -305,43 +411,10 @@ export default function AdminCommunicationsPage() {
                     rows={14}
                     maxLength={50_000}
                     required
-                    className="w-full rounded-sm border border-border bg-background px-3 py-2 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-sm border border-border bg-white/40 px-3 py-2 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/20"
                     placeholder="Escreve aqui a mensagem..."
                   />
                 </label>
-              </div>
-            </section>
-
-            <section className="rounded-sm border border-border p-5 md:p-6">
-              <h2 className="text-xl font-semibold">Públicos</h2>
-              <p className="mb-4 mt-1 text-sm text-foreground/60">
-                Podes selecionar mais do que um. A mesma pessoa pode pertencer a vários públicos.
-              </p>
-              <div className="space-y-3">
-                {EMAIL_AUDIENCE_SEGMENTS.map((segment) => {
-                  const stats = audiences?.[segment];
-                  return (
-                    <label key={segment} className="flex cursor-pointer gap-3 rounded-sm border border-border p-4 hover:bg-accent/20">
-                      <input
-                        type="checkbox"
-                        checked={form.audienceSegments.includes(segment)}
-                        onChange={() => toggleAudience(segment)}
-                        className="mt-1 h-4 w-4 accent-primary"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="flex flex-wrap items-center justify-between gap-2 font-medium">
-                          {EMAIL_AUDIENCE_META[segment].label}
-                          <span className="text-xs font-normal text-foreground/50">
-                            {stats?.count === null ? "Contagem no Loops" : `${stats?.count ?? 0} contactos`}
-                          </span>
-                        </span>
-                        <span className="mt-1 block text-sm text-foreground/60">
-                          {EMAIL_AUDIENCE_META[segment].description}
-                        </span>
-                      </span>
-                    </label>
-                  );
-                })}
               </div>
             </section>
 
@@ -366,9 +439,9 @@ export default function AdminCommunicationsPage() {
           </form>
 
           <aside className="lg:sticky lg:top-6 lg:self-start">
-            <div className="rounded-sm border border-border bg-accent/20 p-5 md:p-6">
+            <div className="rounded-sm border border-border/80 bg-white/30 p-5 shadow-sm md:p-6">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground/50">Pré-visualização</p>
-              <p className="text-xs text-foreground/50">Para: {selectedAudienceLabel || "Público por definir"}</p>
+              <p className="text-xs text-foreground/50">Para: {selectedRecipientLabel || "Destinatário por definir"}</p>
               <h2 className="mt-4 text-xl font-semibold">{form.subject || "Assunto do email"}</h2>
               {form.previewText && <p className="mt-2 text-sm italic text-foreground/55">{form.previewText}</p>}
               <div className="mt-6 whitespace-pre-wrap border-t border-border pt-5 text-sm leading-relaxed text-foreground/80">
@@ -406,7 +479,7 @@ function Field({
         placeholder={placeholder}
         maxLength={maxLength}
         required={required}
-        className="w-full rounded-sm border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+        className="w-full rounded-sm border border-border bg-white/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
       />
     </label>
   );

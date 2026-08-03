@@ -234,6 +234,7 @@ model EmailDraft {
   previewText      String?  @map("preview_text")
   body             String
   audienceSegments String[] @map("audience_segments")
+  recipientEmail   String?  @map("recipient_email")
   createdByEmail   String   @map("created_by_email")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
