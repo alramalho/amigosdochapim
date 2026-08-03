@@ -10,6 +10,8 @@ import type { EmailAudienceSegment } from "@/lib/email-audiences";
 const SES_REGION = process.env.SES_REGION || "eu-west-1";
 const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL || "geral@amigosdochapim.org";
 const SES_REPLY_TO_EMAIL = process.env.SES_REPLY_TO_EMAIL || SES_FROM_EMAIL;
+const SES_ARCHIVE_BCC_EMAIL =
+  process.env.SES_ARCHIVE_BCC_EMAIL || "geral@amigosdochapim.org";
 const SES_CONTACT_LIST_NAME = process.env.SES_CONTACT_LIST_NAME || "amigos-do-chapim";
 const SES_CONFIGURATION_SET_NAME =
   process.env.SES_CONFIGURATION_SET_NAME || "amigos-do-chapim";
@@ -98,6 +100,7 @@ export function getSesDeliveryConfig() {
     provider: "Amazon SES",
     region: SES_REGION,
     fromEmail: SES_FROM_EMAIL,
+    archiveEmail: SES_ARCHIVE_BCC_EMAIL,
   };
 }
 
@@ -154,6 +157,48 @@ export async function sendSesEmail({
   );
 
   if (!result.MessageId) throw new Error("O SES não devolveu um identificador da mensagem.");
+  return result.MessageId;
+}
+
+export async function sendSesArchiveCopy({
+  sendId,
+  subject,
+  previewText,
+  body,
+}: {
+  sendId: string;
+  subject: string;
+  previewText: string | null;
+  body: string;
+}) {
+  if (!isSesConfigured()) {
+    throw new Error("Amazon SES não está configurado.");
+  }
+
+  const content = renderEmail({ previewText, body, managedSubscription: false });
+  const result = await getSesClient().send(
+    new SendEmailCommand({
+      FromEmailAddress: `Amigos do Chapim <${SES_FROM_EMAIL}>`,
+      ReplyToAddresses: [SES_REPLY_TO_EMAIL],
+      Destination: { BccAddresses: [SES_ARCHIVE_BCC_EMAIL] },
+      Content: {
+        Simple: {
+          Subject: { Data: subject, Charset: "UTF-8" },
+          Body: {
+            Text: { Data: content.text, Charset: "UTF-8" },
+            Html: { Data: content.html, Charset: "UTF-8" },
+          },
+        },
+      },
+      ConfigurationSetName: SES_CONFIGURATION_SET_NAME,
+      EmailTags: [
+        { Name: "email_send_id", Value: sendId },
+        { Name: "audience", Value: "ARCHIVE" },
+      ],
+    })
+  );
+
+  if (!result.MessageId) throw new Error("O SES não devolveu um identificador da cópia de arquivo.");
   return result.MessageId;
 }
 

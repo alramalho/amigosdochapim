@@ -4,13 +4,100 @@ import { getCurrentUserEmail, isAdminEmail } from "@/lib/auth";
 import type { EmailAudienceSegment } from "@/lib/email-audiences";
 import { refreshEmailSendCounts } from "@/lib/email-sends";
 import { prisma } from "@/lib/prisma";
-import { emailDeliveryError, sendSesEmail } from "@/lib/ses";
+import { emailDeliveryError, sendSesArchiveCopy, sendSesEmail } from "@/lib/ses";
 
 const BATCH_SIZE = 5;
 const STALE_CLAIM_MS = 5 * 60 * 1_000;
 const MANAGED_TOPICS = new Set(["NEWSLETTER", "PAYING_MEMBERS", "CONTEST_APPLICANTS"]);
 
 export const maxDuration = 60;
+
+async function processArchiveCopy(
+  sendId: string,
+  retryFailed: boolean,
+  staleBefore: Date
+) {
+  await prisma.emailSend.updateMany({
+    where: {
+      id: sendId,
+      archiveStatus: "SENDING",
+      archiveClaimedAt: { lt: staleBefore },
+    },
+    data: {
+      archiveStatus: "QUEUED",
+      archiveClaimToken: null,
+      archiveClaimedAt: null,
+    },
+  });
+
+  if (retryFailed) {
+    await prisma.emailSend.updateMany({
+      where: {
+        id: sendId,
+        archiveStatus: { in: ["FAILED", "BOUNCED", "COMPLAINED"] },
+      },
+      data: {
+        archiveStatus: "QUEUED",
+        archiveMessageId: null,
+        archiveClaimToken: null,
+        archiveClaimedAt: null,
+        archiveError: null,
+        archivedAt: null,
+      },
+    });
+  }
+
+  const claimToken = randomUUID();
+  const claimed = await prisma.emailSend.updateMany({
+    where: { id: sendId, archiveStatus: "QUEUED" },
+    data: {
+      archiveStatus: "SENDING",
+      archiveClaimToken: claimToken,
+      archiveClaimedAt: new Date(),
+      archiveError: null,
+    },
+  });
+
+  if (claimed.count === 1) {
+    const send = await prisma.emailSend.findUnique({ where: { id: sendId } });
+
+    if (send) {
+      try {
+        const archiveMessageId = await sendSesArchiveCopy({
+          sendId,
+          subject: send.subject,
+          previewText: send.previewText,
+          body: send.body,
+        });
+
+        await prisma.emailSend.updateMany({
+          where: { id: sendId, archiveClaimToken: claimToken },
+          data: {
+            archiveStatus: "ACCEPTED",
+            archiveMessageId,
+            archiveClaimToken: null,
+            archiveClaimedAt: null,
+            archiveError: null,
+            archivedAt: new Date(),
+          },
+        });
+      } catch (error) {
+        console.error(`SES archive copy failed for ${sendId}:`, error);
+        await prisma.emailSend.updateMany({
+          where: { id: sendId, archiveClaimToken: claimToken },
+          data: {
+            archiveStatus: "FAILED",
+            archiveClaimToken: null,
+            archiveClaimedAt: null,
+            archiveError: emailDeliveryError(error),
+          },
+        });
+      }
+    }
+  }
+
+  return prisma.emailSend.findUnique({ where: { id: sendId } });
+}
 
 export async function POST(
   request: NextRequest,
@@ -51,10 +138,13 @@ export async function POST(
   });
 
   if (queued.length === 0) {
-    const updated = await refreshEmailSendCounts(sendId);
+    let updated = await refreshEmailSendCounts(sendId);
     const remaining = await prisma.emailDelivery.count({
       where: { sendId, status: { in: ["QUEUED", "SENDING"] } },
     });
+    if (remaining === 0) {
+      updated = await processArchiveCopy(sendId, retryFailed, staleBefore);
+    }
     return NextResponse.json({ send: updated, remaining, processed: 0 });
   }
 
@@ -118,10 +208,13 @@ export async function POST(
     })
   );
 
-  const updated = await refreshEmailSendCounts(sendId);
+  let updated = await refreshEmailSendCounts(sendId);
   const remaining = await prisma.emailDelivery.count({
     where: { sendId, status: { in: ["QUEUED", "SENDING"] } },
   });
+  if (remaining === 0) {
+    updated = await processArchiveCopy(sendId, retryFailed, staleBefore);
+  }
 
   return NextResponse.json({ send: updated, remaining, processed: claimed.length });
 }

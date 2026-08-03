@@ -165,7 +165,41 @@ async function processSesEvent(event: SesEvent) {
     where: { providerMessageId },
     select: { id: true, sendId: true, email: true },
   });
-  if (!delivery) return;
+
+  if (!delivery) {
+    const archiveSend = await prisma.emailSend.findUnique({
+      where: { archiveMessageId: providerMessageId },
+      select: { id: true },
+    });
+    if (!archiveSend) return;
+
+    if (type === "Delivery") {
+      await prisma.emailSend.update({
+        where: { id: archiveSend.id },
+        data: {
+          archiveStatus: "DELIVERED",
+          archivedAt: eventDate(event.delivery?.timestamp),
+          archiveError: null,
+        },
+      });
+    } else if (type === "Bounce" || type === "Complaint") {
+      await prisma.emailSend.update({
+        where: { id: archiveSend.id },
+        data: {
+          archiveStatus: type === "Bounce" ? "BOUNCED" : "COMPLAINED",
+          archivedAt: null,
+          archiveError: eventFailure(event),
+        },
+      });
+    } else if (type === "Reject" || type === "Rendering Failure") {
+      await prisma.emailSend.update({
+        where: { id: archiveSend.id },
+        data: { archiveStatus: "FAILED", archiveError: eventFailure(event) },
+      });
+    }
+
+    return;
+  }
 
   if (type === "Delivery") {
     await prisma.emailDelivery.update({

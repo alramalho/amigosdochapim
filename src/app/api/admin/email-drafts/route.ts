@@ -106,6 +106,8 @@ export async function GET(request: NextRequest) {
         acceptedCount: true,
         deliveredCount: true,
         failedCount: true,
+        archiveStatus: true,
+        archiveError: true,
         createdByEmail: true,
         createdAt: true,
         completedAt: true,

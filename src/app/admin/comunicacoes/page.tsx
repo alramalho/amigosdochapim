@@ -40,6 +40,8 @@ type EmailSendSummary = {
   acceptedCount: number;
   deliveredCount: number;
   failedCount: number;
+  archiveStatus: EmailDeliveryStatus;
+  archiveError: string | null;
   createdByEmail: string;
   createdAt: string;
   completedAt: string | null;
@@ -81,6 +83,7 @@ type DeliveryConfig = {
   provider: string;
   region: string;
   fromEmail: string;
+  archiveEmail: string;
 };
 
 type SendPreview = {
@@ -101,6 +104,7 @@ type SendProgress = {
   recipientCount: number;
   acceptedCount: number;
   failedCount: number;
+  archiveStatus: EmailDeliveryStatus;
   remaining: number;
 };
 
@@ -389,16 +393,26 @@ export default function AdminCommunicationsPage() {
         recipientCount: updated.recipientCount,
         acceptedCount: updated.acceptedCount,
         failedCount: updated.failedCount,
+        archiveStatus: updated.archiveStatus,
         remaining: data.remaining,
       });
 
       if (data.remaining === 0) {
         await loadData(accessToken);
         setSending(false);
+        const archiveFeedback =
+          updated.archiveStatus === "DELIVERED"
+            ? ` Cópia arquivada em ${delivery?.archiveEmail || "geral@amigosdochapim.org"}.`
+            : updated.archiveStatus === "ACCEPTED"
+              ? " Cópia de arquivo aceite pelo SES."
+              : updated.archiveStatus === "FAILED"
+                ? " A cópia de arquivo falhou e pode ser repetida nos envios recentes."
+                : " A cópia de arquivo está a ser processada.";
         setFeedback(
-          updated.failedCount > 0
+          (updated.failedCount > 0
             ? `Envio concluído com ${updated.acceptedCount} aceites e ${updated.failedCount} falhas.`
-            : `Email enviado para ${updated.acceptedCount} destinatário${updated.acceptedCount === 1 ? "" : "s"}.`
+            : `Email enviado para ${updated.acceptedCount} destinatário${updated.acceptedCount === 1 ? "" : "s"}.`) +
+            archiveFeedback
         );
         return;
       }
@@ -611,6 +625,7 @@ export default function AdminCommunicationsPage() {
                         </span>
                       </div>
                       <p className="mt-1 text-xs text-foreground/55">{send.acceptedCount}/{send.recipientCount} aceites{send.failedCount ? ` · ${send.failedCount} falhas` : ""}</p>
+                      <p className="mt-1 text-xs text-foreground/55">Arquivo: {DELIVERY_STATUS_LABELS[send.archiveStatus].toLowerCase()}</p>
                       <button
                         type="button"
                         disabled={loadingSendDetail}
@@ -619,14 +634,17 @@ export default function AdminCommunicationsPage() {
                       >
                         Ver detalhe
                       </button>
-                      {(send.status === "SENDING" || send.status === "FAILED" || send.status === "PARTIALLY_SENT") && (
+                      {(send.status === "SENDING" ||
+                        send.status === "FAILED" ||
+                        send.status === "PARTIALLY_SENT" ||
+                        ["QUEUED", "SENDING", "FAILED", "BOUNCED", "COMPLAINED"].includes(send.archiveStatus)) && (
                         <button
                           type="button"
                           disabled={sending}
-                          onClick={() => processSend(send.id, send.status !== "SENDING")}
+                          onClick={() => processSend(send.id, send.status !== "SENDING" || ["FAILED", "BOUNCED", "COMPLAINED"].includes(send.archiveStatus))}
                           className="ml-3 mt-2 inline-flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
                         >
-                          <RefreshCw className="h-3 w-3" /> {send.status === "SENDING" ? "Retomar" : "Repetir falhas"}
+                          <RefreshCw className="h-3 w-3" /> {send.status === "SENDING" || ["QUEUED", "SENDING"].includes(send.archiveStatus) ? "Retomar" : "Repetir falhas"}
                         </button>
                       )}
                     </div>
@@ -780,6 +798,7 @@ export default function AdminCommunicationsPage() {
               <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">De</dt><dd>{sendPreview.delivery.fromEmail}</dd></div>
               <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">Assunto</dt><dd>{sendPreview.subject}</dd></div>
               <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">Público</dt><dd>{sendPreview.recipientEmail || sendPreview.audienceSegments.map((segment) => EMAIL_AUDIENCE_META[segment].label).join(", ")}</dd></div>
+              <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">Arquivo</dt><dd>Cópia oculta para {sendPreview.delivery.archiveEmail}</dd></div>
             </dl>
 
             <div className="mt-5">
@@ -817,13 +836,19 @@ export default function AdminCommunicationsPage() {
               <button type="button" onClick={() => setSendDetail(null)} aria-label="Fechar" className="p-1 text-foreground/55 hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 border-b border-border bg-white/25 px-6 py-4 text-sm">
+            <div className="grid grid-cols-2 gap-3 border-b border-border bg-white/25 px-6 py-4 text-sm sm:grid-cols-4">
               <div><span className="block text-xs text-foreground/50">Destinatários</span>{sendDetail.recipientCount}</div>
               <div><span className="block text-xs text-foreground/50">Aceites</span>{sendDetail.acceptedCount}</div>
               <div><span className="block text-xs text-foreground/50">Entregues</span>{sendDetail.deliveredCount}</div>
+              <div><span className="block text-xs text-foreground/50">Arquivo</span>{DELIVERY_STATUS_LABELS[sendDetail.archiveStatus]}</div>
             </div>
 
             <div className="max-h-[58vh] overflow-auto p-6">
+              {sendDetail.archiveError && (
+                <p className="mb-4 rounded-sm border border-red-800/20 bg-red-50/50 px-4 py-3 text-xs text-red-800">
+                  Arquivo: {sendDetail.archiveError}
+                </p>
+              )}
               <div className="space-y-2">
                 {sendDetail.deliveries.map((recipient) => (
                   <div key={recipient.id} className="rounded-sm border border-border/80 bg-white/30 px-4 py-3 text-sm">
