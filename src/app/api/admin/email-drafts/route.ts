@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminEmails } from "@/lib/admin";
 import { getCurrentUserEmail, isAdminEmail } from "@/lib/auth";
 import { parseEmailAudienceSegments } from "@/lib/email-audiences";
-import { isNewsletterConfigured } from "@/lib/loops";
+import { getEmailAudienceData } from "@/lib/email-recipients";
 import { prisma } from "@/lib/prisma";
+import { getSesDeliveryConfig } from "@/lib/ses";
 
 const MAX_NAME_LENGTH = 120;
 const MAX_SUBJECT_LENGTH = 200;
@@ -87,56 +87,38 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const now = new Date();
-  const [drafts, payingMembers, applicants, users] = await Promise.all([
-    prisma.emailDraft.findMany({ orderBy: { updatedAt: "desc" } }),
-    prisma.subscription.findMany({
-      where: { status: "ACTIVE", currentPeriodEnd: { gt: now } },
-      select: { user: { select: { email: true } } },
+  const [drafts, audienceData, sends] = await Promise.all([
+    prisma.emailDraft.findMany({
+      orderBy: { updatedAt: "desc" },
+      include: { emailSend: true },
     }),
-    prisma.submission.findMany({
-      where: { status: { not: "DRAFT" } },
-      select: { email: true, candidateName: true },
-      distinct: ["email"],
-    }),
-    prisma.user.findMany({
-      select: { email: true, name: true },
-      orderBy: { name: "asc" },
+    getEmailAudienceData(),
+    prisma.emailSend.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      select: {
+        id: true,
+        draftId: true,
+        name: true,
+        subject: true,
+        status: true,
+        recipientCount: true,
+        acceptedCount: true,
+        deliveredCount: true,
+        failedCount: true,
+        createdByEmail: true,
+        createdAt: true,
+        completedAt: true,
+      },
     }),
   ]);
 
-  const people = new Map<string, { email: string; name: string | null }>();
-
-  for (const user of users) {
-    people.set(user.email.toLowerCase(), { email: user.email.toLowerCase(), name: user.name });
-  }
-
-  for (const applicant of applicants) {
-    const email = applicant.email.toLowerCase();
-    const existing = people.get(email);
-    people.set(email, { email, name: existing?.name || applicant.candidateName });
-  }
-
-  for (const email of getAdminEmails(process.env.ADMIN_EMAILS)) {
-    if (!people.has(email)) people.set(email, { email, name: null });
-  }
-
   return NextResponse.json({
     drafts,
-    audiences: {
-      NEWSLETTER: { count: null, external: true },
-      PAYING_MEMBERS: { count: new Set(payingMembers.map(({ user }) => user.email.toLowerCase())).size },
-      ADMINS: { count: getAdminEmails(process.env.ADMIN_EMAILS).length },
-      CONTEST_APPLICANTS: { count: new Set(applicants.map(({ email }) => email.toLowerCase())).size },
-    },
-    people: Array.from(people.values()).sort((a, b) =>
-      (a.name || a.email).localeCompare(b.name || b.email, "pt")
-    ),
-    delivery: {
-      mode: "draft-only",
-      provider: "Loops",
-      newsletterConfigured: isNewsletterConfigured(),
-    },
+    sends,
+    audiences: audienceData.audiences,
+    people: audienceData.people,
+    delivery: getSesDeliveryConfig(),
   });
 }
 
@@ -180,10 +162,20 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
 
-  const existing = await prisma.emailDraft.findUnique({ where: { id }, select: { id: true } });
+  const existing = await prisma.emailDraft.findUnique({
+    where: { id },
+    select: { id: true, sentAt: true },
+  });
 
   if (!existing) {
     return NextResponse.json({ error: "Rascunho não encontrado." }, { status: 404 });
+  }
+
+  if (existing.sentAt) {
+    return NextResponse.json(
+      { error: "Este email já foi enviado e ficou bloqueado como histórico." },
+      { status: 409 }
+    );
   }
 
   const draft = await prisma.emailDraft.update({ where: { id }, data: validated.data });

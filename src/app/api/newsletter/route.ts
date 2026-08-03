@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isNewsletterConfigured, subscribeToNewsletter } from "@/lib/loops";
+import { prisma } from "@/lib/prisma";
+import { syncNewsletterContact } from "@/lib/ses";
 
 const MAX_SOURCE_LENGTH = 80;
 const MAX_PAGE_PATH_LENGTH = 300;
@@ -32,15 +34,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Introduz um email válido." }, { status: 400 });
   }
 
-  if (!isNewsletterConfigured()) {
-    return NextResponse.json(
-      { error: "A newsletter ainda não está configurada." },
-      { status: 503 },
-    );
-  }
-
   try {
-    await subscribeToNewsletter({ email, source, pagePath });
+    const subscribedAt = new Date();
+    await prisma.newsletterSubscriber.upsert({
+      where: { email },
+      update: { source, pagePath: pagePath || null, subscribedAt, unsubscribedAt: null },
+      create: { email, source, pagePath: pagePath || null, subscribedAt },
+    });
+
+    const externalSyncs = [
+      syncNewsletterContact({ email, source }),
+      ...(isNewsletterConfigured()
+        ? [subscribeToNewsletter({ email, source, pagePath })]
+        : []),
+    ];
+    const results = await Promise.allSettled(externalSyncs);
+
+    for (const result of results) {
+      if (result.status === "rejected") {
+        console.error("Newsletter external sync failed:", result.reason);
+      }
+    }
   } catch (error) {
     console.error("Newsletter signup failed:", error);
     return NextResponse.json(

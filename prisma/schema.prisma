@@ -50,6 +50,24 @@ enum SubmissionFilePurpose {
   FINAL_MATERIAL
 }
 
+enum EmailSendStatus {
+  QUEUED
+  SENDING
+  SENT
+  PARTIALLY_SENT
+  FAILED
+}
+
+enum EmailDeliveryStatus {
+  QUEUED
+  SENDING
+  ACCEPTED
+  DELIVERED
+  BOUNCED
+  COMPLAINED
+  FAILED
+}
+
 model User {
   id               String   @id @default(cuid())
   email            String   @unique
@@ -228,19 +246,91 @@ model PageView {
 }
 
 model EmailDraft {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   name             String
   subject          String
-  previewText      String?  @map("preview_text")
+  previewText      String?   @map("preview_text")
   body             String
-  audienceSegments String[] @map("audience_segments")
-  recipientEmail   String?  @map("recipient_email")
-  createdByEmail   String   @map("created_by_email")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  audienceSegments String[]  @map("audience_segments")
+  recipientEmail   String?   @map("recipient_email")
+  createdByEmail   String    @map("created_by_email")
+  sentByEmail      String?   @map("sent_by_email")
+  sentAt           DateTime? @map("sent_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  emailSend EmailSend?
 
   @@index([updatedAt])
   @@map("email_drafts")
+}
+
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  source         String
+  pagePath       String?   @map("page_path")
+  subscribedAt   DateTime  @default(now()) @map("subscribed_at")
+  unsubscribedAt DateTime? @map("unsubscribed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([unsubscribedAt])
+  @@map("newsletter_subscribers")
+}
+
+model EmailSend {
+  id               String          @id @default(cuid())
+  draftId          String          @unique @map("draft_id")
+  name             String
+  subject          String
+  previewText      String?         @map("preview_text")
+  body             String
+  audienceSegments String[]        @map("audience_segments")
+  recipientEmail   String?         @map("recipient_email")
+  fromEmail        String          @map("from_email")
+  status           EmailSendStatus @default(QUEUED)
+  recipientCount   Int             @map("recipient_count")
+  acceptedCount    Int             @default(0) @map("accepted_count")
+  deliveredCount   Int             @default(0) @map("delivered_count")
+  failedCount      Int             @default(0) @map("failed_count")
+  createdByEmail   String          @map("created_by_email")
+  startedAt        DateTime?       @map("started_at")
+  completedAt      DateTime?       @map("completed_at")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  draft      EmailDraft      @relation(fields: [draftId], references: [id])
+  deliveries EmailDelivery[]
+
+  @@index([createdAt])
+  @@index([status])
+  @@map("email_sends")
+}
+
+model EmailDelivery {
+  id                String              @id @default(cuid())
+  sendId            String              @map("send_id")
+  email             String
+  name              String?
+  audienceSegments  String[]            @map("audience_segments")
+  topicName         String?             @map("topic_name")
+  status            EmailDeliveryStatus @default(QUEUED)
+  providerMessageId String?             @unique @map("provider_message_id")
+  claimToken        String?             @map("claim_token")
+  error             String?
+  attempts          Int                 @default(0)
+  acceptedAt        DateTime?           @map("accepted_at")
+  deliveredAt       DateTime?           @map("delivered_at")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  send EmailSend @relation(fields: [sendId], references: [id], onDelete: Cascade)
+
+  @@unique([sendId, email])
+  @@index([sendId, status])
+  @@map("email_deliveries")
 }
 
 model JuryRanking {

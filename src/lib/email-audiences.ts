@@ -13,7 +13,7 @@ export const EMAIL_AUDIENCE_META: Record<
 > = {
   NEWSLETTER: {
     label: "Newsletter",
-    description: "Pessoas inscritas na lista de novidades gerida no Loops.",
+    description: "Pessoas inscritas para receber novidades e oportunidades futuras.",
   },
   PAYING_MEMBERS: {
     label: "Membros pagantes",
