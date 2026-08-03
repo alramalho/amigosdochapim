@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
           body: draft.body,
           audienceSegments: draft.audienceSegments,
           recipientEmail: draft.recipientEmail,
+          recipientSelections: draft.recipientSelections,
           fromEmail: delivery.fromEmail,
           recipientCount: recipients.length,
           createdByEmail: adminEmail,

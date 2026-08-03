@@ -246,18 +246,19 @@ model PageView {
 }
 
 model EmailDraft {
-  id               String    @id @default(cuid())
-  name             String
-  subject          String
-  previewText      String?   @map("preview_text")
-  body             String
-  audienceSegments String[]  @map("audience_segments")
-  recipientEmail   String?   @map("recipient_email")
-  createdByEmail   String    @map("created_by_email")
-  sentByEmail      String?   @map("sent_by_email")
-  sentAt           DateTime? @map("sent_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  id                  String    @id @default(cuid())
+  name                String
+  subject             String
+  previewText         String?   @map("preview_text")
+  body                String
+  audienceSegments    String[]  @map("audience_segments")
+  recipientEmail      String?   @map("recipient_email")
+  recipientSelections String[]  @default([]) @map("recipient_selections")
+  createdByEmail      String    @map("created_by_email")
+  sentByEmail         String?   @map("sent_by_email")
+  sentAt              DateTime? @map("sent_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   emailSend EmailSend?
 
@@ -281,31 +282,32 @@ model NewsletterSubscriber {
 }
 
 model EmailSend {
-  id                String              @id @default(cuid())
-  draftId           String              @unique @map("draft_id")
-  name              String
-  subject           String
-  previewText       String?             @map("preview_text")
-  body              String
-  audienceSegments  String[]            @map("audience_segments")
-  recipientEmail    String?             @map("recipient_email")
-  fromEmail         String              @map("from_email")
-  status            EmailSendStatus     @default(QUEUED)
-  recipientCount    Int                 @map("recipient_count")
-  acceptedCount     Int                 @default(0) @map("accepted_count")
-  deliveredCount    Int                 @default(0) @map("delivered_count")
-  failedCount       Int                 @default(0) @map("failed_count")
-  archiveStatus     EmailDeliveryStatus @default(QUEUED) @map("archive_status")
-  archiveMessageId  String?             @unique @map("archive_message_id")
-  archiveClaimToken String?             @map("archive_claim_token")
-  archiveClaimedAt  DateTime?           @map("archive_claimed_at")
-  archiveError      String?             @map("archive_error")
-  archivedAt        DateTime?           @map("archived_at")
-  createdByEmail    String              @map("created_by_email")
-  startedAt         DateTime?           @map("started_at")
-  completedAt       DateTime?           @map("completed_at")
-  createdAt         DateTime            @default(now()) @map("created_at")
-  updatedAt         DateTime            @updatedAt @map("updated_at")
+  id                  String              @id @default(cuid())
+  draftId             String              @unique @map("draft_id")
+  name                String
+  subject             String
+  previewText         String?             @map("preview_text")
+  body                String
+  audienceSegments    String[]            @map("audience_segments")
+  recipientEmail      String?             @map("recipient_email")
+  recipientSelections String[]            @default([]) @map("recipient_selections")
+  fromEmail           String              @map("from_email")
+  status              EmailSendStatus     @default(QUEUED)
+  recipientCount      Int                 @map("recipient_count")
+  acceptedCount       Int                 @default(0) @map("accepted_count")
+  deliveredCount      Int                 @default(0) @map("delivered_count")
+  failedCount         Int                 @default(0) @map("failed_count")
+  archiveStatus       EmailDeliveryStatus @default(QUEUED) @map("archive_status")
+  archiveMessageId    String?             @unique @map("archive_message_id")
+  archiveClaimToken   String?             @map("archive_claim_token")
+  archiveClaimedAt    DateTime?           @map("archive_claimed_at")
+  archiveError        String?             @map("archive_error")
+  archivedAt          DateTime?           @map("archived_at")
+  createdByEmail      String              @map("created_by_email")
+  startedAt           DateTime?           @map("started_at")
+  completedAt         DateTime?           @map("completed_at")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
 
   draft      EmailDraft      @relation(fields: [draftId], references: [id])
   deliveries EmailDelivery[]

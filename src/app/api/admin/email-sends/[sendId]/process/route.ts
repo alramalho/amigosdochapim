@@ -66,7 +66,6 @@ async function processArchiveCopy(
         const archiveMessageId = await sendSesArchiveCopy({
           sendId,
           subject: send.subject,
-          previewText: send.previewText,
           body: send.body,
         });
 
@@ -175,7 +174,6 @@ export async function POST(
         const providerMessageId = await sendSesEmail({
           sendId,
           subject: send.subject,
-          previewText: send.previewText,
           body: send.body,
           email: delivery.email,
           topicName,

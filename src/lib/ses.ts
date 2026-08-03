@@ -33,61 +33,18 @@ function getSesClient() {
   return client;
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function messageHtml(body: string) {
-  return escapeHtml(body)
-    .split(/\n{2,}/)
-    .map(
-      (paragraph) =>
-        `<p style="margin:0 0 18px;line-height:1.65">${paragraph.replaceAll("\n", "<br>")}</p>`
-    )
-    .join("");
-}
-
 function renderEmail({
-  previewText,
   body,
   managedSubscription,
 }: {
-  previewText: string | null;
   body: string;
   managedSubscription: boolean;
 }) {
   const unsubscribeText = managedSubscription
-    ? "\n\nPreferências: {{amazonSESUnsubscribeUrl}}"
-    : "";
-  const unsubscribeHtml = managedSubscription
-    ? '<p style="margin:18px 0 0;font-size:12px;color:#71695d"><a href="{{amazonSESUnsubscribeUrl}}" style="color:#71695d">Gerir preferências ou cancelar estas comunicações</a></p>'
-    : "";
-  const preheader = previewText
-    ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${escapeHtml(previewText)}</div>`
+    ? "\n\nGerir preferências ou cancelar: {{amazonSESUnsubscribeUrl}}"
     : "";
 
-  return {
-    text: `${body}\n\n—\nAmigos do Chapim\nhttps://amigosdochapim.org${unsubscribeText}`,
-    html: `<!doctype html>
-<html lang="pt">
-  <body style="margin:0;background:#f6f1e8;color:#2c281f;font-family:Georgia,Times New Roman,serif">
-    ${preheader}
-    <div style="max-width:640px;margin:0 auto;padding:36px 22px">
-      <p style="margin:0 0 30px;color:#9d1820;font-family:Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Amigos do Chapim</p>
-      <div style="font-size:17px">${messageHtml(body)}</div>
-      <div style="margin-top:36px;padding-top:22px;border-top:1px solid #d7cdbc;font-family:Arial,sans-serif;font-size:13px;color:#71695d">
-        <p style="margin:0">Amigos do Chapim · <a href="https://amigosdochapim.org" style="color:#9d1820">amigosdochapim.org</a></p>
-        ${unsubscribeHtml}
-      </div>
-    </div>
-  </body>
-</html>`,
-  };
+  return `${body}${unsubscribeText}`;
 }
 
 export function isSesConfigured() {
@@ -107,7 +64,6 @@ export function getSesDeliveryConfig() {
 export async function sendSesEmail({
   sendId,
   subject,
-  previewText,
   body,
   email,
   topicName,
@@ -115,7 +71,6 @@ export async function sendSesEmail({
 }: {
   sendId: string;
   subject: string;
-  previewText: string | null;
   body: string;
   email: string;
   topicName: Exclude<EmailAudienceSegment, "ADMINS"> | null;
@@ -125,7 +80,7 @@ export async function sendSesEmail({
     throw new Error("Amazon SES não está configurado.");
   }
 
-  const content = renderEmail({ previewText, body, managedSubscription: Boolean(topicName) });
+  const content = renderEmail({ body, managedSubscription: Boolean(topicName) });
   const result = await getSesClient().send(
     new SendEmailCommand({
       FromEmailAddress: `Amigos do Chapim <${SES_FROM_EMAIL}>`,
@@ -135,8 +90,7 @@ export async function sendSesEmail({
         Simple: {
           Subject: { Data: subject, Charset: "UTF-8" },
           Body: {
-            Text: { Data: content.text, Charset: "UTF-8" },
-            Html: { Data: content.html, Charset: "UTF-8" },
+            Text: { Data: content, Charset: "UTF-8" },
           },
         },
       },
@@ -163,19 +117,17 @@ export async function sendSesEmail({
 export async function sendSesArchiveCopy({
   sendId,
   subject,
-  previewText,
   body,
 }: {
   sendId: string;
   subject: string;
-  previewText: string | null;
   body: string;
 }) {
   if (!isSesConfigured()) {
     throw new Error("Amazon SES não está configurado.");
   }
 
-  const content = renderEmail({ previewText, body, managedSubscription: false });
+  const content = renderEmail({ body, managedSubscription: false });
   const result = await getSesClient().send(
     new SendEmailCommand({
       FromEmailAddress: `Amigos do Chapim <${SES_FROM_EMAIL}>`,
@@ -185,8 +137,7 @@ export async function sendSesArchiveCopy({
         Simple: {
           Subject: { Data: subject, Charset: "UTF-8" },
           Body: {
-            Text: { Data: content.text, Charset: "UTF-8" },
-            Html: { Data: content.html, Charset: "UTF-8" },
+            Text: { Data: content, Charset: "UTF-8" },
           },
         },
       },

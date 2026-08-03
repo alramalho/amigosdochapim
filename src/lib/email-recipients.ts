@@ -16,7 +16,14 @@ export type ResolvedEmailRecipient = {
 
 export type SendableEmailDraft = Pick<
   EmailDraft,
-  "id" | "name" | "subject" | "previewText" | "body" | "audienceSegments" | "recipientEmail"
+  | "id"
+  | "name"
+  | "subject"
+  | "previewText"
+  | "body"
+  | "audienceSegments"
+  | "recipientEmail"
+  | "recipientSelections"
 >;
 
 const TOPIC_PRIORITY: Exclude<EmailAudienceSegment, "ADMINS">[] = [
@@ -49,6 +56,29 @@ function addRecipient(
 }
 
 export async function resolveEmailRecipients(draft: SendableEmailDraft) {
+  if (draft.recipientSelections.length) {
+    const { audienceMembers } = await getEmailAudienceData();
+    const recipients = new Map<string, Omit<ResolvedEmailRecipient, "topicName">>();
+
+    for (const selection of draft.recipientSelections) {
+      const separator = selection.indexOf("|");
+      const segment = selection.slice(0, separator) as EmailAudienceSegment;
+      const email = canonicalEmail(selection.slice(separator + 1));
+      if (separator < 1 || !EMAIL_AUDIENCE_SEGMENTS.includes(segment)) continue;
+
+      const person = audienceMembers[segment].find((member) => member.email === email);
+      if (person) addRecipient(recipients, person.email, person.name, segment);
+    }
+
+    return Array.from(recipients.values())
+      .map((recipient): ResolvedEmailRecipient => ({
+        ...recipient,
+        topicName:
+          TOPIC_PRIORITY.find((segment) => recipient.segments.includes(segment)) || null,
+      }))
+      .sort((a, b) => a.email.localeCompare(b.email));
+  }
+
   if (draft.recipientEmail) {
     const email = canonicalEmail(draft.recipientEmail);
     const [user, submission, subscriber] = await Promise.all([
@@ -146,6 +176,7 @@ export function emailSendFingerprint(
       body: draft.body,
       audienceSegments: [...draft.audienceSegments].sort(),
       recipientEmail: draft.recipientEmail,
+      recipientSelections: [...draft.recipientSelections].sort(),
     },
     recipients: recipients.map(({ email, segments, topicName }) => ({
       email,
@@ -200,17 +231,47 @@ export async function getEmailAudienceData() {
   for (const applicant of applicants) addPerson(applicant.email, applicant.candidateName);
   for (const email of getAdminEmails(process.env.ADMIN_EMAILS)) addPerson(email, null);
 
+  const uniquePeople = (
+    values: Array<{ email: string; name: string | null }>
+  ) => {
+    const result = new Map<string, { email: string; name: string | null }>();
+    for (const value of values) {
+      const email = canonicalEmail(value.email);
+      const existing = result.get(email);
+      result.set(email, { email, name: existing?.name || value.name });
+    }
+    return Array.from(result.values()).sort((a, b) =>
+      (a.name || a.email).localeCompare(b.name || b.email, "pt")
+    );
+  };
+
+  const audienceMembers = {
+    NEWSLETTER: uniquePeople(newsletter),
+    PAYING_MEMBERS: uniquePeople(
+      payingMembers.map(({ user }) => ({ email: user.email, name: user.name }))
+    ),
+    ADMINS: uniquePeople(
+      getAdminEmails(process.env.ADMIN_EMAILS).map((email) => ({
+        email,
+        name: people.get(canonicalEmail(email))?.name || null,
+      }))
+    ),
+    CONTEST_APPLICANTS: uniquePeople(
+      applicants.map(({ email, candidateName }) => ({ email, name: candidateName }))
+    ),
+  } satisfies Record<
+    EmailAudienceSegment,
+    Array<{ email: string; name: string | null }>
+  >;
+
   return {
     audiences: {
-      NEWSLETTER: { count: new Set(newsletter.map(({ email }) => canonicalEmail(email))).size },
-      PAYING_MEMBERS: {
-        count: new Set(payingMembers.map(({ user }) => canonicalEmail(user.email))).size,
-      },
-      ADMINS: { count: getAdminEmails(process.env.ADMIN_EMAILS).length },
-      CONTEST_APPLICANTS: {
-        count: new Set(applicants.map(({ email }) => canonicalEmail(email))).size,
-      },
+      NEWSLETTER: { count: audienceMembers.NEWSLETTER.length },
+      PAYING_MEMBERS: { count: audienceMembers.PAYING_MEMBERS.length },
+      ADMINS: { count: audienceMembers.ADMINS.length },
+      CONTEST_APPLICANTS: { count: audienceMembers.CONTEST_APPLICANTS.length },
     },
+    audienceMembers,
     people: Array.from(people.values()).sort((a, b) =>
       (a.name || a.email).localeCompare(b.name || b.email, "pt")
     ),

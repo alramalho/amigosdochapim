@@ -3,6 +3,8 @@
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   Copy,
   FilePlus2,
   RefreshCw,
@@ -55,6 +57,7 @@ type EmailDraft = {
   body: string;
   audienceSegments: EmailAudienceSegment[];
   recipientEmail: string | null;
+  recipientSelections: string[];
   createdByEmail: string;
   sentByEmail: string | null;
   sentAt: string | null;
@@ -71,12 +74,11 @@ type FormState = {
   subject: string;
   previewText: string;
   body: string;
-  audienceSegments: EmailAudienceSegment[];
-  recipientEmail: string;
+  recipientSelections: string[];
 };
 
 type Person = { email: string; name: string | null };
-type RecipientMode = "segments" | "single";
+type AudienceMembers = Record<EmailAudienceSegment, Person[]>;
 
 type DeliveryConfig = {
   configured: boolean;
@@ -94,6 +96,7 @@ type SendPreview = {
   sample: Array<{ email: string; name: string | null; segments: EmailAudienceSegment[] }>;
   subject: string;
   recipientEmail: string | null;
+  recipientSelections: string[];
   audienceSegments: EmailAudienceSegment[];
   delivery: DeliveryConfig;
 };
@@ -128,8 +131,14 @@ const EMPTY_FORM: FormState = {
   subject: "",
   previewText: "",
   body: "",
-  audienceSegments: [],
-  recipientEmail: "",
+  recipientSelections: [],
+};
+
+const EMPTY_AUDIENCE_MEMBERS: AudienceMembers = {
+  NEWSLETTER: [],
+  PAYING_MEMBERS: [],
+  ADMINS: [],
+  CONTEST_APPLICANTS: [],
 };
 
 const STATUS_LABELS: Record<EmailSendStatus, string> = {
@@ -154,6 +163,10 @@ function delay(milliseconds: number) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
+function recipientSelectionKey(segment: EmailAudienceSegment, email: string) {
+  return `${segment}|${email.toLowerCase()}`;
+}
+
 export default function AdminCommunicationsPage() {
   const router = useRouter();
   const [drafts, setDrafts] = useState<EmailDraft[]>([]);
@@ -161,8 +174,12 @@ export default function AdminCommunicationsPage() {
   const [audiences, setAudiences] = useState<AudienceStats | null>(null);
   const [delivery, setDelivery] = useState<DeliveryConfig | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [people, setPeople] = useState<Person[]>([]);
-  const [recipientMode, setRecipientMode] = useState<RecipientMode>("segments");
+  const [audienceMembers, setAudienceMembers] = useState<AudienceMembers>(
+    EMPTY_AUDIENCE_MEMBERS
+  );
+  const [expandedSegments, setExpandedSegments] = useState<EmailAudienceSegment[]>([
+    "NEWSLETTER",
+  ]);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(true);
@@ -203,7 +220,7 @@ export default function AdminCommunicationsPage() {
     setDrafts(data.drafts || []);
     setSends(data.sends || []);
     setAudiences(data.audiences || null);
-    setPeople(data.people || []);
+    setAudienceMembers(data.audienceMembers || EMPTY_AUDIENCE_MEMBERS);
     setDelivery(data.delivery || null);
     return true;
   }
@@ -227,27 +244,77 @@ export default function AdminCommunicationsPage() {
     load();
   }, [router]);
 
-  const selectedRecipientLabel = useMemo(
+  const peopleByEmail = useMemo(() => {
+    const people = new Map<string, Person>();
+    for (const segment of EMAIL_AUDIENCE_SEGMENTS) {
+      for (const person of audienceMembers[segment]) {
+        const existing = people.get(person.email);
+        people.set(person.email, {
+          email: person.email,
+          name: existing?.name || person.name,
+        });
+      }
+    }
+    return people;
+  }, [audienceMembers]);
+
+  const selectedRecipientEmails = useMemo(
     () =>
-      form.recipientEmail ||
-      form.audienceSegments.map((segment) => EMAIL_AUDIENCE_META[segment].label).join(", "),
-    [form.audienceSegments, form.recipientEmail]
+      Array.from(
+        new Set(
+          form.recipientSelections.map((selection) =>
+            selection.slice(selection.indexOf("|") + 1)
+          )
+        )
+      ),
+    [form.recipientSelections]
+  );
+
+  const selectedRecipientLabel = useMemo(() => {
+    if (selectedRecipientEmails.length === 0) return "";
+    if (selectedRecipientEmails.length > 1) return `${selectedRecipientEmails.length} pessoas`;
+    const email = selectedRecipientEmails[0];
+    const person = peopleByEmail.get(email);
+    return person?.name ? `${person.name} · ${email}` : email;
+  }, [peopleByEmail, selectedRecipientEmails]);
+
+  const selectedIncludesManagedAudience = useMemo(
+    () =>
+      form.recipientSelections.some(
+        (selection) => !selection.startsWith("ADMINS|")
+      ),
+    [form.recipientSelections]
   );
 
   const currentDraft = form.id ? drafts.find((draft) => draft.id === form.id) : null;
   const currentDraftSent = Boolean(currentDraft?.sentAt);
 
   const selectDraft = (draft: EmailDraft) => {
+    const legacySelections = draft.recipientEmail
+      ? EMAIL_AUDIENCE_SEGMENTS.flatMap((segment) =>
+          audienceMembers[segment]
+            .filter((person) => person.email === draft.recipientEmail?.toLowerCase())
+            .map((person) => recipientSelectionKey(segment, person.email))
+        )
+      : draft.audienceSegments.flatMap((segment) =>
+          audienceMembers[segment].map((person) =>
+            recipientSelectionKey(segment, person.email)
+          )
+        );
     setForm({
       id: draft.id,
       name: draft.name,
       subject: draft.subject,
       previewText: draft.previewText || "",
       body: draft.body,
-      audienceSegments: draft.audienceSegments,
-      recipientEmail: draft.recipientEmail || "",
+      recipientSelections: Array.from(
+        new Set(
+          draft.recipientSelections.length
+            ? draft.recipientSelections
+            : legacySelections
+        )
+      ),
     });
-    setRecipientMode(draft.recipientEmail ? "single" : "segments");
     setFeedback(null);
     setCopyFeedback(null);
     setSendPreview(null);
@@ -255,28 +322,43 @@ export default function AdminCommunicationsPage() {
 
   const newDraft = () => {
     setForm(EMPTY_FORM);
-    setRecipientMode("segments");
     setFeedback(null);
     setCopyFeedback(null);
     setSendPreview(null);
   };
 
-  const toggleAudience = (segment: EmailAudienceSegment) => {
+  const toggleRecipient = (segment: EmailAudienceSegment, email: string) => {
+    const selection = recipientSelectionKey(segment, email);
     setForm((current) => ({
       ...current,
-      audienceSegments: current.audienceSegments.includes(segment)
-        ? current.audienceSegments.filter((value) => value !== segment)
-        : [...current.audienceSegments, segment],
+      recipientSelections: current.recipientSelections.includes(selection)
+        ? current.recipientSelections.filter((value) => value !== selection)
+        : [...current.recipientSelections, selection],
     }));
   };
 
-  const changeRecipientMode = (mode: RecipientMode) => {
-    setRecipientMode(mode);
+  const toggleCategory = (segment: EmailAudienceSegment) => {
+    const selections = audienceMembers[segment].map((person) =>
+      recipientSelectionKey(segment, person.email)
+    );
     setForm((current) => ({
       ...current,
-      audienceSegments: mode === "single" ? [] : current.audienceSegments,
-      recipientEmail: mode === "segments" ? "" : current.recipientEmail,
+      recipientSelections: selections.every((selection) =>
+        current.recipientSelections.includes(selection)
+      )
+        ? current.recipientSelections.filter(
+            (selection) => !selections.includes(selection)
+          )
+        : Array.from(new Set([...current.recipientSelections, ...selections])),
     }));
+  };
+
+  const toggleCategoryExpanded = (segment: EmailAudienceSegment) => {
+    setExpandedSegments((current) =>
+      current.includes(segment)
+        ? current.filter((value) => value !== segment)
+        : [...current, segment]
+    );
   };
 
   async function persistDraft() {
@@ -487,11 +569,10 @@ export default function AdminCommunicationsPage() {
     const content = [
       `Para: ${selectedRecipientLabel || "Por definir"}`,
       `Assunto: ${form.subject || "Por definir"}`,
-      form.previewText ? `Pré-visualização: ${form.previewText}` : "",
       "",
       form.body,
     ]
-      .filter((line, index) => line || index >= 3)
+      .filter((line, index) => line || index >= 2)
       .join("\n");
 
     try {
@@ -662,73 +743,96 @@ export default function AdminCommunicationsPage() {
             )}
 
             <section className="rounded-sm border border-border/80 bg-white/30 p-5 shadow-sm md:p-6">
-              <h2 className="text-xl font-semibold">Destinatários</h2>
-              <div className="mb-5 mt-4 inline-flex rounded-sm border border-border bg-white/30 p-1">
-                <button
-                  type="button"
-                  disabled={currentDraftSent}
-                  onClick={() => changeRecipientMode("segments")}
-                  className={`rounded-sm px-3 py-2 text-sm transition-colors disabled:opacity-50 ${
-                    recipientMode === "segments" ? "bg-foreground text-background" : "hover:bg-white/50"
-                  }`}
-                >
-                  Públicos
-                </button>
-                <button
-                  type="button"
-                  disabled={currentDraftSent}
-                  onClick={() => changeRecipientMode("single")}
-                  className={`rounded-sm px-3 py-2 text-sm transition-colors disabled:opacity-50 ${
-                    recipientMode === "single" ? "bg-foreground text-background" : "hover:bg-white/50"
-                  }`}
-                >
-                  Uma pessoa
-                </button>
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-semibold">Destinatários</h2>
+                  <p className="mt-1 text-sm text-foreground/60">
+                    Abre uma categoria e escolhe todos ou apenas algumas pessoas.
+                  </p>
+                </div>
+                <span className="text-sm font-medium text-primary">
+                  {selectedRecipientEmails.length} selecionado{selectedRecipientEmails.length === 1 ? "" : "s"}
+                </span>
               </div>
 
-              {recipientMode === "single" ? (
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium">Pessoa ou email</span>
-                  <input
-                    type="email"
-                    list="known-email-recipients"
-                    value={form.recipientEmail}
-                    onChange={(event) => setForm((current) => ({ ...current, recipientEmail: event.target.value }))}
-                    required
-                    disabled={currentDraftSent}
-                    placeholder="nome@email.com"
-                    className="w-full rounded-sm border border-border bg-white/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
-                  />
-                  <datalist id="known-email-recipients">
-                    {people.map((person) => <option key={person.email} value={person.email}>{person.name || person.email}</option>)}
-                  </datalist>
-                  <span className="mt-2 block text-xs text-foreground/55">Escolhe uma pessoa conhecida ou escreve qualquer email válido.</span>
-                </label>
-              ) : (
-                <div className="space-y-3">
-                  {EMAIL_AUDIENCE_SEGMENTS.map((segment) => {
-                    const stats = audiences?.[segment];
-                    return (
-                      <label key={segment} className="flex cursor-pointer gap-3 rounded-sm border border-border/80 bg-white/25 p-4 hover:bg-white/45">
+              <div className="mt-5 space-y-3">
+                {EMAIL_AUDIENCE_SEGMENTS.map((segment) => {
+                  const members = audienceMembers[segment];
+                  const selectedCount = members.filter((person) =>
+                    form.recipientSelections.includes(
+                      recipientSelectionKey(segment, person.email)
+                    )
+                  ).length;
+                  const allSelected = members.length > 0 && selectedCount === members.length;
+                  const expanded = expandedSegments.includes(segment);
+
+                  return (
+                    <div
+                      key={segment}
+                      className="overflow-hidden rounded-sm border border-border/80 bg-white/25"
+                    >
+                      <div className="flex items-center gap-3 px-4 py-3">
                         <input
                           type="checkbox"
-                          checked={form.audienceSegments.includes(segment)}
-                          onChange={() => toggleAudience(segment)}
-                          disabled={currentDraftSent}
-                          className="mt-1 h-4 w-4 accent-primary"
+                          checked={allSelected}
+                          onChange={() => toggleCategory(segment)}
+                          disabled={currentDraftSent || members.length === 0}
+                          aria-label={`Selecionar todos: ${EMAIL_AUDIENCE_META[segment].label}`}
+                          className="h-4 w-4 shrink-0 accent-primary disabled:opacity-50"
                         />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex flex-wrap items-center justify-between gap-2 font-medium">
-                            {EMAIL_AUDIENCE_META[segment].label}
-                            <span className="text-xs font-normal text-foreground/50">{stats?.count ?? 0} contactos</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleCategoryExpanded(segment)}
+                          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                          aria-expanded={expanded}
+                        >
+                          {expanded ? (
+                            <ChevronDown className="h-4 w-4 shrink-0 text-foreground/45" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 shrink-0 text-foreground/45" />
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-center justify-between gap-2 font-medium">
+                              {EMAIL_AUDIENCE_META[segment].label}
+                              <span className="text-xs font-normal text-foreground/50">
+                                {selectedCount}/{audiences?.[segment]?.count ?? members.length}
+                              </span>
+                            </span>
+                            <span className="mt-0.5 block text-xs text-foreground/55">
+                              {EMAIL_AUDIENCE_META[segment].description}
+                            </span>
                           </span>
-                          <span className="mt-1 block text-sm text-foreground/60">{EMAIL_AUDIENCE_META[segment].description}</span>
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
+                        </button>
+                      </div>
+
+                      {expanded && (
+                        <div className="max-h-64 overflow-auto border-t border-border/70 bg-white/20 px-3 py-2">
+                          {members.map((person) => (
+                            <label
+                              key={person.email}
+                              className="flex cursor-pointer items-start gap-3 rounded-sm px-2 py-2.5 hover:bg-white/45"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={form.recipientSelections.includes(
+                                  recipientSelectionKey(segment, person.email)
+                                )}
+                                onChange={() => toggleRecipient(segment, person.email)}
+                                disabled={currentDraftSent}
+                                className="mt-0.5 h-4 w-4 shrink-0 accent-primary disabled:opacity-50"
+                              />
+                              <span className="min-w-0 text-sm">
+                                {person.name && <span className="block font-medium">{person.name}</span>}
+                                <span className="block break-all text-foreground/55">{person.email}</span>
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </section>
 
             <section className="rounded-sm border border-border/80 bg-white/30 p-5 shadow-sm md:p-6">
@@ -736,7 +840,6 @@ export default function AdminCommunicationsPage() {
               <div className="space-y-3">
                 <Field label="Nome interno" value={form.name} onChange={(name) => setForm((current) => ({ ...current, name }))} placeholder="Ex.: Resultado da primeira fase" maxLength={120} disabled={currentDraftSent} />
                 <Field label="Assunto" value={form.subject} onChange={(subject) => setForm((current) => ({ ...current, subject }))} maxLength={200} disabled={currentDraftSent} />
-                <Field label="Texto de pré-visualização (opcional)" value={form.previewText} onChange={(previewText) => setForm((current) => ({ ...current, previewText }))} maxLength={300} required={false} disabled={currentDraftSent} />
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium">Mensagem</span>
                   <textarea
@@ -773,9 +876,8 @@ export default function AdminCommunicationsPage() {
               <p className="text-xs text-foreground/50">De: {delivery?.fromEmail || "Por configurar"}</p>
               <p className="mt-1 text-xs text-foreground/50">Para: {selectedRecipientLabel || "Destinatário por definir"}</p>
               <h2 className="mt-4 text-xl font-semibold">{form.subject || "Assunto do email"}</h2>
-              {form.previewText && <p className="mt-2 text-sm italic text-foreground/55">{form.previewText}</p>}
               <div className="mt-6 whitespace-pre-wrap border-t border-border pt-5 text-sm leading-relaxed text-foreground/80">{form.body || "A mensagem aparece aqui enquanto escreves."}</div>
-              {recipientMode === "segments" && form.audienceSegments.some((segment) => segment !== "ADMINS") && (
+              {selectedIncludesManagedAudience && (
                 <p className="mt-6 border-t border-border pt-4 text-xs text-foreground/45">O email incluirá gestão de preferências e cancelamento de subscrição.</p>
               )}
             </div>
@@ -797,7 +899,7 @@ export default function AdminCommunicationsPage() {
             <dl className="mt-6 space-y-3 rounded-sm border border-border bg-white/35 p-4 text-sm">
               <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">De</dt><dd>{sendPreview.delivery.fromEmail}</dd></div>
               <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">Assunto</dt><dd>{sendPreview.subject}</dd></div>
-              <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">Público</dt><dd>{sendPreview.recipientEmail || sendPreview.audienceSegments.map((segment) => EMAIL_AUDIENCE_META[segment].label).join(", ")}</dd></div>
+              <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">Para</dt><dd>{sendPreview.count} pessoa{sendPreview.count === 1 ? "" : "s"} selecionada{sendPreview.count === 1 ? "" : "s"}</dd></div>
               <div className="grid grid-cols-[80px_1fr] gap-3"><dt className="text-foreground/55">Arquivo</dt><dd>Cópia oculta para {sendPreview.delivery.archiveEmail}</dd></div>
             </dl>
 

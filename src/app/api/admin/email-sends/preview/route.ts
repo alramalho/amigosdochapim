@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
       })),
       subject: draft.subject,
       recipientEmail: draft.recipientEmail,
+      recipientSelections: draft.recipientSelections,
       audienceSegments: draft.audienceSegments,
       delivery: getSesDeliveryConfig(),
     },

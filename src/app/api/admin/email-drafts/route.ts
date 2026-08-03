@@ -10,6 +10,7 @@ const MAX_SUBJECT_LENGTH = 200;
 const MAX_PREVIEW_LENGTH = 300;
 const MAX_BODY_LENGTH = 50_000;
 const MAX_EMAIL_LENGTH = 320;
+const MAX_RECIPIENTS = 5_000;
 
 async function requireAdminEmail(request: NextRequest) {
   const email = await getCurrentUserEmail(request);
@@ -20,6 +21,23 @@ function text(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function parseRecipientSelections(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return Array.from(
+    new Set(
+      value
+        .map((selection) => text(selection))
+        .filter(Boolean)
+        .map((selection) => {
+          const separator = selection.indexOf("|");
+          return `${selection.slice(0, separator)}|${selection
+            .slice(separator + 1)
+            .toLowerCase()}`;
+        })
+    )
+  );
+}
+
 function validateDraft(value: unknown) {
   const body = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   const name = text(body.name);
@@ -28,13 +46,19 @@ function validateDraft(value: unknown) {
   const messageBody = text(body.body);
   const audienceSegments = parseEmailAudienceSegments(body.audienceSegments);
   const recipientEmail = text(body.recipientEmail).toLowerCase();
+  const recipientSelections = parseRecipientSelections(body.recipientSelections);
 
-  if (!name || !subject || !messageBody || (audienceSegments.length === 0 && !recipientEmail)) {
+  if (
+    !name ||
+    !subject ||
+    !messageBody ||
+    (audienceSegments.length === 0 && !recipientEmail && recipientSelections.length === 0)
+  ) {
     return { error: "Preenche o nome, assunto, mensagem e destinatário." } as const;
   }
 
-  if (audienceSegments.length > 0 && recipientEmail) {
-    return { error: "Escolhe públicos ou uma única pessoa, não ambos." } as const;
+  if (recipientSelections.length > 0 && (audienceSegments.length > 0 || recipientEmail)) {
+    return { error: "Usa apenas a nova seleção de destinatários." } as const;
   }
 
   if (
@@ -42,6 +66,23 @@ function validateDraft(value: unknown) {
     (recipientEmail.length > MAX_EMAIL_LENGTH || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail))
   ) {
     return { error: "Introduz um email válido para o destinatário." } as const;
+  }
+
+  if (
+    recipientSelections.length > MAX_RECIPIENTS ||
+    recipientSelections.some((selection) => {
+      const separator = selection.indexOf("|");
+      const segment = selection.slice(0, separator);
+      const email = selection.slice(separator + 1).toLowerCase();
+      return (
+        separator < 1 ||
+        !parseEmailAudienceSegments([segment]).length ||
+        email.length > MAX_EMAIL_LENGTH ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      );
+    })
+  ) {
+    return { error: "A seleção contém destinatários inválidos." } as const;
   }
 
   if (name.length > MAX_NAME_LENGTH) {
@@ -68,6 +109,7 @@ function validateDraft(value: unknown) {
       body: messageBody,
       audienceSegments,
       recipientEmail: recipientEmail || null,
+      recipientSelections,
     },
   } as const;
 }
@@ -120,6 +162,7 @@ export async function GET(request: NextRequest) {
     sends,
     audiences: audienceData.audiences,
     people: audienceData.people,
+    audienceMembers: audienceData.audienceMembers,
     delivery: getSesDeliveryConfig(),
   });
 }
