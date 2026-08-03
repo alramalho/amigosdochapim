@@ -2,13 +2,21 @@ import { prisma } from "@/lib/prisma";
 import { CONTEST_SLUG, CONTEST_WINDOWS } from "@/lib/contest";
 
 export async function getOrCreateCurrentContest() {
+  const now = new Date();
+  const initialStatus =
+    now > CONTEST_WINDOWS.applicationsCloseAt
+      ? "INITIAL_REVIEW"
+      : now >= CONTEST_WINDOWS.applicationsOpenAt
+        ? "APPLICATIONS_OPEN"
+        : "DRAFT";
+
   return prisma.contest.upsert({
     where: { slug: CONTEST_SLUG },
     update: CONTEST_WINDOWS,
     create: {
       title: "Concurso de Curtas-metragens dos Amigos do Chapim - 2026",
       slug: CONTEST_SLUG,
-      status: "APPLICATIONS_OPEN",
+      status: initialStatus,
       ...CONTEST_WINDOWS,
     },
   });

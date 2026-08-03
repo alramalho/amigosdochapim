@@ -1,18 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { AuthNavLink } from "@/components/auth-nav-link";
+import { ContestHeroActions } from "@/components/contest-hero-actions";
 import { TornEdge } from "@/components/torn-edge";
-import { CONTEST_WINDOWS } from "@/lib/contest";
-
-// UTC, not Europe/Lisbon: applicationsCloseAt is 23:59:59Z, which is already
-// past midnight in Lisbon - localizing would show "31 julho" and contradict
-// the "30 julho 2026" copy on /o-que-deve-ser-entregue.
-const CANDIDATURAS_FECHAM = CONTEST_WINDOWS.applicationsCloseAt.toLocaleDateString("pt-PT", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
 
 interface SiteHeaderProps {
   aprovadoCM: boolean;
@@ -41,23 +30,10 @@ export function SiteHeader({ aprovadoCM }: SiteHeaderProps) {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight">
               Democratizar a arte.
             </h1>
-            <p className="text-base md:text-lg text-background/80 max-w-sm mb-10">
+            <p className="text-base md:text-lg text-background/80 max-w-sm">
               Uma iniciativa dedicada a ajudar os jovens artistas portugueses
             </p>
-
-            <p className="text-xs md:text-sm text-background/60 mb-2 tracking-wide uppercase">
-              1º Concurso de Curtas-Metragens
-            </p>
-            <p className="text-sm md:text-base text-background/80 max-w-sm mb-5">
-              Candidaturas abertas até {CANDIDATURAS_FECHAM}. Financiamos a
-              curta-metragem vencedora de um jovem artista português.
-            </p>
-            <Link
-              href="/o-que-deve-ser-entregue"
-              className="inline-flex w-fit items-center gap-2 bg-background text-foreground px-5 py-2.5 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
-            >
-              Candidatar →
-            </Link>
+            <ContestHeroActions />
           </div>
 
           <div>

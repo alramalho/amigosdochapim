@@ -5,19 +5,23 @@ import posthog from "posthog-js";
 import { useState } from "react";
 
 type NewsletterSignupProps = {
+  id?: string;
   title: string;
   description: string;
   source: string;
   buttonLabel?: string;
   className?: string;
+  variant?: "section" | "compact";
 };
 
 export function NewsletterSignup({
+  id,
   title,
   description,
   source,
   buttonLabel = "Receber novidades",
   className = "",
+  variant = "section",
 }: NewsletterSignupProps) {
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
@@ -65,11 +69,28 @@ export function NewsletterSignup({
   };
 
   return (
-    <section className={`bg-accent/30 py-12 md:py-16 ${className}`}>
-      <div className="mx-auto max-w-4xl px-4">
-        <div className="grid gap-6 md:grid-cols-[1fr_minmax(18rem,24rem)] md:items-center md:gap-10">
+    <section
+      id={id}
+      className={`${variant === "section" ? "bg-accent/30 py-12 md:py-16" : ""} ${className}`}
+    >
+      <div className={variant === "section" ? "mx-auto max-w-4xl px-4" : ""}>
+        <div
+          className={
+            variant === "section"
+              ? "grid gap-6 md:grid-cols-[1fr_minmax(18rem,24rem)] md:items-center md:gap-10"
+              : "space-y-6"
+          }
+        >
           <div>
-            <h2 className="text-2xl font-semibold md:text-3xl">{title}</h2>
+            <h2
+              className={
+                variant === "section"
+                  ? "text-2xl font-semibold md:text-3xl"
+                  : "text-2xl font-semibold"
+              }
+            >
+              {title}
+            </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-foreground/75 md:text-base">
               {description}
             </p>

@@ -162,8 +162,8 @@ export default function AdminCandidaturasPage() {
           <Link href="/painel" className="text-sm text-foreground/60 hover:text-foreground">
             ← Painel
           </Link>
-          <Link href="/candidatar" className="text-sm text-foreground/60 hover:text-foreground">
-            Nova candidatura
+          <Link href="/admin/comunicacoes" className="text-sm text-foreground/60 hover:text-foreground">
+            Comunicações
           </Link>
         </header>
 

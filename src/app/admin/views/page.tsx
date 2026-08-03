@@ -110,13 +110,18 @@ export default function AdminViewsPage() {
   return (
     <main className="min-h-screen px-4 py-10">
       <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center mb-10">
+        <header className="flex flex-wrap justify-between gap-4 mb-10">
           <Link href="/painel" className="text-sm text-foreground/60 hover:text-foreground">
             ← Painel
           </Link>
-          <Link href="/admin/candidaturas" className="text-sm text-foreground/60 hover:text-foreground">
-            Candidaturas
-          </Link>
+          <nav className="flex gap-4">
+            <Link href="/admin/candidaturas" className="text-sm text-foreground/60 hover:text-foreground">
+              Candidaturas
+            </Link>
+            <Link href="/admin/comunicacoes" className="text-sm text-foreground/60 hover:text-foreground">
+              Comunicações
+            </Link>
+          </nav>
         </header>
 
         <h1 className="text-3xl md:text-5xl font-semibold mb-3">Visualizações</h1>

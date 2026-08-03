@@ -50,8 +50,8 @@ export default function Home() {
           <div className="space-y-4 text-base md:text-lg leading-relaxed mb-6">
             <p>
               O processo é simples e transparente. Anualmente abrimos
-              candidaturas para projetos artísticos. O primeiro concurso será
-              dedicado a curtas-metragens, com candidaturas iniciais abertas de
+              candidaturas para projetos artísticos. O primeiro concurso é
+              dedicado a curtas-metragens. As candidaturas iniciais decorreram de
               15 de maio a 30 de julho de 2026. Cada candidato submete os seus
               dados, carta de motivação e uma proposta artística em PDF. Os
               finalistas entregam depois um plano de produção com orçamento e
@@ -60,12 +60,6 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-            <Link
-              href="/candidatar"
-              className="inline-flex w-fit items-center justify-center bg-primary text-primary-foreground px-5 py-2.5 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
-            >
-              Submeter candidatura →
-            </Link>
             <Link
               href="/o-que-deve-ser-entregue"
               className="text-primary underline underline-offset-4 hover:no-underline text-sm md:text-base"
@@ -176,7 +170,7 @@ export default function Home() {
             Aceitamos candidaturas de todas as áreas artísticas: cinema,
             música, teatro, artes plásticas, fotografia, dança, e outras
             formas de expressão criativa.
-            No entanto, o primeiro concurso focar-se-á apenas em curta-metragens.
+            No entanto, o primeiro concurso foca-se apenas em curta-metragens.
           </FAQItem>
           <FAQItem question="Posso cancelar a minha subscrição a qualquer momento?">
             Sim, sem qualquer compromisso. Podes cancelar a tua subscrição a
@@ -192,8 +186,9 @@ export default function Home() {
       </section>
 
       <NewsletterSignup
+        id="novidades"
         title="Acompanha os próximos passos"
-        description="Só usamos esta lista para novidades importantes: novos concursos, alterações de datas e avisos essenciais. Nada de spam."
+        description="As candidaturas de 2026 já encerraram. Recebe notícias sobre o resultado, novos concursos e outras oportunidades importantes. Nada de spam."
         source="homepage_bottom"
       />
 

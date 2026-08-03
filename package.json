@@ -7,7 +7,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "WATCHPACK_POLLING=true portless amigosdochapim next dev -p 3027",
+    "dev": "WATCHPACK_POLLING=true portless amigosdochapim next dev",
     "tunnel": "stripe listen --forward-to localhost:3027/api/stripe/webhook",
     "dev:tunnel": "concurrently \"next dev -p 3027\" \"stripe listen --forward-to localhost:3027/api/stripe/webhook\"",
     "build": "prisma generate && next build",

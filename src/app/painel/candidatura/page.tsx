@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { supabase } from "@/lib/supabase";
-import {
-  SUBMISSION_EDIT_WINDOW_DAYS,
-  canEditSubmission,
-  getSubmissionEditDeadline,
-} from "@/lib/submission-editing";
 
 type Submission = {
   id: string;
@@ -105,9 +101,6 @@ export default function CandidaturaPainelPage() {
     return <main className="min-h-screen flex items-center justify-center">A carregar...</main>;
   }
 
-  const editAllowed = submission ? canEditSubmission(submission.createdAt) : true;
-  const editDeadline = submission ? getSubmissionEditDeadline(submission.createdAt) : null;
-
   return (
     <main className="min-h-screen px-4 py-10">
       <div className="max-w-4xl mx-auto">
@@ -115,23 +108,24 @@ export default function CandidaturaPainelPage() {
           <Link href="/painel" className="text-sm text-foreground/60 hover:text-foreground">
             ← Painel
           </Link>
-          {submission && !editAllowed ? (
-            <span className="text-sm text-foreground/40">Edição fechada</span>
-          ) : (
-            <Link href="/candidatar" className="text-sm text-foreground/60 hover:text-foreground">
-              {submission ? "Editar candidatura" : "Submeter candidatura"}
-            </Link>
-          )}
+          <span className="text-sm text-foreground/40">Candidaturas encerradas</span>
         </header>
 
         <h1 className="text-3xl md:text-5xl font-semibold mb-4">A tua candidatura</h1>
 
         {!submission ? (
           <div className="border border-border rounded-sm p-6 mt-8">
-            <p className="text-foreground/70 mb-5">Ainda não submeteste candidatura para o concurso de 2026.</p>
-            <Link href="/candidatar" className="inline-block px-5 py-3 bg-primary text-primary-foreground rounded-sm">
-              Submeter candidatura
-            </Link>
+            <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">Prazo terminado</p>
+            <h2 className="text-2xl font-semibold">Não existe uma candidatura associada a esta conta.</h2>
+            <p className="text-foreground/70 mt-3 mb-7">
+              As candidaturas ao concurso de 2026 encerraram a 30 de julho e já não é possível iniciar uma submissão.
+            </p>
+            <NewsletterSignup
+              title="Acompanha os próximos concursos"
+              description="Recebe um aviso quando abrirmos uma nova oportunidade para jovens artistas."
+              source="candidate-panel-closed"
+              variant="compact"
+            />
           </div>
         ) : (
           <div className="space-y-8 mt-8">
@@ -143,10 +137,7 @@ export default function CandidaturaPainelPage() {
                   <p className="text-sm text-foreground/50 mt-3">
                     Submetida em {formatDateTime(submission.createdAt)}
                   </p>
-                  <p className="text-sm text-foreground/50 mt-1">
-                    Só é possível editar até {SUBMISSION_EDIT_WINDOW_DAYS} dias após a submissão
-                    {editDeadline ? `, ou seja, até ${formatDateTime(editDeadline)}.` : "."}
-                  </p>
+                  <p className="text-sm text-foreground/50 mt-1">A fase de candidatura está encerrada.</p>
                 </div>
                 <span className="text-xs uppercase tracking-wide border border-border rounded-sm px-3 py-1 self-start">
                   {statusLabel(submission.status)}

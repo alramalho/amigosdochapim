@@ -42,6 +42,12 @@ export default function OQueDeveSerEntreguePage() {
           e a proposta artística; só os candidatos selecionados avançam para a
           entrega complementar da fase final.
         </p>
+        <div className="mt-8 border-l-4 border-primary bg-accent/30 px-5 py-4">
+          <p className="font-medium">As candidaturas iniciais encerraram a 30 de julho de 2026.</p>
+          <p className="mt-1 text-sm text-foreground/70">
+            Mantemos esta página disponível como referência do concurso em curso.
+          </p>
+        </div>
       </section>
 
       {/* Fase 1 */}
@@ -131,12 +137,6 @@ export default function OQueDeveSerEntreguePage() {
           <p className="text-base md:text-lg text-foreground/80 mb-6 md:mb-8">
             Descobre como o júri avalia as candidaturas e como funciona a votação final.
           </p>
-          <Link
-            href="/candidatar"
-            className="inline-block bg-primary text-primary-foreground px-6 py-3 md:px-8 md:py-3 rounded-sm text-sm md:text-base font-medium hover:opacity-90 transition-opacity"
-          >
-            Submeter candidatura →
-          </Link>
           <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
             <Link
               href="/juri"
@@ -155,8 +155,8 @@ export default function OQueDeveSerEntreguePage() {
       </section>
 
       <NewsletterSignup
-        title="Ainda não estás pronto para candidatar?"
-        description="Fica na lista para receber apenas novidades importantes: novos concursos, alterações de datas e avisos essenciais. Nada de spam."
+        title="Queres saber quando abrir o próximo concurso?"
+        description="Fica na lista para receber notícias sobre esta edição e futuras oportunidades. Nada de spam."
         source="delivery_page_bottom"
         buttonLabel="Ficar a par"
       />

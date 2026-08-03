@@ -227,6 +227,21 @@ model PageView {
   @@map("page_views")
 }
 
+model EmailDraft {
+  id               String   @id @default(cuid())
+  name             String
+  subject          String
+  previewText      String?  @map("preview_text")
+  body             String
+  audienceSegments String[] @map("audience_segments")
+  createdByEmail   String   @map("created_by_email")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([updatedAt])
+  @@map("email_drafts")
+}
+
 model JuryRanking {
   id                   String    @id @default(cuid())
   contestId            String    @map("contest_id")

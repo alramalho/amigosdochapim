@@ -152,7 +152,7 @@ export default function PainelPage() {
               Bem-vindo ao teu painel
             </h1>
             <p className="text-foreground/70 mb-8">
-              Não encontrámos contribuições associadas a este email. Podes submeter ou acompanhar uma candidatura, ou falar connosco se o teu acesso ao júri deveria aparecer aqui.
+              Não encontrámos contribuições associadas a este email. Podes acompanhar uma candidatura já submetida ou falar connosco se o teu acesso ao júri deveria aparecer aqui.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -390,7 +390,7 @@ export default function PainelPage() {
             <div className="bg-foreground/5 rounded-xl p-6">
               <h2 className="text-lg font-medium mb-4">Candidatura</h2>
               <p className="text-sm text-foreground/70 mb-4">
-                Submete ou acompanha a tua candidatura ao concurso de curtas-metragens de 2026.
+                Consulta a tua candidatura ao concurso de curtas-metragens de 2026 e acompanha os próximos passos.
               </p>
               <Link
                 href="/painel/candidatura"
@@ -419,6 +419,12 @@ export default function PainelPage() {
                 className="mt-2 block text-sm text-foreground/70 hover:text-foreground transition-colors"
               >
                 Ver visualizações →
+              </Link>
+              <Link
+                href="/admin/comunicacoes"
+                className="mt-2 block text-sm text-foreground/70 hover:text-foreground transition-colors"
+              >
+                Preparar comunicação →
               </Link>
             </div>
           )}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getOrCreateCurrentContest } from "@/lib/contest-db";
+import { isWithinWindow } from "@/lib/contest";
 import { createPresignedUploadUrl, validateUploadRequest, type UploadPurpose } from "@/lib/s3";
 
 export async function POST(request: NextRequest) {
@@ -13,6 +14,15 @@ export async function POST(request: NextRequest) {
   }
 
   const contest = await getOrCreateCurrentContest();
+
+  if (
+    upload.purpose === "CV" &&
+    (contest.status !== "APPLICATIONS_OPEN" ||
+      !isWithinWindow(contest.applicationsOpenAt, contest.applicationsCloseAt))
+  ) {
+    return NextResponse.json({ error: "As candidaturas estão encerradas." }, { status: 403 });
+  }
+
   const presigned = await createPresignedUploadUrl({
     ownerSegment: user ? `users/${user.id}` : `pending/${crypto.randomUUID()}`,
     contestSlug: contest.slug,
