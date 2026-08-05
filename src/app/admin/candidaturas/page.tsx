@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAdminEmails } from "@/lib/admin";
 import { supabase } from "@/lib/supabase";
 
@@ -15,6 +15,11 @@ type Submission = {
   finalMaterials: unknown | null;
   files?: unknown[];
   juryReviews: unknown[];
+};
+
+type StatusToast = {
+  type: "success" | "error";
+  message: string;
 };
 
 const statuses = [
@@ -78,6 +83,9 @@ export default function AdminCandidaturasPage() {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [updatingSubmissionIds, setUpdatingSubmissionIds] = useState<string[]>([]);
+  const [statusToast, setStatusToast] = useState<StatusToast | null>(null);
+  const toastTimer = useRef<number | null>(null);
 
   const load = (token: string) => {
     return fetch("/api/admin/submissions", {
@@ -120,18 +128,53 @@ export default function AdminCandidaturasPage() {
     checkAccess();
   }, [router]);
 
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  const showStatusToast = (toast: StatusToast) => {
+    setStatusToast(toast);
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setStatusToast(null), 3500);
+  };
+
   const updateStatus = async (submissionId: string, status: string) => {
     if (!accessToken) return;
 
-    await fetch("/api/admin/submissions", {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ submissionId, status }),
-    });
-    await load(accessToken);
+    setUpdatingSubmissionIds((current) => [...current, submissionId]);
+
+    try {
+      const response = await fetch("/api/admin/submissions", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ submissionId, status }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.submission) {
+        throw new Error(data.error || "Não foi possível atualizar o estado.");
+      }
+
+      setSubmissions((current) => current.map((submission) =>
+        submission.id === submissionId ? data.submission : submission
+      ));
+      showStatusToast({
+        type: "success",
+        message: `Estado atualizado para “${statusMeta[status]?.label || status}”.`,
+      });
+    } catch (error) {
+      showStatusToast({
+        type: "error",
+        message: error instanceof Error ? error.message : "Não foi possível atualizar o estado.",
+      });
+    } finally {
+      setUpdatingSubmissionIds((current) => current.filter((id) => id !== submissionId));
+    }
   };
 
   if (loading) {
@@ -157,6 +200,19 @@ export default function AdminCandidaturasPage() {
 
   return (
     <main className="min-h-screen px-4 py-10">
+      {statusToast && (
+        <div
+          role={statusToast.type === "error" ? "alert" : "status"}
+          aria-live={statusToast.type === "error" ? "assertive" : "polite"}
+          className={`fixed right-4 top-4 z-50 max-w-sm rounded-sm border px-4 py-3 text-sm shadow-lg ${
+            statusToast.type === "error"
+              ? "border-rose-300 bg-rose-50 text-rose-900"
+              : "border-emerald-300 bg-emerald-50 text-emerald-900"
+          }`}
+        >
+          {statusToast.message}
+        </div>
+      )}
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-10">
           <Link href="/painel" className="text-sm text-foreground/60 hover:text-foreground">
@@ -208,11 +264,22 @@ export default function AdminCandidaturasPage() {
                 </Link>
               </div>
               <label className="block">
-                <span className="block text-xs uppercase tracking-wide text-foreground/50 mb-2">Estado</span>
+                <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-foreground/50 mb-2">
+                  Estado
+                  {updatingSubmissionIds.includes(submission.id) && (
+                    <span
+                      className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-foreground/25 border-t-foreground"
+                      role="status"
+                      aria-label="A guardar estado"
+                    />
+                  )}
+                </span>
                 <select
                   value={submission.status}
                   onChange={(event) => updateStatus(submission.id, event.target.value)}
-                  className="w-full border border-border rounded-sm px-3 py-2 bg-background text-sm"
+                  disabled={updatingSubmissionIds.includes(submission.id)}
+                  aria-busy={updatingSubmissionIds.includes(submission.id)}
+                  className="w-full border border-border rounded-sm px-3 py-2 bg-background text-sm disabled:cursor-wait disabled:opacity-60"
                 >
                   {statuses.map((status) => (
                     <option key={status} value={status}>
@@ -220,8 +287,10 @@ export default function AdminCandidaturasPage() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-2 text-xs text-foreground/50">
-                  {statusMeta[submission.status]?.description || "Estado interno da candidatura."}
+                <p className="mt-2 text-xs text-foreground/50" aria-live="polite">
+                  {updatingSubmissionIds.includes(submission.id)
+                    ? "A guardar alteração..."
+                    : statusMeta[submission.status]?.description || "Estado interno da candidatura."}
                 </p>
               </label>
             </div>
