@@ -104,6 +104,15 @@ export default function JurySubmissionPage() {
               </p>
             </div>
 
+            {!submission.finalMaterials && (
+              <div className="border border-amber-300 bg-amber-50 text-amber-950 rounded-sm p-5">
+                <h2 className="font-semibold mb-2">Candidatura ainda incompleta</h2>
+                <p className="text-sm leading-relaxed">
+                  Estás a ver os materiais da candidatura inicial. O plano de produção da segunda fase ainda não foi submetido e aparecerá aqui quando estiver disponível.
+                </p>
+              </div>
+            )}
+
             <Section title="Sinopse" content={submission.synopsis} />
             <Section title="Plot points principais" content={submission.plotPoints} />
             <Section title="Argumento resumido" content={submission.scriptSummary} />

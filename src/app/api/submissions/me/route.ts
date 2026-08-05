@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ensureCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest, formatSubmission } from "@/lib/contest-db";
-import { isWithinWindow } from "@/lib/contest";
+import { canSubmitFinalMaterials, isWithinWindow } from "@/lib/contest";
 import { getS3Config, parseUploadDescriptor } from "@/lib/s3";
 
 function text(value: unknown) {
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest) {
     },
   });
 
-  if (!submission || submission.status !== "SELECTED_FOR_FINAL") {
+  if (!submission || !canSubmitFinalMaterials(submission.status)) {
     return NextResponse.json({ error: "Esta candidatura não está selecionada para a fase final." }, { status: 403 });
   }
 

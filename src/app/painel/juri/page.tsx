@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { isJuryRankingSubmissionStatus } from "@/lib/contest";
 
 type Submission = {
   id: string;
@@ -25,8 +26,16 @@ export default function JuriPainelPage() {
     }))
       .then((response) => response.json())
       .then((data) => {
-        setSubmissions(data.submissions || []);
-        setRanking(data.ranking?.orderedSubmissionIds || data.submissions?.map((submission: Submission) => submission.id) || []);
+        const nextSubmissions = (data.submissions || []) as Submission[];
+        const eligibleIds = nextSubmissions
+          .filter((submission) => isJuryRankingSubmissionStatus(submission.status))
+          .map((submission) => submission.id);
+        const savedIds = Array.isArray(data.ranking?.orderedSubmissionIds)
+          ? data.ranking.orderedSubmissionIds.filter((id: string) => eligibleIds.includes(id))
+          : [];
+
+        setSubmissions(nextSubmissions);
+        setRanking([...savedIds, ...eligibleIds.filter((id) => !savedIds.includes(id))]);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -60,6 +69,8 @@ export default function JuriPainelPage() {
     return <main className="min-h-screen flex items-center justify-center">A carregar candidaturas...</main>;
   }
 
+  const incompleteCount = submissions.filter((submission) => !submission.finalMaterials).length;
+
   return (
     <main className="min-h-screen px-4 py-10">
       <div className="max-w-6xl mx-auto">
@@ -75,18 +86,29 @@ export default function JuriPainelPage() {
         <div className="mb-8">
           <h1 className="text-3xl md:text-5xl font-semibold mb-3">Área do júri</h1>
           <p className="text-foreground/70 max-w-2xl">
-            Revê as candidaturas finalistas, guarda notas por critério e ordena a tua preferência final.
+            Revê as candidaturas submetidas e guarda notas por critério. O ranking final abre apenas para os projetos que concluírem a segunda fase.
           </p>
         </div>
+
+        {incompleteCount > 0 && (
+          <div className="mb-8 border border-amber-300 bg-amber-50 text-amber-950 rounded-sm p-5">
+            <h2 className="font-semibold mb-2">Atenção: os materiais ainda não estão completos</h2>
+            <p className="text-sm leading-relaxed">
+              Estás a consultar as candidaturas iniciais. {incompleteCount === 1
+                ? "Há 1 candidatura que ainda não entregou"
+                : `Há ${incompleteCount} candidaturas que ainda não entregaram`} o plano de produção da segunda fase. Esta área será atualizada automaticamente à medida que esses materiais forem submetidos.
+            </p>
+          </div>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <section>
             <h2 className="text-xl font-semibold mb-4">Candidaturas para avaliação</h2>
             {submissions.length === 0 ? (
               <div className="border border-border bg-accent/20 rounded-sm p-6">
-                <h3 className="font-semibold mb-2">Ainda não há candidaturas para avaliação.</h3>
+                <h3 className="font-semibold mb-2">Ainda não há candidaturas submetidas.</h3>
                 <p className="text-sm text-foreground/70">
-                  As candidaturas aparecerão aqui quando a organização marcar os projetos finalistas para a fase do júri.
+                  As candidaturas aparecerão aqui assim que forem recebidas pela organização.
                 </p>
               </div>
             ) : (
@@ -102,9 +124,14 @@ export default function JuriPainelPage() {
                         <h3 className="font-semibold">{submission.candidateName}</h3>
                         <p className="text-sm text-foreground/70 mt-1 line-clamp-2">{submission.synopsis}</p>
                       </div>
-                      <span className="text-xs text-foreground/50 whitespace-nowrap">
-                        {submission.juryReviews?.length ? "Revista" : "Por rever"}
-                      </span>
+                      <div className="text-right whitespace-nowrap">
+                        <span className="block text-xs text-foreground/50">
+                          {submission.juryReviews?.length ? "Revista" : "Por rever"}
+                        </span>
+                        <span className={`block text-xs mt-1 ${submission.finalMaterials ? "text-emerald-700" : "text-amber-700"}`}>
+                          {submission.finalMaterials ? "2.ª fase recebida" : "2.ª fase por entregar"}
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -116,7 +143,7 @@ export default function JuriPainelPage() {
             <h2 className="text-xl font-semibold mb-4">Ranking final</h2>
             {ranking.length === 0 ? (
               <p className="text-sm text-foreground/70">
-                O ranking abre quando existirem candidaturas finalistas.
+                O ranking abre quando existirem candidaturas com a segunda fase submetida.
               </p>
             ) : (
               <div className="space-y-2">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, userHasJuryAccess } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isJuryVisibleSubmissionStatus } from "@/lib/contest";
 
 function score(value: unknown) {
   if (value === null || value === undefined || value === "") return null;
@@ -49,7 +50,7 @@ export async function PATCH(
   const { submissionId } = await params;
   const submission = await prisma.submission.findUnique({ where: { id: submissionId } });
 
-  if (!submission || !["FINAL_MATERIALS_SUBMITTED", "FINALIST", "WINNER"].includes(submission.status)) {
+  if (!submission || !isJuryVisibleSubmissionStatus(submission.status)) {
     return NextResponse.json({ error: "Submission not available to jury." }, { status: 404 });
   }
 

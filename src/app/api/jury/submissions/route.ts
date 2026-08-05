@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, userHasJuryAccess } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest, formatSubmission } from "@/lib/contest-db";
+import { JURY_VISIBLE_SUBMISSION_STATUSES } from "@/lib/contest";
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser(request);
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
     where: {
       contestId: contest.id,
       status: {
-        in: ["FINAL_MATERIALS_SUBMITTED", "FINALIST", "WINNER"],
+        in: [...JURY_VISIBLE_SUBMISSION_STATUSES],
       },
     },
     include: {

@@ -70,7 +70,8 @@ export default function CandidaturaPainelPage() {
 
     let uploadedFiles: UploadedFile[] = [];
     try {
-      uploadedFiles = await Promise.all(finalFiles.map((file) => uploadFile(file, "FINAL_MATERIAL")));
+      const authHeader = await getAuthHeader();
+      uploadedFiles = await Promise.all(finalFiles.map((file) => uploadFile(file, "FINAL_MATERIAL", authHeader)));
     } catch (uploadError) {
       setMessage(uploadError instanceof Error ? uploadError.message : "Não foi possível enviar os ficheiros.");
       setSaving(false);
@@ -148,7 +149,7 @@ export default function CandidaturaPainelPage() {
             {submission.status === "SELECTED_FOR_FINAL" || submission.finalMaterials ? (
               <section className="border border-border rounded-sm p-6">
                 <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">
-                  16 - 31 agosto 2026
+                  Disponível antecipadamente · prazo até 31 agosto 2026
                 </p>
                 <h2 className="text-2xl font-semibold mb-4">Entrega dos requisitos da fase final</h2>
                 <form onSubmit={saveFinalMaterials} className="space-y-4">
@@ -204,10 +205,14 @@ async function getAuthHeader(): Promise<Record<string, string>> {
   return session ? { Authorization: `Bearer ${session.access_token}` } : {};
 }
 
-async function uploadFile(file: File, purpose: "CV" | "FINAL_MATERIAL"): Promise<UploadedFile> {
+async function uploadFile(
+  file: File,
+  purpose: "CV" | "FINAL_MATERIAL",
+  authHeader: Record<string, string> = {}
+): Promise<UploadedFile> {
   const presignResponse = await fetch("/api/uploads/presign", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeader },
     body: JSON.stringify({
       purpose,
       fileName: file.name,

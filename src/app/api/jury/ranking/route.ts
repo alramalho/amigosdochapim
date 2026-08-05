@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, userHasJuryAccess } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest } from "@/lib/contest-db";
+import { JURY_RANKING_SUBMISSION_STATUSES } from "@/lib/contest";
 
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser(request);
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     where: {
       contestId: contest.id,
       id: { in: orderedSubmissionIds },
-      status: { in: ["FINAL_MATERIALS_SUBMITTED", "FINALIST", "WINNER"] },
+      status: { in: [...JURY_RANKING_SUBMISSION_STATUSES] },
     },
   });
 
