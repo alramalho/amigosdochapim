@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { JURY_ACCESS_ONE_OFF_THRESHOLD } from "@/lib/contest";
 import { getAdminEmails } from "@/lib/admin";
+import { isSpecialJurorEmail } from "@/lib/jury";
 
 const userAccessInclude = {
   subscription: true,
@@ -62,7 +63,7 @@ export async function getCurrentUser(request?: NextRequest) {
 
   if (user) return user;
 
-  return prisma.user.findFirst({
+  const caseInsensitiveUser = await prisma.user.findFirst({
     where: {
       email: {
         equals: email,
@@ -71,6 +72,19 @@ export async function getCurrentUser(request?: NextRequest) {
     },
     include: userAccessInclude,
   });
+
+  if (caseInsensitiveUser) return caseInsensitiveUser;
+
+  if (isSpecialJurorEmail(email)) {
+    return prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: { email },
+      include: userAccessInclude,
+    });
+  }
+
+  return null;
 }
 
 export async function ensureCurrentUser(request?: NextRequest) {
@@ -99,6 +113,8 @@ export async function ensureCurrentUser(request?: NextRequest) {
 }
 
 export function userHasJuryAccess(user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>) {
+  if (isSpecialJurorEmail(user.email)) return true;
+
   const totalOneOff = user.donations
     .filter((donation) => donation.type === "ONE_OFF")
     .reduce((sum, donation) => sum + donation.amount, 0);
