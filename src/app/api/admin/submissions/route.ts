@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, isAdminEmail } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest, formatSubmission } from "@/lib/contest-db";
+import { isNonContestSubmissionEmail } from "@/lib/submission-visibility";
 
 const submissionStatuses = new Set([
   "DRAFT",
@@ -14,11 +15,6 @@ const submissionStatuses = new Set([
   "REJECTED",
 ]);
 
-const excludedSubmissionEmails = new Set([
-  "alexandre.ramalho.1998@gmail.com",
-  "lia.borges@icloud.com",
-]);
-
 async function requireAdmin(request: NextRequest) {
   const user = await getCurrentUser(request);
 
@@ -27,16 +23,6 @@ async function requireAdmin(request: NextRequest) {
   }
 
   return user;
-}
-
-function canonicalEmail(email: string) {
-  const [local, domain] = email.toLowerCase().split("@");
-  if (!local || !domain) return email.toLowerCase();
-  return `${local.split("+")[0]}@${domain}`;
-}
-
-function shouldExcludeSubmission(submission: { email: string }) {
-  return excludedSubmissionEmails.has(canonicalEmail(submission.email));
 }
 
 export async function GET(request: NextRequest) {
@@ -57,7 +43,7 @@ export async function GET(request: NextRequest) {
     },
     orderBy: { createdAt: "asc" },
   });
-  const visibleSubmissions = submissions.filter((submission) => !shouldExcludeSubmission(submission));
+  const visibleSubmissions = submissions.filter((submission) => !isNonContestSubmissionEmail(submission.email));
 
   return NextResponse.json({
     contest,

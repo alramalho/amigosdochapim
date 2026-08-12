@@ -31,6 +31,7 @@ interface UserData {
   };
   hasJuryAccess: boolean;
   hasCreditsAccess: boolean;
+  hasSubmission: boolean;
 }
 
 export default function PainelPage() {
@@ -385,10 +386,10 @@ export default function PainelPage() {
             </div>
           )}
 
-          {/* Candidate Card - Jury members cannot submit */}
-          {!user.hasJuryAccess && (
+          {/* Candidate Card */}
+          {(!user.hasJuryAccess || user.hasSubmission) && (
             <div className="bg-foreground/5 rounded-xl p-6">
-              <h2 className="text-lg font-medium mb-4">Candidatura</h2>
+              <h2 className="text-lg font-medium mb-4">A tua candidatura</h2>
               <p className="text-sm text-foreground/70 mb-4">
                 Consulta a tua candidatura ao concurso de curtas-metragens de 2026 e acompanha os próximos passos.
               </p>

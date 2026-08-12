@@ -3,7 +3,7 @@ import { getCurrentUser, isSubscriptionActive, userHasJuryAccess } from "@/lib/a
 import { CREDITS_THRESHOLD } from "@/lib/contest";
 import { prisma } from "@/lib/prisma";
 
-function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>) {
+function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>, hasSubmission = false) {
   if (!user) {
     return null;
   }
@@ -39,18 +39,20 @@ function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>) {
     },
     hasJuryAccess,
     hasCreditsAccess,
+    hasSubmission,
   };
 }
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser(request);
-  const userData = getUserData(user);
 
-  if (!userData) {
+  if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  return NextResponse.json(userData);
+  const hasSubmission = await prisma.submission.count({ where: { userId: user.id } }).then((count) => count > 0);
+
+  return NextResponse.json(getUserData(user, hasSubmission));
 }
 
 export async function PATCH(request: NextRequest) {
@@ -75,6 +77,7 @@ export async function PATCH(request: NextRequest) {
       donations: true,
     },
   });
+  const hasSubmission = await prisma.submission.count({ where: { userId: user.id } }).then((count) => count > 0);
 
-  return NextResponse.json(getUserData(updatedUser));
+  return NextResponse.json(getUserData(updatedUser, hasSubmission));
 }
