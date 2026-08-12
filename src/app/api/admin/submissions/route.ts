@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, isAdminEmail } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest, formatSubmission } from "@/lib/contest-db";
-import { isNonContestSubmissionEmail } from "@/lib/submission-visibility";
 
 const submissionStatuses = new Set([
   "DRAFT",
@@ -43,7 +42,7 @@ export async function GET(request: NextRequest) {
     },
     orderBy: { createdAt: "asc" },
   });
-  const visibleSubmissions = submissions.filter((submission) => !isNonContestSubmissionEmail(submission.email));
+  const visibleSubmissions = submissions.filter((submission) => !submission.isTest);
 
   return NextResponse.json({
     contest,

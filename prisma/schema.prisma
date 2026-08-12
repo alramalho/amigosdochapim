@@ -145,6 +145,7 @@ model Submission {
   contestId          String           @map("contest_id")
   userId             String           @map("user_id")
   status             SubmissionStatus @default(SUBMITTED)
+  isTest             Boolean          @default(false) @map("is_test")
   candidateName      String           @map("candidate_name")
   age                Int
   email              String

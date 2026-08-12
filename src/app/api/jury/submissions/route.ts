@@ -3,7 +3,6 @@ import { getCurrentUser, userHasJuryAccess } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateCurrentContest, formatSubmission } from "@/lib/contest-db";
 import { JURY_VISIBLE_SUBMISSION_STATUSES } from "@/lib/contest";
-import { isNonContestSubmissionEmail } from "@/lib/submission-visibility";
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser(request);
@@ -13,9 +12,10 @@ export async function GET(request: NextRequest) {
   }
 
   const contest = await getOrCreateCurrentContest();
-  const allSubmissions = await prisma.submission.findMany({
+  const submissions = await prisma.submission.findMany({
     where: {
       contestId: contest.id,
+      isTest: false,
       status: {
         in: [...JURY_VISIBLE_SUBMISSION_STATUSES],
       },
@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
     },
     orderBy: { createdAt: "asc" },
   });
-  const submissions = allSubmissions.filter((submission) => !isNonContestSubmissionEmail(submission.email));
 
   const ranking = await prisma.juryRanking.findUnique({
     where: {
