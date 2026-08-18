@@ -5,13 +5,14 @@ import { prisma } from "@/lib/prisma";
 import { JURY_ACCESS_ONE_OFF_THRESHOLD } from "@/lib/contest";
 import { getAdminEmails } from "@/lib/admin";
 import { isSpecialJurorEmail } from "@/lib/jury";
+import { canImpersonate, readImpersonatedEmail } from "@/lib/impersonation";
 
 const userAccessInclude = {
   subscription: true,
   donations: true,
 } as const;
 
-export async function getCurrentUserEmail(request?: NextRequest) {
+async function resolveSessionEmail(request?: NextRequest) {
   let email: string | undefined;
 
   if (process.env.NODE_ENV !== "production") {
@@ -47,6 +48,38 @@ export async function getCurrentUserEmail(request?: NextRequest) {
   }
 
   return email.toLowerCase();
+}
+
+export type AuthIdentity = {
+  realEmail: string | null;
+  effectiveEmail: string | null;
+  isImpersonating: boolean;
+};
+
+export async function getAuthIdentity(request?: NextRequest): Promise<AuthIdentity> {
+  const realEmail = await resolveSessionEmail(request);
+
+  if (!realEmail) {
+    return { realEmail: null, effectiveEmail: null, isImpersonating: false };
+  }
+
+  const impersonatedEmail = await readImpersonatedEmail();
+
+  if (impersonatedEmail && canImpersonate(realEmail, impersonatedEmail)) {
+    return { realEmail, effectiveEmail: impersonatedEmail, isImpersonating: true };
+  }
+
+  return { realEmail, effectiveEmail: realEmail, isImpersonating: false };
+}
+
+export async function getCurrentUserEmail(request?: NextRequest) {
+  const { effectiveEmail } = await getAuthIdentity(request);
+  return effectiveEmail;
+}
+
+export async function getRealUserEmail(request?: NextRequest) {
+  const { realEmail } = await getAuthIdentity(request);
+  return realEmail;
 }
 
 export async function getCurrentUser(request?: NextRequest) {

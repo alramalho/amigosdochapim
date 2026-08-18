@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthHandler } from "@/components/auth-handler";
 import { ViewTracker } from "@/components/view-tracker";
 import { ConsentBanner } from "@/components/consent-banner";
+import { ImpersonationBar } from "@/components/impersonation-bar";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -40,6 +41,7 @@ export default function RootLayout({
         <AuthHandler />
         <ViewTracker />
         <ConsentBanner />
+        <ImpersonationBar />
         {children}
       </body>
     </html>
