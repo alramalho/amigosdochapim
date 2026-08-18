@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, isSubscriptionActive, userHasJuryAccess } from "@/lib/auth";
+import { getCurrentUser, isAdminEmail, isSubscriptionActive, userHasJuryAccess } from "@/lib/auth";
 import { CREDITS_THRESHOLD } from "@/lib/contest";
 import { prisma } from "@/lib/prisma";
 
@@ -19,6 +19,8 @@ function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>, hasSubmis
   const hasCreditsAccess = totalContributions >= CREDITS_THRESHOLD;
 
   return {
+    email: user.email,
+    isAdmin: isAdminEmail(user.email),
     name: user.name,
     subscription: user.subscription
       ? {

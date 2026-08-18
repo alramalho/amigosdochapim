@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, Edit3, ExternalLink, FileSpreadsheet, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { getAdminEmails } from "@/lib/admin";
 import { InstagramLink } from "@/components/instagram-link";
 
 //note to self
@@ -32,6 +31,8 @@ interface UserData {
   hasJuryAccess: boolean;
   hasCreditsAccess: boolean;
   hasSubmission: boolean;
+  email: string;
+  isAdmin: boolean;
 }
 
 export default function PainelPage() {
@@ -65,6 +66,7 @@ export default function PainelPage() {
       if (res.ok) {
         const userData = await res.json();
         setUser(userData);
+        setUserEmail(userData.email);
         setNameDraft(userData.name || "");
       }
       // If not ok (404), user exists in Supabase but not in our DB - that's fine, show no subscription state
@@ -210,7 +212,7 @@ export default function PainelPage() {
 
   const hasSubscription = !!user.subscription;
   const activeSubscription = user.subscription?.isActive;
-  const isAdmin = !!userEmail && getAdminEmails(process.env.NEXT_PUBLIC_ADMIN_EMAILS).includes(userEmail.toLowerCase());
+  const isAdmin = user.isAdmin;
 
   // Determine user tier for display purposes
   const getUserTier = () => {
