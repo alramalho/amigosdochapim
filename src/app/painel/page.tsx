@@ -77,11 +77,16 @@ export default function PainelPage() {
   }, [router]);
 
   const handleManageSubscription = async () => {
-    if (!userEmail) return;
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/entrar");
+      return;
+    }
+
     const res = await fetch("/api/stripe/portal", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: userEmail }),
+      headers: { Authorization: `Bearer ${session.access_token}` },
     });
     const { url } = await res.json();
     if (url) window.location.href = url;

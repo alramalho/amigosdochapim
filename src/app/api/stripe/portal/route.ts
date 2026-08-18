@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAuthIdentity, getCurrentUser } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
+  const identity = await getAuthIdentity(request);
+
+  if (!identity.effectiveEmail) {
+    return NextResponse.json({ error: "Inicia sessão para gerir a subscrição." }, { status: 401 });
+  }
+
+  if (identity.isImpersonating) {
+    return NextResponse.json(
+      { error: "Não é possível gerir a subscrição durante uma personificação." },
+      { status: 403 }
+    );
+  }
+
+  const user = await getCurrentUser(request);
+
+  if (!user?.stripeCustomerId) {
+    return NextResponse.json({ error: "No subscription found" }, { status: 404 });
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3027";
+
   try {
-    const { email } = await request.json();
-
-    if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
-    }
-
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user?.stripeCustomerId) {
-      return NextResponse.json({ error: "No subscription found" }, { status: 404 });
-    }
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3027";
-
-    // Create Stripe billing portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
       return_url: `${appUrl}/painel`,
