@@ -45,6 +45,12 @@ enum SubmissionStatus {
   REJECTED
 }
 
+enum InterviewAvailabilityChoice {
+  YES
+  IF_NEEDED
+  NO
+}
+
 enum SubmissionFilePurpose {
   CV
   FINAL_MATERIAL
@@ -356,4 +362,17 @@ model JuryRanking {
 
   @@unique([contestId, jurorId])
   @@map("jury_rankings")
+}
+
+model InterviewAvailability {
+  id         String                      @id @default(cuid())
+  jurorEmail String                      @map("juror_email")
+  slotStart  DateTime                    @map("slot_start")
+  choice     InterviewAvailabilityChoice
+  createdAt  DateTime                    @default(now()) @map("created_at")
+  updatedAt  DateTime                    @updatedAt @map("updated_at")
+
+  @@unique([jurorEmail, slotStart])
+  @@index([slotStart])
+  @@map("interview_availability")
 }
