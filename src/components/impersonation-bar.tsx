@@ -8,6 +8,7 @@ type Target = {
   name: string | null;
   status: string | null;
   isTest: boolean;
+  roles: string[];
 };
 
 type State = {
@@ -15,6 +16,13 @@ type State = {
   impersonatedEmail: string | null;
   isImpersonating: boolean;
   targets: Target[];
+};
+
+const roleLabels: Record<string, { label: string; className: string }> = {
+  ADMIN: { label: "Admin", className: "border-violet-300 bg-violet-100 text-violet-900" },
+  EXTERNAL_JUROR: { label: "Júri externo", className: "border-sky-300 bg-sky-100 text-sky-900" },
+  CANDIDATE: { label: "Candidato", className: "border-emerald-300 bg-emerald-100 text-emerald-900" },
+  CONTRIBUTOR: { label: "Contribuidor", className: "border-amber-300 bg-amber-100 text-amber-900" },
 };
 
 const statusLabels: Record<string, string> = {
@@ -163,9 +171,28 @@ export function ImpersonationBar() {
                         </span>
                       )}
                     </span>
-                    <span className="block text-xs text-foreground/60">{target.email}</span>
+                    {target.name && (
+                      <span className="block text-xs text-foreground/60">{target.email}</span>
+                    )}
+                    {target.roles.length > 0 && (
+                      <span className="flex flex-wrap gap-1 mt-1.5">
+                        {target.roles.map((role) => {
+                          const meta = roleLabels[role];
+                          if (!meta) return null;
+
+                          return (
+                            <span
+                              key={role}
+                              className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm border ${meta.className}`}
+                            >
+                              {meta.label}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    )}
                     {target.status && (
-                      <span className="block text-xs text-foreground/50 mt-0.5">
+                      <span className="block text-xs text-foreground/50 mt-1">
                         {statusLabels[target.status] || target.status}
                       </span>
                     )}
