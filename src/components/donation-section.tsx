@@ -4,15 +4,12 @@ import { useState } from "react";
 import { differenceInCalendarMonths } from "date-fns";
 import { Check, CheckCheck } from "lucide-react";
 import posthog from "posthog-js";
+import { useContestBalance } from "@/lib/use-contest-balance";
 import { DonationProgress, FundedContestCard } from "./donation-progress";
 
-// Next concurso application deadline
-const CONCURSO_DEADLINE_DATE = new Date("2026-07-30");
-const CONCURSO_DEADLINE_LABEL = "30 de Julho de 2026";
-
-// Calculate months until concurso (including current month)
-function getMonthsUntilConcurso(): number {
-  const months = differenceInCalendarMonths(CONCURSO_DEADLINE_DATE, new Date()) + 1;
+// Months of subscription until the contest currently being funded closes (including current month)
+function getMonthsUntilConcurso(deadline: Date): number {
+  const months = differenceInCalendarMonths(deadline, new Date()) + 1;
   return Math.max(1, months); // At least 1 month
 }
 
@@ -30,7 +27,8 @@ export function DonationSection() {
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const monthsUntilConcurso = getMonthsUntilConcurso();
+  const { loading: balanceLoading, target } = useContestBalance();
+  const monthsUntilConcurso = getMonthsUntilConcurso(target.contest.applicationsCloseAt);
 
   // Calculate contribution until concurso
   const selectedAmount = donationType === "subscription" && selectedTier
@@ -102,7 +100,7 @@ export function DonationSection() {
     <div>
       {/* Donation Progress */}
       <div className="mb-0">
-        <DonationProgress selectedAmount={selectedAmount} />
+        <DonationProgress selectedAmount={selectedAmount} target={target} loading={balanceLoading} />
       </div>
 
       {/* Donation Type Tabs */}
@@ -439,7 +437,7 @@ export function DonationSection() {
             {selectedTier && (
               <div className="space-y-4 pt-2 animate-[fadeInPulse_0.3s_ease-out]">
                 <p className="text-sm text-foreground/60 text-center">
-                  Contribuirás <strong>{selectedAmount}€</strong> até {CONCURSO_DEADLINE_LABEL} ({monthsUntilConcurso} meses)
+                  Contribuirás <strong>{selectedAmount}€</strong> até {target.contest.applicationsCloseLabel} ({monthsUntilConcurso} {monthsUntilConcurso === 1 ? "mês" : "meses"})
                 </p>
                 <label className="flex items-center justify-center gap-2 cursor-pointer">
                   <input
@@ -546,7 +544,7 @@ export function DonationSection() {
             {selectedTier && (
               <div className="space-y-4 pt-2 flex flex-col items-center">
                 <p className="text-sm text-foreground/60 text-center">
-                  Contribuirás <strong>{selectedAmount}€</strong> até {CONCURSO_DEADLINE_LABEL} ({monthsUntilConcurso} meses)
+                  Contribuirás <strong>{selectedAmount}€</strong> até {target.contest.applicationsCloseLabel} ({monthsUntilConcurso} {monthsUntilConcurso === 1 ? "mês" : "meses"})
                 </p>
                 <label className="flex items-center justify-center gap-2 cursor-pointer">
                   <input
@@ -577,7 +575,7 @@ export function DonationSection() {
       )}
 
       <div className="mt-10 md:mt-12">
-        <FundedContestCard />
+        <FundedContestCard target={target} />
       </div>
     </div>
   );

@@ -1,23 +1,16 @@
 "use client";
 
 import Lottie from "lottie-react";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import partyPopperAnimation from "../../public/party-popper-lottie.json";
-
-interface BalanceData {
-  total: number;
-  donations: number;
-  fundosProprios: number;
-  goal: number;
-  progress: number;
-}
+import type { ContestFundingTarget } from "@/lib/contest";
 
 interface DonationProgressProps {
   selectedAmount?: number;
+  target: ContestFundingTarget;
+  loading: boolean;
 }
 
-const FUTURE_CONTESTS_PER_YEAR = 2;
-const FIRST_FUTURE_CONTEST_YEAR = 2027;
 const FIGURE_FILL_TOP = 4;
 const FIGURE_FILL_BOTTOM = 156;
 const FIGURE_FILL_HEIGHT = FIGURE_FILL_BOTTOM - FIGURE_FILL_TOP;
@@ -31,51 +24,11 @@ function formatEuros(value: number) {
   return `${euroFormatter.format(value)}€`;
 }
 
-function getFutureContestLabel(fundedFutureContests: number) {
-  const year = FIRST_FUTURE_CONTEST_YEAR + Math.floor(fundedFutureContests / FUTURE_CONTESTS_PER_YEAR);
-  const edition = (fundedFutureContests % FUTURE_CONTESTS_PER_YEAR) + 1;
-
-  return {
-    title: `Concurso ${year}`,
-    edition: `${edition}.ª edição`,
-  };
-}
-
-export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) {
-  const [data, setData] = useState<BalanceData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchBalance() {
-      try {
-        const response = await fetch("/api/stripe/balance");
-        if (response.ok) {
-          const balanceData = await response.json();
-          setData(balanceData);
-        }
-      } catch (error) {
-        console.error("Error fetching balance:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchBalance();
-  }, []);
-
-  const goal = data?.goal ?? 1300;
-  const currentTotal = data?.total ?? 0;
-  const fundosProprios = data?.fundosProprios ?? 0;
-  const donations = data?.donations ?? 0;
-  const isFunded = currentTotal >= goal;
-  const donationsNeededForFirstContest = Math.max(goal - fundosProprios, 0);
-  const nextContestBaseAmount = Math.max(donations - donationsNeededForFirstContest, 0);
-  const fundedFutureContests = Math.floor(nextContestBaseAmount / goal);
-  const nextContestDisplayAmount = nextContestBaseAmount % goal;
-  const nextContestLabel = getFutureContestLabel(fundedFutureContests);
-  const displayFundosProprios = isFunded ? 0 : fundosProprios;
-  const displayDonations = isFunded ? nextContestDisplayAmount : donations;
-  const displayBaseTotal = isFunded ? nextContestDisplayAmount : currentTotal;
+export function DonationProgress({ selectedAmount = 0, target, loading }: DonationProgressProps) {
+  const { goal, isFunded, contest } = target;
+  const displayFundosProprios = target.fundosProprios;
+  const displayDonations = target.donations;
+  const displayBaseTotal = target.raised;
   const selectedForDisplayedContest = Math.min(selectedAmount, Math.max(goal - displayBaseTotal, 0));
   const displayTotalWithSelected = displayBaseTotal + selectedForDisplayedContest;
 
@@ -90,18 +43,17 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
       <div className="flex flex-row justify-between items-start gap-4 md:gap-8 w-full overflow-hidden">
         {/* Left side: Title + Money info */}
         <div className="text-left min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">Concurso de Curtas 2026:</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-3xl text-foreground/70">
+            {isFunded ? "Próximo concurso:" : `Concurso de Curtas ${contest.year}:`}
+          </h1>
           {isFunded ? (
-            <div className="mb-4 md:mb-6">
-              <h1 className="text-4xl sm:text-5xl md:text-5xl text-foreground/70 font-bold">
-                {nextContestLabel.title}
-              </h1>
-              <p className="text-2xl sm:text-3xl md:text-3xl text-foreground/60 font-semibold mt-1">
-                {nextContestLabel.edition}
-              </p>
-            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-5xl text-foreground/70 font-bold mb-4 md:mb-6">
+              {contest.title}
+            </h1>
           ) : (
-            <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold mb-4 md:mb-6">15 Maio - 30 Julho 2026</h1>
+            <h1 className="text-4xl sm:text-6xl md:text-6xl text-foreground/70 font-bold mb-4 md:mb-6">
+              {contest.applicationsRangeLabel}
+            </h1>
           )}
 
           {/* Money info - below title */}
@@ -120,12 +72,12 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
               <span className="text-foreground/50 text-base md:text-lg">/ {formatEuros(goal)}</span>
             </div>
             {/* Legend */}
-            {!loading && data && (
+            {!loading && (
               <div className="flex flex-col gap-1 text-xs md:text-sm">
                 {!isFunded && (
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 md:w-3 md:h-3 rounded-sm bg-primary" />
-                    <span className="text-foreground/60">Fundos próprios: <strong>{formatEuros(data.fundosProprios)}</strong></span>
+                    <span className="text-foreground/60">Fundos próprios: <strong>{formatEuros(displayFundosProprios)}</strong></span>
                   </div>
                 )}
                 <div className="flex items-center gap-1.5">
@@ -175,31 +127,12 @@ export function DonationProgress({ selectedAmount = 0 }: DonationProgressProps) 
   );
 }
 
-export function FundedContestCard() {
-  const [data, setData] = useState<BalanceData | null>(null);
-
-  useEffect(() => {
-    async function fetchBalance() {
-      try {
-        const response = await fetch("/api/stripe/balance");
-        if (response.ok) {
-          setData(await response.json());
-        }
-      } catch (error) {
-        console.error("Error fetching balance:", error);
-      }
-    }
-
-    fetchBalance();
-  }, []);
-
-  const isFunded = !!data && data.total >= data.goal;
-
-  if (!isFunded) return null;
+export function FundedContestCard({ target }: { target: ContestFundingTarget }) {
+  if (!target.isFunded || !target.fundedContest) return null;
 
   return (
     <div className="relative overflow-hidden border border-border bg-accent/40 rounded-sm p-5 md:p-6 text-center">
-      <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">Concurso 2026 financiado</p>
+      <p className="text-sm uppercase tracking-wide text-primary font-medium mb-2">{target.fundedContest.title} financiado</p>
       <div className="mb-2 flex items-center justify-center gap-2">
         <p className="text-2xl md:text-3xl font-semibold">Chegámos ao objetivo.</p>
         <Lottie
