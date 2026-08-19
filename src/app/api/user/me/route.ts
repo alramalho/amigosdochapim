@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, isAdminEmail, isSubscriptionActive, userHasJuryAccess } from "@/lib/auth";
 import { CREDITS_THRESHOLD } from "@/lib/contest";
+import { getInterviewSlots } from "@/lib/interviews";
+import { isSpecialJurorEmail } from "@/lib/jury";
 import { prisma } from "@/lib/prisma";
 
 function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>, hasSubmission = false) {
@@ -45,6 +47,28 @@ function getUserData(user: Awaited<ReturnType<typeof getCurrentUser>>, hasSubmis
   };
 }
 
+async function buildPayload(
+  user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>,
+  hasSubmission: boolean
+) {
+  const isExternalJuror = isSpecialJurorEmail(user.email) && !isAdminEmail(user.email);
+
+  const interviewAvailability = isExternalJuror
+    ? {
+        answered: await prisma.interviewAvailability.count({
+          where: { jurorEmail: user.email },
+        }),
+        total: getInterviewSlots().length,
+      }
+    : null;
+
+  return {
+    ...getUserData(user, hasSubmission),
+    isExternalJuror,
+    interviewAvailability,
+  };
+}
+
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser(request);
 
@@ -54,7 +78,7 @@ export async function GET(request: NextRequest) {
 
   const hasSubmission = await prisma.submission.count({ where: { userId: user.id } }).then((count) => count > 0);
 
-  return NextResponse.json(getUserData(user, hasSubmission));
+  return NextResponse.json(await buildPayload(user, hasSubmission));
 }
 
 export async function PATCH(request: NextRequest) {
@@ -81,5 +105,5 @@ export async function PATCH(request: NextRequest) {
   });
   const hasSubmission = await prisma.submission.count({ where: { userId: user.id } }).then((count) => count > 0);
 
-  return NextResponse.json(getUserData(updatedUser, hasSubmission));
+  return NextResponse.json(await buildPayload(updatedUser, hasSubmission));
 }

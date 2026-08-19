@@ -33,6 +33,8 @@ interface UserData {
   hasSubmission: boolean;
   email: string;
   isAdmin: boolean;
+  isExternalJuror: boolean;
+  interviewAvailability: { answered: number; total: number } | null;
 }
 
 export default function PainelPage() {
@@ -218,6 +220,7 @@ export default function PainelPage() {
   const hasSubscription = !!user.subscription;
   const activeSubscription = user.subscription?.isActive;
   const isAdmin = user.isAdmin;
+  const isExternalJuror = user.isExternalJuror;
 
   // Determine user tier for display purposes
   const getUserTier = () => {
@@ -286,7 +289,7 @@ export default function PainelPage() {
             ) : (
               <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-semibold">
-                  Olá, {user.name || "Amigo"}!
+                  Olá{user.name ? `, ${user.name}` : isExternalJuror ? "" : ", Amigo"}!
                 </h1>
                 <button
                   type="button"
@@ -306,10 +309,26 @@ export default function PainelPage() {
           <p className="text-sm text-foreground/50 mb-2">{userEmail}</p>
           {nameMessage && <p className="text-sm text-foreground/60 mb-2">{nameMessage}</p>}
           <p className="text-foreground/70">
-            Bem-vindo à tua área de membro. És um{" "}
-            <span className="font-medium">{getUserTier()}</span>.
+            {isExternalJuror ? (
+              <>
+                Bem-vindo à tua área de <span className="font-medium">jurado convidado</span> do
+                Concurso de Curtas 2026.
+              </>
+            ) : (
+              <>
+                Bem-vindo à tua área de membro. És um{" "}
+                <span className="font-medium">{getUserTier()}</span>.
+              </>
+            )}
           </p>
         </div>
+
+        {isExternalJuror && user.interviewAvailability && (
+          <InterviewAvailabilityCard
+            answered={user.interviewAvailability.answered}
+            total={user.interviewAvailability.total}
+          />
+        )}
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Subscription Card - Only if has subscription */}
@@ -346,6 +365,7 @@ export default function PainelPage() {
           )}
 
           {/* Contributions Card */}
+          {!isExternalJuror && (
           <div className="bg-foreground/5 rounded-xl p-6">
             <h2 className="text-lg font-medium mb-4">As tuas contribuições</h2>
             <div className="space-y-2 text-sm">
@@ -375,6 +395,7 @@ export default function PainelPage() {
               )}
             </div>
           </div>
+          )}
 
           {/* Jury Card - For users with jury access */}
           {user.hasJuryAccess && (
@@ -521,4 +542,46 @@ function subscriptionStatusClass(subscription: NonNullable<UserData["subscriptio
   }
 
   return "text-red-600";
+}
+
+function InterviewAvailabilityCard({ answered, total }: { answered: number; total: number }) {
+  const done = answered >= total;
+  const started = answered > 0;
+
+  return (
+    <div
+      className={`rounded-xl p-6 mb-6 border ${
+        done ? "border-border bg-foreground/5" : "border-amber-300 bg-amber-50"
+      }`}
+    >
+      <p
+        className={`text-xs uppercase tracking-wide font-medium mb-2 ${
+          done ? "text-foreground/50" : "text-amber-800"
+        }`}
+      >
+        {done ? "Concluído" : "Ação pendente"}
+      </p>
+      <h2 className="text-lg font-medium mb-2">Disponibilidade para as entrevistas</h2>
+      <p className="text-sm text-foreground/70 mb-4">
+        {done
+          ? "Já indicaste a tua disponibilidade para as entrevistas aos finalistas. Podes alterá-la a qualquer momento."
+          : "Precisamos da tua disponibilidade para as entrevistas aos 3 finalistas, na semana de 7 a 13 de setembro. Uma entrevista por dia, 45 minutos, com os três jurados."}
+      </p>
+      {started && !done && (
+        <p className="text-sm text-amber-900 mb-4">
+          Respondeste a {answered} de {total} horários.
+        </p>
+      )}
+      <Link
+        href="/painel/juri/disponibilidade"
+        className={`inline-block text-sm px-4 py-2 rounded-sm ${
+          done
+            ? "text-foreground/70 hover:text-foreground"
+            : "bg-primary text-primary-foreground"
+        }`}
+      >
+        {done ? "Rever disponibilidade →" : started ? "Continuar →" : "Indicar disponibilidade →"}
+      </Link>
+    </div>
+  );
 }
