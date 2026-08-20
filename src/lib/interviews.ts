@@ -17,7 +17,7 @@ export const INTERVIEW_DAYS = [
 ] as const;
 
 // Edit these to change the times offered to the jury.
-export const INTERVIEW_TIMES = ["18:00", "19:00", "20:00"] as const;
+export const INTERVIEW_TIMES = ["18:00", "19:00", "20:00", "21:00"] as const;
 
 export const AVAILABILITY_CHOICES = ["YES", "IF_NEEDED", "NO"] as const;
 export type AvailabilityChoice = (typeof AVAILABILITY_CHOICES)[number];
